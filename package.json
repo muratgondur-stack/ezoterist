@@ -1,0 +1,12 @@
+{
+  "name": "ezoterist",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Orata Ezoteriz modern landing page",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
