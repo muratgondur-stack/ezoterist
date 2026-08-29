@@ -31,20 +31,22 @@ body {
 
 .logo-panel {
   display: grid;
-  min-height: 300px;
+  min-height: 280px;
   padding: 48px 64px;
   place-items: center;
-  border: 7px solid var(--border);
+  border: 6px solid var(--border);
+  border-radius: 30px;
   background: var(--panel);
   box-shadow: 0 0 0 1px rgba(255, 122, 0, 0.35), 0 18px 70px rgba(255, 122, 0, 0.16);
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(3.2rem, 11vw, 9.5rem);
+  font-size: clamp(3rem, 9vw, 8rem);
   font-weight: 700;
   letter-spacing: 0.22em;
   line-height: 1;
+  text-align: center;
   text-indent: 0.22em;
   white-space: nowrap;
   text-shadow: 2px 3px 0 rgba(0, 0, 0, 0.2);
@@ -57,6 +59,6 @@ h1 {
 
 @media (max-width: 560px) {
   .welcome { width: min(100% - 20px, 1100px); }
-  .logo-panel { min-height: 220px; padding: 32px 16px; border-width: 5px; }
+  .logo-panel { min-height: 220px; padding: 32px 16px; border-width: 5px; border-radius: 22px; }
   h1 { font-size: clamp(2rem, 12vw, 4.5rem); letter-spacing: 0.12em; text-indent: 0.12em; }
 }
