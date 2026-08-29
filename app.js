@@ -1,4 +1,26 @@
 const videos = document.querySelectorAll(".background-video");
+const panel = document.getElementById("videoPanel");
+const toggle = document.querySelector(".panel-toggle");
+let isOpen = false;
+
+const playVideos = () => {
+  if (!isOpen) return;
+  videos.forEach((video) => video.play().catch(() => {}));
+};
+
+toggle?.addEventListener("click", () => {
+  isOpen = !isOpen;
+  panel?.classList.toggle("is-open", isOpen);
+  panel?.setAttribute("aria-hidden", String(!isOpen));
+  toggle.setAttribute("aria-expanded", String(isOpen));
+  toggle.textContent = isOpen ? "Videoyu Kapat" : "Videoyu Aç";
+
+  if (isOpen) {
+    playVideos();
+  } else {
+    videos.forEach((video) => video.pause());
+  }
+});
 
 videos.forEach((video) => {
   let direction = 1;
@@ -35,10 +57,10 @@ videos.forEach((video) => {
   });
 
   video.addEventListener("loadedmetadata", () => {
-    video.play().catch(() => {});
+    playVideos();
   });
 
   if (video.readyState >= 1) {
-    video.play().catch(() => {});
+    playVideos();
   }
 });

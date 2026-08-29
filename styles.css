@@ -11,6 +11,10 @@
 html, body { min-height: 100%; }
 
 body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   min-height: 100vh;
   margin: 0;
   overflow: hidden;
@@ -20,13 +24,34 @@ body {
   background: var(--background);
 }
 
+.panel-toggle {
+  position: relative;
+  z-index: 2;
+  margin-top: 12px;
+  padding: 10px 22px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.62);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel-toggle:hover { background: rgba(255, 122, 0, 0.3); }
+
 .video-panel {
   position: relative;
   width: 100%;
-  height: calc(100vh - 24px);
+  height: calc(100vh - 76px);
   overflow: hidden;
   border-radius: 22px;
   background: #000;
+  display: none;
+}
+
+.video-panel.is-open {
+  display: block;
 }
 
 .background-video {
@@ -49,5 +74,6 @@ body {
 
 @media (max-width: 560px) {
   body { padding: 8px; }
-  .video-panel { height: calc(100vh - 16px); border-radius: 16px; }
+  .panel-toggle { margin-top: 4px; }
+  .video-panel { height: calc(100vh - 60px); border-radius: 16px; }
 }
