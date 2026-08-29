@@ -34,38 +34,7 @@ body {
 
 .portrait-video { display: none; }
 
-.welcome {
-  position: relative;
-  z-index: 1;
-  width: min(100% - 32px, 520px);
-  margin-top: 6vh;
-  text-align: center;
-  animation: appear 900ms ease both;
-}
-
-h1 {
-  margin: 0;
-  font-size: clamp(1.75rem, 4vw, 3.6rem);
-  font-weight: 700;
-  letter-spacing: 0.13em;
-  line-height: 1;
-  text-align: center;
-  text-indent: 0.13em;
-  white-space: nowrap;
-  text-shadow: 2px 3px 0 rgba(0, 0, 0, 0.2);
-}
-
-@keyframes appear {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @media (orientation: portrait) {
   .landscape-video { display: none; }
   .portrait-video { display: block; }
-}
-
-@media (max-width: 560px) {
-  .welcome { width: min(100% - 20px, 520px); margin-top: 4vh; }
-  h1 { font-size: clamp(1.45rem, 9vw, 2.8rem); letter-spacing: 0.08em; text-indent: 0.08em; }
 }
