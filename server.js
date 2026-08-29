@@ -14,6 +14,7 @@ const contentTypes = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
+  ".mp4": "video/mp4",
   ".json": "application/json; charset=utf-8",
 };
 
