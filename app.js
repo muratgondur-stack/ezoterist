@@ -7,6 +7,9 @@ const playVideos = () => {
   if (!isOpen) return;
   videos.forEach((video) => {
     if (getComputedStyle(video).display !== "none") {
+      video.muted = true;
+      video.playsInline = true;
+      video.autoplay = true;
       video.play().catch(() => {});
     }
   });
