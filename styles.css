@@ -15,7 +15,7 @@ body {
   min-height: 100vh;
   margin: 0;
   overflow: hidden;
-  place-items: center;
+  place-items: start center;
   font-family: "Manrope", system-ui, sans-serif;
   color: var(--foreground);
   background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), url("/ezoterist-bg-landscape.png") center / cover no-repeat fixed;
@@ -24,30 +24,31 @@ body {
 .welcome {
   position: relative;
   z-index: 1;
-  width: min(100% - 32px, 680px);
+  width: min(100% - 32px, 520px);
+  margin-top: 6vh;
   text-align: center;
   animation: appear 900ms ease both;
 }
 
 .logo-panel {
   display: grid;
-  min-height: 170px;
-  padding: 30px 42px;
+  min-height: 120px;
+  padding: 22px 30px;
   place-items: center;
-  border: 4px solid var(--border);
-  border-radius: 26px;
-  background: rgba(119, 119, 119, 0.88);
+  border: 3px solid var(--border);
+  border-radius: 22px;
+  background: rgba(119, 119, 119, 0.3);
   box-shadow: 0 0 0 1px rgba(255, 122, 0, 0.35), 0 18px 70px rgba(255, 122, 0, 0.16);
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-size: clamp(1.75rem, 4vw, 3.6rem);
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.13em;
   line-height: 1;
   text-align: center;
-  text-indent: 0.16em;
+  text-indent: 0.13em;
   white-space: nowrap;
   text-shadow: 2px 3px 0 rgba(0, 0, 0, 0.2);
 }
@@ -64,7 +65,7 @@ h1 {
 }
 
 @media (max-width: 560px) {
-  .welcome { width: min(100% - 20px, 1100px); }
-  .logo-panel { min-height: 130px; padding: 24px 12px; border-width: 4px; border-radius: 20px; }
-  h1 { font-size: clamp(1.65rem, 10vw, 3.2rem); letter-spacing: 0.1em; text-indent: 0.1em; }
+  .welcome { width: min(100% - 20px, 520px); margin-top: 4vh; }
+  .logo-panel { min-height: 100px; padding: 20px 12px; border-width: 3px; border-radius: 18px; }
+  h1 { font-size: clamp(1.45rem, 9vw, 2.8rem); letter-spacing: 0.08em; text-indent: 0.08em; }
 }
