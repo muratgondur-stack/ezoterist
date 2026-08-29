@@ -18,21 +18,83 @@ const contentTypes = {
   ".json": "application/json; charset=utf-8",
 };
 
-function sendFile(response, filePath) {
-  fs.readFile(filePath, (error, content) => {
-    if (error) {
-      response.writeHead(error.code === "ENOENT" ? 404 : 500, {
+// iOS Safari probes video with `Range: bytes=0-1` and refuses to play unless the
+// server answers 206. Returns null to serve the whole file, or "invalid" for 416.
+function parseRange(header, size) {
+  if (!header) return null;
+
+  const match = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
+  if (!match) return null;
+
+  const [, rawStart, rawEnd] = match;
+  if (rawStart === "" && rawEnd === "") return null;
+
+  let start;
+  let end;
+
+  if (rawStart === "") {
+    const suffixLength = Number(rawEnd);
+    if (suffixLength === 0) return "invalid";
+    start = Math.max(0, size - suffixLength);
+    end = size - 1;
+  } else {
+    start = Number(rawStart);
+    end = rawEnd === "" ? size - 1 : Math.min(Number(rawEnd), size - 1);
+  }
+
+  if (!Number.isInteger(start) || !Number.isInteger(end)) return "invalid";
+  if (start > end || start >= size) return "invalid";
+
+  return { start, end };
+}
+
+function sendFile(request, response, filePath) {
+  fs.stat(filePath, (error, stats) => {
+    if (error || !stats.isFile()) {
+      const notFound = !error || error.code === "ENOENT";
+      response.writeHead(notFound ? 404 : 500, {
         "Content-Type": "text/plain; charset=utf-8",
       });
-      response.end(error.code === "ENOENT" ? "Not found" : "Server error");
+      response.end(notFound ? "Not found" : "Server error");
       return;
     }
 
-    response.writeHead(200, {
+    const range = parseRange(request.headers.range, stats.size);
+
+    if (range === "invalid") {
+      response.writeHead(416, {
+        "Content-Range": `bytes */${stats.size}`,
+        "Accept-Ranges": "bytes",
+      });
+      response.end();
+      return;
+    }
+
+    const headers = {
       "Content-Type": contentTypes[path.extname(filePath)] || "application/octet-stream",
       "Cache-Control": path.basename(filePath) === "index.html" ? "no-cache" : "public, max-age=3600",
-    });
-    response.end(content);
+      "Accept-Ranges": "bytes",
+      "Last-Modified": stats.mtime.toUTCString(),
+    };
+
+    if (range) {
+      headers["Content-Range"] = `bytes ${range.start}-${range.end}/${stats.size}`;
+      headers["Content-Length"] = range.end - range.start + 1;
+      response.writeHead(206, headers);
+    } else {
+      headers["Content-Length"] = stats.size;
+      response.writeHead(200, headers);
+    }
+
+    if (request.method === "HEAD") {
+      response.end();
+      return;
+    }
+
+    const stream = fs.createReadStream(filePath, range ? { start: range.start, end: range.end } : undefined);
+    stream.on("error", () => response.destroy());
+    response.on("close", () => stream.destroy());
+    stream.pipe(response);
   });
 }
 
@@ -61,12 +123,7 @@ const server = http.createServer((request, response) => {
 
   fs.stat(requestedFile, (error, stats) => {
     const filePath = !error && stats.isFile() ? requestedFile : path.join(root, "index.html");
-    if (request.method === "HEAD") {
-      response.writeHead(200, { "Content-Type": contentTypes[path.extname(filePath)] || "text/html; charset=utf-8" });
-      response.end();
-      return;
-    }
-    sendFile(response, filePath);
+    sendFile(request, response, filePath);
   });
 });
 

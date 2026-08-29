@@ -7,8 +7,8 @@ let isOpen = false;
 
 const sourceForViewport = () =>
   (portraitQuery.matches || window.innerHeight > window.innerWidth)
-    ? "/ezoterist-bg-portrait.mp4?v=4"
-    : "/ezoterist-bg-landscape.mp4?v=4";
+    ? "/ezoterist-bg-portrait.mp4?v=5"
+    : "/ezoterist-bg-landscape.mp4?v=5";
 
 const loadVideo = (shouldPlay = false) => {
   const source = sourceForViewport();
