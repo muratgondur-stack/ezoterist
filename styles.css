@@ -1,10 +1,9 @@
 :root {
   color-scheme: dark;
-  --background: #070914;
-  --foreground: #f8f9ff;
-  --muted: rgba(248, 249, 255, 0.52);
-  --mint: #8ff1d2;
-  --blue: #8fb7ff;
+  --background: #000000;
+  --foreground: #f1f1f1;
+  --panel: #777777;
+  --border: #d71920;
 }
 
 * { box-sizing: border-box; }
@@ -19,59 +18,36 @@ body {
   place-items: center;
   font-family: "Manrope", system-ui, sans-serif;
   color: var(--foreground);
-  background:
-    radial-gradient(circle at 18% 12%, rgba(143, 241, 210, 0.16), transparent 30%),
-    radial-gradient(circle at 84% 82%, rgba(143, 183, 255, 0.14), transparent 32%),
-    var(--background);
+  background: var(--background);
 }
-
-body::before {
-  position: fixed;
-  inset: 0;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 72px 72px;
-  content: "";
-  mask-image: radial-gradient(circle at center, black 12%, transparent 78%);
-  pointer-events: none;
-}
-
-.aurora {
-  position: fixed;
-  width: 34rem;
-  height: 34rem;
-  border-radius: 50%;
-  filter: blur(75px);
-  opacity: 0.28;
-  pointer-events: none;
-}
-
-.aurora-one { top: -18rem; left: -14rem; background: var(--mint); }
-.aurora-two { right: -18rem; bottom: -20rem; background: var(--blue); }
 
 .welcome {
   position: relative;
   z-index: 1;
-  width: min(100% - 32px, 1200px);
+  width: min(100% - 32px, 1100px);
   text-align: center;
   animation: appear 900ms ease both;
 }
 
-.brand {
-  margin: 0 0 24px;
-  color: var(--muted);
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.42em;
+.logo-panel {
+  display: grid;
+  min-height: 300px;
+  padding: 48px 64px;
+  place-items: center;
+  border: 7px solid var(--border);
+  background: var(--panel);
+  box-shadow: 0 0 0 1px rgba(215, 25, 32, 0.35), 0 18px 70px rgba(215, 25, 32, 0.16);
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(2.8rem, 8vw, 7.5rem);
+  font-size: clamp(3.2rem, 11vw, 9.5rem);
   font-weight: 700;
-  letter-spacing: -0.07em;
-  line-height: 0.98;
-  text-wrap: balance;
-  text-shadow: 0 0 60px rgba(143, 241, 210, 0.12);
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-indent: 0.22em;
+  white-space: nowrap;
+  text-shadow: 2px 3px 0 rgba(0, 0, 0, 0.2);
 }
 
 @keyframes appear {
@@ -80,7 +56,7 @@ h1 {
 }
 
 @media (max-width: 560px) {
-  .welcome { width: min(100% - 24px, 1200px); }
-  .brand { margin-bottom: 18px; font-size: 0.65rem; letter-spacing: 0.3em; }
-  h1 { font-size: clamp(2.6rem, 13vw, 4.5rem); }
+  .welcome { width: min(100% - 20px, 1100px); }
+  .logo-panel { min-height: 220px; padding: 32px 16px; border-width: 5px; }
+  h1 { font-size: clamp(2rem, 12vw, 4.5rem); letter-spacing: 0.12em; text-indent: 0.12em; }
 }
