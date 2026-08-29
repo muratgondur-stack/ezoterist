@@ -70,6 +70,9 @@ videos.forEach((video) => {
   });
 
   if (video.readyState >= 1) {
+    if (video.readyState >= 3) {
+      video.classList.add("is-ready");
+    }
     playVideos();
   }
 });
