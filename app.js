@@ -4,36 +4,41 @@ videos.forEach((video) => {
   let direction = 1;
   let lastTime = 0;
 
-  const animate = (timestamp) => {
+  const reverse = (timestamp) => {
     if (!lastTime) lastTime = timestamp;
     const elapsed = Math.min(timestamp - lastTime, 100);
     lastTime = timestamp;
 
     if (video.readyState >= 2 && Number.isFinite(video.duration)) {
-      const step = (elapsed / 1000) * direction;
-      const nextTime = video.currentTime + step;
+      const nextTime = video.currentTime - elapsed / 1000;
 
-      if (nextTime >= video.duration) {
-        direction = -1;
-        video.currentTime = Math.max(video.duration - 0.01, 0);
-      } else if (nextTime <= 0) {
+      if (nextTime <= 0) {
         direction = 1;
+        lastTime = 0;
         video.currentTime = 0;
-      } else {
-        video.currentTime = nextTime;
+        video.play().catch(() => {});
+        return;
       }
+
+      video.currentTime = nextTime;
     }
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(reverse);
   };
 
-  video.addEventListener("loadedmetadata", () => {
+  video.addEventListener("ended", () => {
+    direction = -1;
+    lastTime = 0;
     video.pause();
-    requestAnimationFrame(animate);
+    video.currentTime = Math.max(video.duration - 0.01, 0);
+    requestAnimationFrame(reverse);
+  });
+
+  video.addEventListener("loadedmetadata", () => {
+    video.play().catch(() => {});
   });
 
   if (video.readyState >= 1) {
-    video.pause();
-    requestAnimationFrame(animate);
+    video.play().catch(() => {});
   }
 });
