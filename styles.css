@@ -11,18 +11,26 @@
 html, body { min-height: 100%; }
 
 body {
-  display: grid;
   min-height: 100vh;
   margin: 0;
   overflow: hidden;
-  place-items: start center;
+  padding: 12px;
   font-family: "Manrope", system-ui, sans-serif;
   color: var(--foreground);
   background: var(--background);
 }
 
+.video-panel {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 24px);
+  overflow: hidden;
+  border-radius: 22px;
+  background: #000;
+}
+
 .background-video {
-  position: fixed;
+  position: absolute;
   z-index: 0;
   inset: 0;
   width: 100%;
@@ -37,4 +45,9 @@ body {
 @media (orientation: portrait) {
   .landscape-video { display: none; }
   .portrait-video { display: block; }
+}
+
+@media (max-width: 560px) {
+  body { padding: 8px; }
+  .video-panel { height: calc(100vh - 16px); border-radius: 16px; }
 }
