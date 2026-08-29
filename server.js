@@ -38,7 +38,14 @@ const server = http.createServer((request, response) => {
     return;
   }
 
-  const requestPath = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+  let requestPath;
+  try {
+    requestPath = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+  } catch {
+    response.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Invalid URL");
+    return;
+  }
   const requestedFile = path.resolve(root, `.${requestPath}`);
 
   if (requestedFile !== root && !requestedFile.startsWith(root + path.sep)) {
