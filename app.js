@@ -6,7 +6,9 @@ const portraitQuery = window.matchMedia("(orientation: portrait)");
 let isOpen = false;
 
 const sourceForViewport = () =>
-  portraitQuery.matches ? "/ezoterist-bg-portrait.mp4?v=3" : "/ezoterist-bg-landscape.mp4?v=3";
+  (portraitQuery.matches || window.innerHeight > window.innerWidth)
+    ? "/ezoterist-bg-portrait.mp4?v=4"
+    : "/ezoterist-bg-landscape.mp4?v=4";
 
 const loadVideo = (shouldPlay = false) => {
   const source = sourceForViewport();
