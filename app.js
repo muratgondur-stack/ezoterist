@@ -1,19 +1,48 @@
-const videos = document.querySelectorAll(".background-video");
+const videos = [...document.querySelectorAll(".background-video")];
 const panel = document.getElementById("videoPanel");
 const toggle = document.querySelector(".panel-toggle");
 let isOpen = false;
+const reverseFrames = new WeakMap();
 
-const playVideos = () => {
+const activeVideo = () => videos.find((video) => getComputedStyle(video).display !== "none");
+
+const playActiveVideo = () => {
   if (!isOpen) return;
-  videos.forEach((video) => {
-    if (getComputedStyle(video).display !== "none") {
-      video.muted = true;
-      video.playsInline = true;
-      video.autoplay = true;
-      video.play().catch(() => {});
-    }
-  });
+  const video = activeVideo();
+  if (!video) return;
+
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  video.autoplay = true;
+  video.play().catch(() => {});
 };
+
+const reverseVideo = (video, timestamp) => {
+  const previous = reverseFrames.get(video) || timestamp;
+  const elapsed = Math.min(timestamp - previous, 100);
+  const nextTime = video.currentTime - elapsed / 1000;
+
+  if (nextTime <= 0) {
+    reverseFrames.delete(video);
+    video.currentTime = 0;
+    if (isOpen && activeVideo() === video) playActiveVideo();
+    return;
+  }
+
+  video.currentTime = nextTime;
+  reverseFrames.set(video, timestamp);
+  requestAnimationFrame((next) => reverseVideo(video, next));
+};
+
+videos.forEach((video) => {
+  video.addEventListener("ended", () => {
+    video.pause();
+    video.currentTime = Math.max(video.duration - 0.01, 0);
+    reverseFrames.set(video, 0);
+    requestAnimationFrame((next) => reverseVideo(video, next));
+  });
+});
 
 toggle?.addEventListener("click", () => {
   isOpen = !isOpen;
@@ -23,59 +52,8 @@ toggle?.addEventListener("click", () => {
   toggle.textContent = isOpen ? "Videoyu Kapat" : "Videoyu Aç";
 
   if (isOpen) {
-    playVideos();
+    playActiveVideo();
   } else {
     videos.forEach((video) => video.pause());
-  }
-});
-
-videos.forEach((video) => {
-  let direction = 1;
-  let lastTime = 0;
-
-  const reverse = (timestamp) => {
-    if (!lastTime) lastTime = timestamp;
-    const elapsed = Math.min(timestamp - lastTime, 100);
-    lastTime = timestamp;
-
-    if (video.readyState >= 2 && Number.isFinite(video.duration)) {
-      const nextTime = video.currentTime - elapsed / 1000;
-
-      if (nextTime <= 0) {
-        direction = 1;
-        lastTime = 0;
-        video.currentTime = 0;
-        video.play().catch(() => {});
-        return;
-      }
-
-      video.currentTime = nextTime;
-    }
-
-    requestAnimationFrame(reverse);
-  };
-
-  video.addEventListener("ended", () => {
-    direction = -1;
-    lastTime = 0;
-    video.pause();
-    video.currentTime = Math.max(video.duration - 0.01, 0);
-    requestAnimationFrame(reverse);
-  });
-
-  video.addEventListener("loadedmetadata", () => {
-    playVideos();
-  });
-
-  video.addEventListener("canplay", () => {
-    video.classList.add("is-ready");
-    playVideos();
-  });
-
-  if (video.readyState >= 1) {
-    if (video.readyState >= 3) {
-      video.classList.add("is-ready");
-    }
-    playVideos();
   }
 });
