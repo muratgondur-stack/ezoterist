@@ -20,7 +20,7 @@ toggle?.addEventListener("click", () => {
   toggle.textContent = isOpen ? "Videoyu Kapat" : "Videoyu Aç";
 
   if (isOpen) {
-    requestAnimationFrame(playVideos);
+    playVideos();
   } else {
     videos.forEach((video) => video.pause());
   }
