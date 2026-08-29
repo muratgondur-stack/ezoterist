@@ -4,6 +4,7 @@
   --foreground: #f1f1f1;
   --panel: #777777;
   --border: #ff7a00;
+  --video-border: #e21b23;
 }
 
 * { box-sizing: border-box; }
@@ -45,6 +46,7 @@ body {
   width: 100%;
   height: calc(100vh - 76px);
   overflow: hidden;
+  border: 5px solid var(--video-border);
   border-radius: 22px;
   background: #000;
   display: none;
@@ -75,5 +77,5 @@ body {
 @media (max-width: 560px) {
   body { padding: 8px; }
   .panel-toggle { margin-top: 4px; }
-  .video-panel { height: calc(100vh - 60px); border-radius: 16px; }
+  .video-panel { height: calc(100vh - 60px); border-width: 4px; border-radius: 16px; }
 }
