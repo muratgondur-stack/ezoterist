@@ -66,19 +66,11 @@ body {
   pointer-events: none;
 }
 
-.portrait-video { display: none; }
-
 @media (orientation: portrait) {
-  .video-panel {
+  .video-panel,
+  body {
     background-image: url("/ezoterist-bg.png");
   }
-
-  body {
-    background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), url("/ezoterist-bg.png") center / cover no-repeat fixed;
-  }
-
-  .landscape-video { display: none; }
-  .portrait-video { display: block; }
 }
 
 @media (max-width: 560px) {

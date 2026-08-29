@@ -1,48 +1,30 @@
-const videos = [...document.querySelectorAll(".background-video")];
 const panel = document.getElementById("videoPanel");
 const toggle = document.querySelector(".panel-toggle");
+const video = document.getElementById("backgroundVideo");
+const portraitQuery = window.matchMedia("(orientation: portrait)");
+
 let isOpen = false;
-const reverseFrames = new WeakMap();
 
-const activeVideo = () => videos.find((video) => getComputedStyle(video).display !== "none");
+const sourceForViewport = () =>
+  portraitQuery.matches ? "/ezoterist-bg-portrait.mp4?v=3" : "/ezoterist-bg-landscape.mp4?v=3";
 
-const playActiveVideo = () => {
-  if (!isOpen) return;
-  const video = activeVideo();
-  if (!video) return;
-
-  video.muted = true;
-  video.defaultMuted = true;
-  video.playsInline = true;
-  video.autoplay = true;
-  video.play().catch(() => {});
-};
-
-const reverseVideo = (video, timestamp) => {
-  const previous = reverseFrames.get(video) || timestamp;
-  const elapsed = Math.min(timestamp - previous, 100);
-  const nextTime = video.currentTime - elapsed / 1000;
-
-  if (nextTime <= 0) {
-    reverseFrames.delete(video);
-    video.currentTime = 0;
-    if (isOpen && activeVideo() === video) playActiveVideo();
+const loadVideo = (shouldPlay = false) => {
+  const source = sourceForViewport();
+  if (video.dataset.source === source) {
+    if (shouldPlay) video.play().catch(() => {});
     return;
   }
 
-  video.currentTime = nextTime;
-  reverseFrames.set(video, timestamp);
-  requestAnimationFrame((next) => reverseVideo(video, next));
-};
+  video.dataset.source = source;
+  video.src = source;
+  video.loop = true;
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  video.load();
 
-videos.forEach((video) => {
-  video.addEventListener("ended", () => {
-    video.pause();
-    video.currentTime = Math.max(video.duration - 0.01, 0);
-    reverseFrames.set(video, 0);
-    requestAnimationFrame((next) => reverseVideo(video, next));
-  });
-});
+  if (shouldPlay) video.play().catch(() => {});
+};
 
 toggle?.addEventListener("click", () => {
   isOpen = !isOpen;
@@ -52,8 +34,14 @@ toggle?.addEventListener("click", () => {
   toggle.textContent = isOpen ? "Videoyu Kapat" : "Videoyu Aç";
 
   if (isOpen) {
-    playActiveVideo();
+    loadVideo(true);
   } else {
-    videos.forEach((video) => video.pause());
+    video.pause();
   }
 });
+
+portraitQuery.addEventListener("change", () => {
+  loadVideo(isOpen);
+});
+
+loadVideo();
