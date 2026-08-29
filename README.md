@@ -1,12 +1,12 @@
-# Orata Ezoteriz
+# Ezoter.ist
 
 Modern, tek sayfalık bir web uygulaması.
 
 ## İçerik
 
-- Ana sayfada `orata ezoteriz projesi hazır` mesajı
-- Cam efektli, modern hero tasarım
-- Küçük bir etkileşim: butona basınca hazır durumu vurgusu
+- Tam ekran arka plan görseli üzerine kurulu sade bir açılış sayfası
+- "Videoyu Aç" butonuyla açılıp kapanan video paneli
+- Ekran yönüne göre otomatik olarak dikey ya da yatay video kaynağı seçimi
 
 ## Çalıştırma
 
