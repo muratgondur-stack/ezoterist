@@ -78,3 +78,17 @@ body {
   .panel-toggle { margin-top: 4px; }
   .video-panel { height: calc(100vh - 60px); border-width: 4px; border-radius: 16px; }
 }
+
+.center-panel {
+  position: fixed;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 18px 32px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  color: var(--foreground);
+  background: rgba(0, 0, 0, 0.62);
+  font-weight: 700;
+}
