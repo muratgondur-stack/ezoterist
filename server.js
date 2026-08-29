@@ -2,7 +2,8 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const port = Number.parseInt(process.env.PORT || "3000", 10);
+const configuredPort = Number.parseInt(process.env.PORT || "", 10);
+const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
 const root = __dirname;
 
 const contentTypes = {
