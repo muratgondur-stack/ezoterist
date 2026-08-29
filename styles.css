@@ -48,7 +48,7 @@ body {
   overflow: hidden;
   border: 5px solid var(--video-border);
   border-radius: 22px;
-  background: #000;
+  background: url("/ezoterist-bg-landscape.png") center / cover no-repeat;
   display: none;
 }
 
@@ -63,13 +63,22 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 1;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.background-video.is-ready {
+  opacity: 1;
 }
 
 .portrait-video { display: none; }
 
 @media (orientation: portrait) {
+  .video-panel {
+    background-image: url("/ezoterist-bg.png");
+  }
+
   body {
     background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), url("/ezoterist-bg.png") center / cover no-repeat fixed;
   }

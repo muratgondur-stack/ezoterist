@@ -64,6 +64,11 @@ videos.forEach((video) => {
     playVideos();
   });
 
+  video.addEventListener("canplay", () => {
+    video.classList.add("is-ready");
+    playVideos();
+  });
+
   if (video.readyState >= 1) {
     playVideos();
   }
