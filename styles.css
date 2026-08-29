@@ -3,7 +3,7 @@
   --background: #000000;
   --foreground: #f1f1f1;
   --panel: #777777;
-  --border: #d71920;
+  --border: #ff7a00;
 }
 
 * { box-sizing: border-box; }
@@ -36,7 +36,7 @@ body {
   place-items: center;
   border: 7px solid var(--border);
   background: var(--panel);
-  box-shadow: 0 0 0 1px rgba(215, 25, 32, 0.35), 0 18px 70px rgba(215, 25, 32, 0.16);
+  box-shadow: 0 0 0 1px rgba(255, 122, 0, 0.35), 0 18px 70px rgba(255, 122, 0, 0.16);
 }
 
 h1 {
