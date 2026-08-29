@@ -18,7 +18,7 @@ body {
   place-items: center;
   font-family: "Manrope", system-ui, sans-serif;
   color: var(--foreground);
-  background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), url("/ezoterist-bg.png") center / cover no-repeat fixed;
+  background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), url("/ezoterist-bg-landscape.png") center / cover no-repeat fixed;
 }
 
 .welcome {
@@ -55,6 +55,12 @@ h1 {
 @keyframes appear {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (orientation: portrait) {
+  body {
+    background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), url("/ezoterist-bg.png") center / cover no-repeat fixed;
+  }
 }
 
 @media (max-width: 560px) {
