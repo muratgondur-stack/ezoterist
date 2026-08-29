@@ -5,7 +5,11 @@ let isOpen = false;
 
 const playVideos = () => {
   if (!isOpen) return;
-  videos.forEach((video) => video.play().catch(() => {}));
+  videos.forEach((video) => {
+    if (getComputedStyle(video).display !== "none") {
+      video.play().catch(() => {});
+    }
+  });
 };
 
 toggle?.addEventListener("click", () => {
@@ -16,7 +20,7 @@ toggle?.addEventListener("click", () => {
   toggle.textContent = isOpen ? "Videoyu Kapat" : "Videoyu Aç";
 
   if (isOpen) {
-    playVideos();
+    requestAnimationFrame(playVideos);
   } else {
     videos.forEach((video) => video.pause());
   }
