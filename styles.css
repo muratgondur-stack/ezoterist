@@ -92,3 +92,38 @@ body {
   background: rgba(0, 0, 0, 0.62);
   font-weight: 700;
 }
+
+.auth-bar {
+  position: fixed;
+  z-index: 4;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-bar-user {
+  max-width: 40vw;
+  overflow: hidden;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-bar-link {
+  padding: 8px 18px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.62);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.auth-bar-link:hover { background: rgba(255, 122, 0, 0.3); }
