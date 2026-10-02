@@ -7,7 +7,7 @@ const fitLayout = () => {
   const root = document.documentElement;
   const grid = document.querySelector(".menu-grid");
   const firstButton = grid?.querySelector(".menu-button");
-  const leftEdge = document.getElementById("faceToggle")?.getBoundingClientRect().right || 110;
+  const leftEdge = document.getElementById("musicToggle")?.getBoundingClientRect().right || 58;
   const bar = document.getElementById("authBar")?.getBoundingClientRect();
   const barLeft = bar ? bar.left : window.innerWidth;
 
