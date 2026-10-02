@@ -61,7 +61,7 @@ body::before {
 .home-header h1::before {
   content: "";
   position: absolute;
-  inset: -70px -8%;
+  inset: -40px -3%;
   z-index: -1;
   background: radial-gradient(ellipse at center, rgba(225, 228, 236, 0.75) 0%, rgba(200, 205, 218, 0.45) 40%, rgba(180, 186, 200, 0.18) 62%, transparent 78%);
   filter: blur(22px);
@@ -225,4 +225,47 @@ body::before {
 .music-toggle.is-muted .music-wave { display: none; }
 .music-toggle.is-muted .music-off { display: inline; }
 
-.music-toggle:hover { background: rgba(255, 122, 0, 0.3); }
+.music-toggle:hover,
+.face-toggle:hover { background: rgba(255, 122, 0, 0.3); }
+
+.face-toggle {
+  position: fixed;
+  z-index: 4;
+  top: 16px;
+  left: 68px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.62);
+  cursor: pointer;
+}
+
+.face-toggle.is-active { border-color: #ff7a00; background: rgba(255, 122, 0, 0.45); }
+.face-toggle:disabled { opacity: 0.6; cursor: progress; }
+
+.face-preview {
+  position: fixed;
+  z-index: 4;
+  top: 68px;
+  left: 16px;
+  width: 128px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  transform: scaleX(-1);
+  background: #000;
+}
+
+.menu-button.is-face-focus img {
+  transform: translateY(-4px) scale(1.08);
+  filter: drop-shadow(0 0 22px var(--glow));
+}
+
+.menu-button.is-face-focus span {
+  outline: 2px solid #ff7a00;
+  background: rgba(255, 122, 0, 0.55);
+}
