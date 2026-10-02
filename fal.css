@@ -81,3 +81,13 @@
 /* El falı: iki fotoğraf yuvası */
 .photo-slots.two { grid-template-columns: repeat(2, 1fr); max-width: 440px; }
 .symbol-list .gorunum { display: inline-block; margin-bottom: 4px; padding: 2px 9px; border-radius: 999px; background: rgba(120, 160, 255, 0.14); color: #b9cbff; font-size: 0.74rem; font-weight: 700; }
+
+/* Tek fotoğraflı bölümler (yüz okuma, fotoğraf analizi) */
+.photo-slots.one { grid-template-columns: 1fr; max-width: 240px; }
+.result-badges { margin: 4px 0 2px; }
+.palette { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+.swatch { display: inline-block; width: 18px; height: 18px; margin-right: 8px; border: 2px solid rgba(255, 255, 255, 0.35); border-radius: 50%; vertical-align: -3px; }
+.palette .swatch { width: 38px; height: 38px; margin: 0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45); }
+.chakra-card { border-color: rgba(160, 120, 255, 0.45); background: linear-gradient(140deg, rgba(140, 90, 230, 0.16), var(--card)); }
+.element-grid.five { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 960px) { .element-grid.five { grid-template-columns: repeat(2, 1fr); } }
