@@ -181,7 +181,7 @@ async function openSign(key) {
     if (openKey !== key) return;
     $("dlgToday").textContent = data.metin;
     $("dlgBadge").textContent = data.kaynak === "ai" ? "✨ Astroloğumuzun yorumu" : "🔭 Gökyüzü hesabına göre";
-    bindListen($("dlgListenToday"), () => `/api/astroloji/ses?tur=gunluk&burc=${key}`);
+    bindListen($("dlgListenToday"), () => `/api/astroloji/ses?tur=gunluk&burc=${key}&gun=${data.tarih}`);
   } catch {
     if (openKey === key) $("dlgToday").textContent = "Günün yorumu şu an alınamadı. Biraz sonra tekrar dene.";
   }
@@ -237,7 +237,8 @@ function trio(label, key, text) {
   return div;
 }
 
-async function showChart(values) {
+// Haritanın görsel kısmı (Güneş/Ay/yükselen kartları, yerleşimler) girdiden tarayıcıda çizilir.
+function drawChart(values) {
   const chart = chartFrom(values);
   $("chartResult").hidden = false;
 
@@ -263,27 +264,52 @@ async function showChart(values) {
       <span class="where">${sym(k.sign)} ${burclar[k.sign].ad} ${Math.floor(k.degree)}°${k.retro ? ' <span class="retro">℞</span>' : ""}</span>`;
     return li;
   }));
+}
 
+const shortDate = (ms) => new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long" }).format(new Date(ms));
+
+function fillForm(girdi) {
+  form.elements.tarih.value = girdi.tarih || "";
+  form.elements.saat.value = girdi.saat || "";
+  form.elements.saatYok.checked = Boolean(girdi.saatYok);
+  form.elements.saat.disabled = form.elements.saatYok.checked;
+  form.elements.sehir.value = girdi.sehir || "";
+}
+
+// Sunucudaki kayıtlı haritayı (yorum + ses) gösterir.
+function showSaved(kayit) {
+  fillForm(kayit.girdi);
+  drawChart(kayit.girdi);
+  $("chartReading").textContent = kayit.metin;
+  $("chartBadge").textContent = kayit.kaynak === "ai" ? "✨ Astroloğumuzun yorumu" : "📜 Haritanın özeti";
+  const notlar = [`Bu harita ${shortDate(kayit.olusturma)} tarihinde çıkarıldı.`];
+  if (kayit.yeniHaritaTarihi) notlar.push(`Farklı bilgilerle yeni harita ${shortDate(kayit.yeniHaritaTarihi)} tarihinden itibaren çıkarılabilir.`);
+  $("chartNote").textContent = notlar.join(" ");
+  bindListen($("chartListen"), () => `/api/astroloji/ses?tur=harita&id=${kayit.id}`);
+}
+
+async function requestChart(girdi) {
+  stopVoice();
+  drawChart(girdi);
   $("chartResult").scrollIntoView({ behavior: "smooth", block: "start" });
   $("chartReading").textContent = "Haritan yorumlanıyor…";
   $("chartBadge").textContent = "";
+  $("chartNote").textContent = "";
   $("chartListen").hidden = true;
-  stopVoice();
 
   try {
     const response = await fetch("/api/astroloji/harita", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",
-      body: JSON.stringify({ yerlesim: chart.yerlesim, yukselen: chart.yukselen }),
+      body: JSON.stringify({ girdi }),
     });
-    if (!response.ok) throw new Error();
-    const data = await response.json();
-    $("chartReading").textContent = data.metin;
-    $("chartBadge").textContent = data.kaynak === "ai" ? "✨ Astroloğumuzun yorumu" : "📜 Haritanın özeti";
-    bindListen($("chartListen"), () => `/api/astroloji/ses?tur=harita&id=${data.id}`);
-  } catch {
-    $("chartReading").textContent = "Yorum şu an alınamadı; yerleşimlerin aşağıda.";
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error);
+    if (data.kilitli) toast(`Yeni harita ${shortDate(data.yeniHaritaTarihi)} tarihinden itibaren çıkarılabilir. Kayıtlı haritan gösteriliyor.`);
+    showSaved(data);
+  } catch (error) {
+    $("chartReading").textContent = error.message || "Yorum şu an alınamadı; yerleşimlerin aşağıda.";
   }
 }
 
@@ -293,26 +319,16 @@ form.elements.saatYok.addEventListener("change", () => {
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const values = {
+  const girdi = {
     tarih: form.elements.tarih.value,
-    saat: form.elements.saat.value,
-    saatYok: form.elements.saatYok.checked,
+    saat: form.elements.saatYok.checked ? "" : form.elements.saat.value,
+    saatYok: form.elements.saatYok.checked || !form.elements.saat.value,
     sehir: form.elements.sehir.value,
   };
-  if (!values.tarih || !values.sehir) { toast("Doğum tarihini ve yerini seç."); return; }
-  storage.set("ezo_harita", values);
-  showChart(values);
+  if (!girdi.tarih || !girdi.sehir) { toast("Doğum tarihini ve yerini seç."); return; }
+  requestChart(girdi);
 });
 
-function restoreForm() {
-  const saved = storage.get("ezo_harita");
-  if (!saved) return;
-  form.elements.tarih.value = saved.tarih || "";
-  form.elements.saat.value = saved.saat || "";
-  form.elements.saatYok.checked = Boolean(saved.saatYok);
-  form.elements.saat.disabled = form.elements.saatYok.checked;
-  form.elements.sehir.value = saved.sehir || "";
-}
 
 // --- Sözlük ---
 
@@ -353,13 +369,13 @@ async function init() {
   }
   $("topbarUser").textContent = me.user.name || me.user.email;
   durum = await fetch("/api/astroloji/durum", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : durum)).catch(() => durum);
-  $("chartListen").hidden = true;
+  const kayit = await fetch("/api/astroloji/harita", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (kayit?.id) showSaved(kayit);
 }
 
 renderSky();
 setInterval(renderSky, 5 * 60 * 1000);
 renderSigns();
 fillCities();
-restoreForm();
 renderGlossary();
 init();

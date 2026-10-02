@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/astroloji.css?v=2" />
+    <link rel="stylesheet" href="/astroloji.css?v=3" />
   </head>
   <body>
     <header class="topbar">
@@ -92,7 +92,7 @@
               <select name="sehir" required></select>
             </label>
             <button type="submit" class="btn btn-primary">Haritamı hesapla</button>
-            <p class="form-hint">Bilgilerin yalnızca bu cihazda hatırlanır.</p>
+            <p class="form-hint">Haritan hesabına kaydedilir; farklı bilgilerle yeni harita 3 günde bir çıkarılabilir.</p>
           </form>
 
           <div class="chart-result" id="chartResult" hidden>
@@ -103,6 +103,7 @@
                 <span class="badge" id="chartBadge"></span>
               </div>
               <p class="reading-text" id="chartReading">Yorum hazırlanıyor…</p>
+              <p class="chart-note" id="chartNote"></p>
               <button type="button" class="listen" id="chartListen" hidden>🔊 Alev'den dinle</button>
             </div>
             <div class="card">
@@ -167,6 +168,6 @@
 
     <script src="/astro.js?v=1"></script>
     <script src="/astroloji-veri.js?v=1"></script>
-    <script src="/astroloji-sayfa.js?v=1"></script>
+    <script src="/astroloji-sayfa.js?v=2"></script>
   </body>
 </html>

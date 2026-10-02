@@ -20,7 +20,6 @@ const tts = {
   voice: (process.env.TTS_VOICE || "alev").trim(),
 };
 
-const HARITA_GUNLUK_SINIR = 20;
 const TIME_ZONE = "Europe/Istanbul";
 
 function setup(dataDir) {
@@ -141,6 +140,7 @@ async function gunlukYorum(cfg, burc) {
       const metin = await askLlm(ASTROLOG_SISTEM, kullanici);
       const value = { tarih, metin, kaynak: "ai" };
       await writeCache(file, value);
+      eskiGunleriSil(cfg).catch(() => {});
       return value;
     } catch (error) {
       console.error("Günlük yorum üretilemedi:", error.message);
@@ -150,17 +150,31 @@ async function gunlukYorum(cfg, burc) {
 }
 
 // --- Doğum haritası yorumu ---
+// Her kullanıcının tek bir kayıtlı haritası olur. Tekrar girince kayıtlı yorum (ve sesi) gelir;
+// farklı bilgilerle yeni harita ancak 3 günde bir üretilebilir.
 
 const BODY_KEYS = Astro.BODIES;
-function haritaDogrula(body) {
-  const yerlesim = {};
-  for (const key of BODY_KEYS) {
-    const sign = String(body?.yerlesim?.[key] || "");
-    if (!Astro.SIGN_KEYS.includes(sign)) return null;
-    yerlesim[key] = sign;
-  }
-  const yukselen = body?.yukselen ? String(body.yukselen) : "";
-  if (yukselen && !Astro.SIGN_KEYS.includes(yukselen)) return null;
+const HARITA_ARALIK_MS = 3 * 24 * 60 * 60 * 1000;
+
+function girdiDogrula(body) {
+  const g = body?.girdi || {};
+  const tarih = String(g.tarih || "");
+  const saat = g.saatYok ? "" : String(g.saat || "");
+  const sehir = String(g.sehir || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(tarih)) return null;
+  if (saat && !/^\d{2}:\d{2}$/.test(saat)) return null;
+  if (!Veri.sehirler.some((c) => c.ad === sehir)) return null;
+  return { tarih, saat, saatYok: !saat, sehir };
+}
+
+// Yerleşimler sunucuda yeniden hesaplanır; istemciden gelen konuma güvenilmez.
+function haritaHesapla(girdi) {
+  const [year, month, day] = girdi.tarih.split("-").map(Number);
+  const city = Veri.sehirler.find((c) => c.ad === girdi.sehir);
+  const [hour, minute] = girdi.saatYok ? [12, 0] : girdi.saat.split(":").map(Number);
+  const when = Astro.localToUtc(year, month, day, hour, minute, city.saatDilimi);
+  const yerlesim = Object.fromEntries(Astro.positions(when).map((k) => [k.body, k.sign]));
+  const yukselen = girdi.saatYok ? "" : Astro.signOf(Astro.angles(when, city.enlem, city.boylam).asc);
   return { yerlesim, yukselen };
 }
 
@@ -177,23 +191,13 @@ function sabitHarita({ yerlesim, yukselen }) {
   return parcalar.join(" ");
 }
 
-const haritaSayaci = new Map();
-async function haritaYorum(cfg, harita, userId) {
+// Aynı yerleşimlere sahip haritalar (aynı gün doğanlar gibi) yorumu paylaşır.
+async function haritaMetni(cfg, harita) {
   const id = haritaId(harita);
   const file = path.join(cfg.base, "harita", `${id}.json`);
-  if (!llmEnabled) {
-    // Sesli dinleme önbellekten okur; sabit yorum da kaydedilir.
-    const value = { id, metin: sabitHarita(harita), kaynak: "sabit", harita };
-    await writeCache(file, value);
-    return value;
-  }
   const cached = await readCache(file);
   if (cached) return cached;
-
-  const sayacKey = `${userId}:${bugun()}`;
-  const count = haritaSayaci.get(sayacKey) || 0;
-  if (count >= HARITA_GUNLUK_SINIR) return { id, metin: sabitHarita(harita), kaynak: "sabit", sinir: true };
-  haritaSayaci.set(sayacKey, count + 1);
+  if (!llmEnabled) return { id, metin: sabitHarita(harita), kaynak: "sabit" };
 
   return once(`harita:${id}`, async () => {
     const satirlar = BODY_KEYS.map((k) => `${Veri.gezegenler[k].ad}: ${Veri.burclar[harita.yerlesim[k]].ad}`).join(", ");
@@ -203,8 +207,7 @@ async function haritaYorum(cfg, harita, userId) {
       "Bu kişiye hitaben (sen diliyle) kişisel bir harita yorumu yaz: 180-240 kelime, üç paragraf. " +
       "Birinci paragraf Güneş, Ay ve yükselenin birlikte çizdiği karakter; ikinci paragraf aşk ve ilişkiler (Venüs, Mars); üçüncüsü yetenekler ve yol (Merkür, Jüpiter, Satürn). Sıcak ve güçlendirici bitir.";
     try {
-      const metin = await askLlm(ASTROLOG_SISTEM, kullanici);
-      const value = { id, metin, kaynak: "ai", harita };
+      const value = { id, metin: await askLlm(ASTROLOG_SISTEM, kullanici), kaynak: "ai" };
       await writeCache(file, value);
       return value;
     } catch (error) {
@@ -212,6 +215,29 @@ async function haritaYorum(cfg, harita, userId) {
       return { id, metin: sabitHarita(harita), kaynak: "sabit" };
     }
   });
+}
+
+const kullaniciDosyasi = (cfg, userId) => path.join(cfg.base, "kullanici", `${String(userId).replace(/[^a-zA-Z0-9-]/g, "")}.json`);
+const ayniGirdi = (a, b) => Boolean(a && b) && a.tarih === b.tarih && a.saat === b.saat && a.sehir === b.sehir;
+
+// Kilit yalnız yapay zekâ yorumunda işler; bağlantı yokken üretilen sabit yorum yenilenebilir.
+function haritaCevabi(kayit, extra = {}) {
+  const kilitBitis = kayit.kaynak === "ai" ? kayit.olusturma + HARITA_ARALIK_MS : 0;
+  return { ...kayit, yeniHaritaTarihi: kilitBitis > Date.now() ? kilitBitis : null, ...extra };
+}
+
+async function haritaOlustur(cfg, userId, girdi) {
+  const file = kullaniciDosyasi(cfg, userId);
+  const kayit = await readCache(file);
+  if (kayit?.kaynak === "ai") {
+    if (ayniGirdi(kayit.girdi, girdi)) return haritaCevabi(kayit);
+    if (Date.now() - kayit.olusturma < HARITA_ARALIK_MS) return haritaCevabi(kayit, { kilitli: true });
+  }
+  const harita = haritaHesapla(girdi);
+  const yorum = await haritaMetni(cfg, harita);
+  const yeni = { id: yorum.id, girdi, ...harita, metin: yorum.metin, kaynak: yorum.kaynak, olusturma: Date.now() };
+  await writeCache(file, yeni);
+  return haritaCevabi(yeni);
 }
 
 // --- Ses (V100'deki Piper, Alev) ---
@@ -226,14 +252,14 @@ const sesMetni = (text) =>
     .replace(/\s+/g, " ")
     .trim();
 
-// Üretilen ses önbelleğe yazılır; aynı metin ikinci kez V100'e gitmez.
-async function sesDosyasi(cfg, text) {
+// Ses bir kez üretilip dosyaya yazılır; metin değişmedikçe V100'e tekrar gidilmez. Dosya adındaki kısa
+// özet, metin değişirse (ör. yapay zekâ sonradan açılırsa) yeni sesin üretilmesini sağlar.
+async function sesDosyasi(text, dir, name) {
   const clean = sesMetni(text).slice(0, 4000);
-  const hash = crypto.createHash("sha1").update(`${tts.voice}|${clean}`).digest("hex");
-  const dir = path.join(cfg.base, "ses");
-  const mp3 = path.join(dir, `${hash}.mp3`);
+  const hash = crypto.createHash("sha1").update(`${tts.voice}|${clean}`).digest("hex").slice(0, 10);
+  const mp3 = path.join(dir, `${name}-${hash}.mp3`);
   if (fs.existsSync(mp3)) return mp3;
-  return once(`ses:${hash}`, async () => {
+  return once(`ses:${mp3}`, async () => {
     const result = await fetch(tts.url, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${tts.token}` },
@@ -249,6 +275,18 @@ async function sesDosyasi(cfg, text) {
     await fs.promises.rename(tmp, mp3);
     return mp3;
   });
+}
+
+// Günlük yorum klasörleri (metin + ses) bir hafta tutulur.
+async function eskiGunleriSil(cfg) {
+  const dir = path.join(cfg.base, "gunluk");
+  const sinir = bugun(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+  const gunler = await fs.promises.readdir(dir).catch(() => []);
+  await Promise.all(
+    gunler
+      .filter((g) => /^\d{4}-\d{2}-\d{2}$/.test(g) && g < sinir)
+      .map((g) => fs.promises.rm(path.join(dir, g), { recursive: true, force: true })),
+  );
 }
 
 function burcSesMetni(burc) {
@@ -286,27 +324,33 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const routes = {
       "GET /api/astroloji/durum": async () => sendJson(response, 200, { ai: llmEnabled, ses: sesVar() }),
       "GET /api/astroloji/gunluk": async () => sendJson(response, 200, await gunlukYorum(cfg, burcParam())),
-      "POST /api/astroloji/harita": async () => {
-        const harita = haritaDogrula(await readJson(request));
-        if (!harita) throw Object.assign(new Error("Harita bilgisi eksik."), { status: 400 });
-        sendJson(response, 200, await haritaYorum(cfg, harita, user.id));
+      "GET /api/astroloji/harita": async () => {
+        const kayit = await readCache(kullaniciDosyasi(cfg, user.id));
+        sendJson(response, 200, kayit ? haritaCevabi(kayit) : {});
       },
+      "POST /api/astroloji/harita": async () => {
+        const girdi = girdiDogrula(await readJson(request));
+        if (!girdi) throw Object.assign(new Error("Doğum tarihi, saati ya da yeri eksik."), { status: 400 });
+        sendJson(response, 200, await haritaOlustur(cfg, user.id, girdi));
+      },
+      // Günlük ses o günün klasörüne, burç tanıtımı kalıcı klasöre, harita sesi haritanın yanına yazılır.
       "GET /api/astroloji/ses": async () => {
         if (!sesVar()) throw Object.assign(new Error("Seslendirme henüz hazır değil."), { status: 503 });
         const tur = url.searchParams.get("tur");
-        let text;
-        if (tur === "burc") text = burcSesMetni(burcParam());
-        else if (tur === "gunluk") {
+        let file;
+        if (tur === "burc") {
           const burc = burcParam();
-          text = `${Veri.burclar[burc].ad} burcu için bugün. ${(await gunlukYorum(cfg, burc)).metin}`;
+          file = await sesDosyasi(burcSesMetni(burc), path.join(cfg.base, "ses"), `burc-${burc}`);
+        } else if (tur === "gunluk") {
+          const burc = burcParam();
+          const gunluk = await gunlukYorum(cfg, burc);
+          const text = `${Veri.burclar[burc].ad} burcu için bugün. ${gunluk.metin}`;
+          file = await sesDosyasi(text, path.join(cfg.base, "gunluk", gunluk.tarih), burc);
         } else if (tur === "harita") {
-          const id = String(url.searchParams.get("id") || "");
-          if (!/^[0-9a-f]{16}$/.test(id)) throw Object.assign(new Error("Geçersiz harita."), { status: 400 });
-          const cached = await readCache(path.join(cfg.base, "harita", `${id}.json`));
-          if (!cached) throw Object.assign(new Error("Önce haritanı hesapla."), { status: 404 });
-          text = cached.metin;
+          const kayit = await readCache(kullaniciDosyasi(cfg, user.id));
+          if (!kayit) throw Object.assign(new Error("Önce haritanı hesapla."), { status: 404 });
+          file = await sesDosyasi(kayit.metin, path.join(cfg.base, "harita"), kayit.id);
         } else throw Object.assign(new Error("Geçersiz istek."), { status: 400 });
-        const file = await sesDosyasi(cfg, text);
         sendFile(request, response, file);
       },
     };
@@ -321,4 +365,4 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   };
 }
 
-module.exports = { createHandler, sabitHarita, haritaId };
+module.exports = { createHandler };

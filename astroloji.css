@@ -350,6 +350,8 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
 .chart-form input:disabled { opacity: 0.45; }
 
 .form-hint { color: var(--muted); font-size: 0.8rem; text-align: center; }
+.chart-note { margin-top: 10px; color: var(--muted); font-size: 0.82rem; }
+.chart-note:empty { display: none; }
 
 .chart-result { display: flex; flex-direction: column; gap: 16px; }
 
