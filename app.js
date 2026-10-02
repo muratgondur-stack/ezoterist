@@ -33,6 +33,19 @@ menuButtons.forEach((button) => {
   });
 });
 
+// Her 2 saniyede rastgele bir butona fareyle üzerine gelinmiş gibi animasyon yap.
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  let lastPulsed;
+  setInterval(() => {
+    if (document.hidden) return;
+    const candidates = [...menuButtons].filter((button) => button !== lastPulsed);
+    const button = candidates[Math.floor(Math.random() * candidates.length)];
+    lastPulsed = button;
+    button.classList.add("is-pulsing");
+    setTimeout(() => button.classList.remove("is-pulsing"), 900);
+  }, 2000);
+}
+
 // Girişten "/#bolum" adresine dönüldüyse o bölümü aç.
 const returnedTo = [...menuButtons].find((button) => button.getAttribute("href") === window.location.hash);
 if (returnedTo) {
