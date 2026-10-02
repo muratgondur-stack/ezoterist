@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Tarot: bize özel 78 kartlık deste, günün kartı, aşk açılımı ve Kelt Haçı; okuyucumuz Feryal'den sesli yorum." />
+    <title>Tarot · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=5" />
+    <link rel="stylesheet" href="/numeroloji.css?v=2" />
+    <link rel="stylesheet" href="/ruya.css?v=1" />
+    <link rel="stylesheet" href="/tarot.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Tarot</p>
+          <h1>Kartlar senin için<br />ne söylüyor?</h1>
+          <p class="lead">Bize özel 78 kartlık destemizden kartlarını kendi elinle seç. Okuyucumuz Feryal açılımını kart kart yorumlasın, sen de sesinden dinle.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#masa">Kartlarımı seç</a>
+            <a class="btn btn-ghost" href="#deste">Desteyi incele</a>
+          </div>
+        </div>
+        <figure class="numerolog" id="numerolog">
+          <div class="numerolog-glow" aria-hidden="true"></div>
+          <div class="numerolog-frame">
+            <img src="/uzman/numerolog-c.webp" alt="Tarot okuyucumuz Feryal" width="420" height="420" />
+            <video id="numerologVideo" src="/uzman/numerolog-c.mp4" muted loop playsinline webkit-playsinline preload="none" aria-hidden="true"></video>
+          </div>
+          <figcaption><b>Feryal · Tarot Okuyucumuz</b><span id="numerologCaption">Yorumunu sesli dinlediğinde seninle konuşur.</span></figcaption>
+        </figure>
+      </section>
+
+      <section id="masa" aria-labelledby="tableTitle">
+        <div class="section-head">
+          <h2 id="tableTitle">Tarot masası</h2>
+          <p class="section-note" id="quota">Önce açılımını seç.</p>
+        </div>
+        <ul class="spread-grid" id="spreadGrid"></ul>
+        <label class="question" id="questionBox" hidden>
+          <span>Kartlara sormak istediğin bir şey var mı? (isteğe bağlı)</span>
+          <input type="text" id="question" maxlength="300" placeholder="Örneğin: Bu ilişki beni nereye götürüyor?" />
+        </label>
+
+        <div class="table" id="table" hidden>
+          <p class="table-hint" id="tableHint"></p>
+          <div class="ribbon-wrap"><div class="ribbon" id="ribbon"></div></div>
+          <div class="spread" id="spread"></div>
+          <div class="table-actions">
+            <button type="button" class="btn btn-primary" id="revealButton" hidden>Kartlarımı aç</button>
+            <button type="button" class="btn btn-ghost" id="resetButton" hidden>Yeni açılım</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="dream-result" id="sonuc" hidden aria-labelledby="readingTitle">
+        <div class="section-head">
+          <p class="eyebrow" id="readingMeta"></p>
+          <h2 id="readingTitle"></h2>
+          <span class="badge" id="readingBadge"></span>
+        </div>
+        <ol class="card-readings" id="cardReadings"></ol>
+        <div class="card story" id="storyCard">
+          <h3>Kartların hikâyesi</h3>
+          <p class="reading-text" id="story"></p>
+          <button type="button" class="listen" id="readingListen" hidden>🔊 Feryal'den dinle</button>
+        </div>
+        <p class="advice" id="advice"></p>
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Açılımın hazır. Dilersen uzmanlarımızdan birini seç; kartlarını kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3" placeholder="Örneğin: Kule kartı beni biraz endişelendirdi."></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">Tarot günlüğüm</h2>
+          <p class="section-note" id="journalNote">Açtığın kartlar burada saklanır.</p>
+        </div>
+        <ul class="journal" id="journal"></ul>
+      </section>
+
+      <section id="deste" aria-labelledby="deckTitle">
+        <div class="section-head">
+          <h2 id="deckTitle">Ezoter.ist destesi</h2>
+          <p class="section-note">78 kart, bize özel çizildi. Bir karta dokun: düz ve ters anlamı.</p>
+        </div>
+        <div class="chips deck-filter" id="deckFilter"></div>
+        <ul class="deck-grid" id="deckGrid"></ul>
+      </section>
+
+      <p class="disclaimer">Tarot, kendini tanımak ve ilham almak için bir rehberdir; önemli kararlarını yalnızca ona göre verme.</p>
+    </main>
+
+    <dialog class="sign-dialog card-dialog" id="cardDialog" aria-labelledby="dlgName">
+      <form method="dialog" class="dlg-close-form"><button class="dlg-close" aria-label="Kapat">✕</button></form>
+      <div class="dlg-head">
+        <img id="dlgImage" src="" alt="" width="540" height="810" />
+        <div>
+          <p class="dlg-dates" id="dlgGroup"></p>
+          <h2 id="dlgName"></h2>
+          <p class="dlg-position" id="dlgKeywords"></p>
+          <div class="card upright"><h3>☀️ Düz</h3><p id="dlgUpright"></p></div>
+          <div class="card reversed"><h3>🌙 Ters</h3><p id="dlgReversed"></p></div>
+        </div>
+      </div>
+    </dialog>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/tarot-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/tarot-sayfa.js?v=1"></script>
+  </body>
+</html>

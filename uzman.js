@@ -104,6 +104,17 @@ function renderDetail(t) {
       a.innerHTML = `<img src="/api/uzman/foto?id=${t.id}&n=${n}" alt="Fincan fotoğrafı ${n + 1}" loading="lazy" />`;
       return a;
     }));
+  } else if (t.kaynak.kartlar) {
+    // Tarot açılımında kartlar gösterilir (ters gelenler ters).
+    f("fotoKutu").querySelector("h4").textContent = "Kartlar";
+    f("fotolar").replaceChildren(...t.kaynak.kartlar.map((c) => {
+      const img = document.createElement("img");
+      img.src = `/tarot/kart/${c.id}.webp`;
+      img.alt = c.id;
+      img.className = "tarot-mini";
+      if (c.ters) img.style.transform = "rotate(180deg)";
+      return img;
+    }));
   } else f("fotoKutu").remove();
   if (t.soru) f("soru").textContent = t.soru;
   else f("soruKutu").remove();

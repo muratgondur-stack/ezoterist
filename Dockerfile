@@ -14,6 +14,9 @@ COPY ruya ./ruya
 COPY foto-fal.js fal-veri.js fal-api.js fal.html fal.css fal-sayfa.js ./
 COPY el-fali-veri.js el-fali-api.js el-fali.html el-fali-sayfa.js ./
 COPY el-fali ./el-fali
+COPY tarot-veri.js tarot-api.js tarot.html tarot.css tarot-sayfa.js ./
+COPY tarot ./tarot
+COPY foto-sayfa.js yuz-okuma-veri.js yuz-okuma-api.js fotograf-analiz-veri.js fotograf-analiz-api.js ./
 COPY fal ./fal
 COPY uzman ./uzman
 COPY astroloji ./astroloji

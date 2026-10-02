@@ -1,0 +1,230 @@
+/* Tarot sayfası: astroloji.css, numeroloji.css ve ruya.css'in üzerine. */
+
+:root { --tcard-w: 110px; }
+
+/* --- Açılım seçimi --- */
+
+.spread-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0 0 16px; padding: 0; list-style: none; }
+
+.spread-option {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  border: 1.5px solid var(--card-border);
+  border-radius: 18px;
+  color: inherit;
+  background: var(--card);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.spread-option:hover { transform: translateY(-2px); border-color: var(--accent); }
+.spread-option[aria-pressed="true"] { border-color: var(--accent); background: linear-gradient(150deg, rgba(255, 122, 0, 0.16), var(--card)); }
+.spread-option b { font-family: var(--serif); font-size: 1.35rem; color: var(--gold); }
+.spread-option small { color: var(--muted); font-size: 0.84rem; }
+.spread-option .count { margin-top: auto; font-size: 0.78rem; font-weight: 800; color: var(--foreground); }
+
+.question { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; font-size: 0.9rem; font-weight: 700; }
+.question input {
+  width: 100%;
+  max-width: 640px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+}
+.question input:focus { outline: none; border-color: var(--accent); }
+
+/* --- Masa --- */
+
+.table {
+  position: relative;
+  padding: 22px 16px 26px;
+  overflow: hidden;
+  border: 1px solid rgba(243, 194, 107, 0.3);
+  border-radius: 28px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 190, 110, 0.18), transparent 55%),
+    radial-gradient(ellipse at 50% 120%, rgba(120, 60, 200, 0.35), transparent 60%),
+    linear-gradient(160deg, #1d0f33, #0c0a1e 60%, #140b26);
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.6), 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.table::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 4px 4px;
+  opacity: 0.6;
+}
+
+.table-hint { position: relative; margin-bottom: 14px; color: var(--gold); font-family: var(--serif); font-size: 1.35rem; text-align: center; }
+
+.ribbon-wrap { position: relative; overflow-x: auto; overflow-y: visible; padding: 18px 8px 10px; scrollbar-width: thin; }
+.ribbon { display: flex; width: max-content; padding: 0 40px; }
+
+.ribbon-card {
+  flex: none;
+  width: 72px;
+  aspect-ratio: 2 / 3;
+  margin-right: -44px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: url("/tarot/kart/arka.webp") center / cover;
+  box-shadow: -3px 4px 10px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  transform: translateY(var(--wave, 0px)) rotate(var(--tilt, 0deg));
+  transition: transform 0.25s ease, margin 0.25s ease, opacity 0.35s ease;
+  animation: deal 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.ribbon-card:hover,
+.ribbon-card:focus-visible { transform: translateY(-22px) rotate(0deg); margin-right: -30px; outline: none; box-shadow: 0 0 20px rgba(255, 190, 90, 0.6); }
+.ribbon-card.is-taken { opacity: 0; pointer-events: none; transform: translateY(-80px) scale(0.8); }
+
+@keyframes deal { from { opacity: 0; transform: translate(calc(var(--from, 0) * 1px), -40px) rotate(-30deg) scale(0.6); } }
+
+.ribbon.is-shuffling .ribbon-card { animation: shuffle 0.9s ease-in-out both; animation-delay: var(--delay, 0ms); }
+@keyframes shuffle {
+  0% { transform: translateX(0); }
+  30% { transform: translateX(calc(var(--from, 0) * -1px)) rotate(8deg); }
+  60% { transform: translateX(calc(var(--from, 0) * 0.5px)) rotate(-6deg); }
+  100% { transform: translateY(var(--wave, 0px)) rotate(var(--tilt, 0deg)); }
+}
+
+/* --- Açılım düzeni --- */
+
+.spread { position: relative; display: grid; justify-content: center; gap: 16px; margin-top: 22px; }
+.spread.gunun { grid-template-columns: calc(var(--tcard-w) * 1.9); }
+.spread.uc { grid-template-columns: repeat(3, calc(var(--tcard-w) * 1.4)); }
+.spread.ask { grid-template-columns: repeat(5, calc(var(--tcard-w) * 1.15)); }
+.spread.kelt {
+  grid-template-columns: repeat(5, var(--tcard-w));
+  grid-template-areas:
+    ". p5 . . p10"
+    "p4 p1 p6 . p9"
+    ". p3 . . p8"
+    ". . . . p7";
+}
+
+/* Kelt Haçı: 1 ortada, 2 onun üstünde çapraz, 3 alt, 4 sol, 5 üst, 6 sağ, 7-10 sağda aşağıdan yukarı. */
+.spread.kelt .slot:nth-child(1) { grid-area: p1; }
+.spread.kelt .slot:nth-child(2) { grid-area: p1; }
+.spread.kelt .slot:nth-child(3) { grid-area: p3; }
+.spread.kelt .slot:nth-child(4) { grid-area: p4; }
+.spread.kelt .slot:nth-child(5) { grid-area: p5; }
+.spread.kelt .slot:nth-child(6) { grid-area: p6; }
+.spread.kelt .slot:nth-child(7) { grid-area: p7; }
+.spread.kelt .slot:nth-child(8) { grid-area: p8; }
+.spread.kelt .slot:nth-child(9) { grid-area: p9; }
+.spread.kelt .slot:nth-child(10) { grid-area: p10; }
+
+.slot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.slot-label { color: var(--muted); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.06em; text-align: center; text-transform: uppercase; }
+.spread.kelt .slot:nth-child(2) { grid-area: p1; position: relative; z-index: 2; transform: rotate(90deg) translateX(18%); }
+.spread.kelt .slot:nth-child(2) .slot-label { display: none; }
+
+.tcard { width: 100%; aspect-ratio: 2 / 3; perspective: 1200px; }
+.tcard-inner { position: relative; width: 100%; height: 100%; transition: transform 0.9s cubic-bezier(0.3, 0.7, 0.2, 1); transform-style: preserve-3d; }
+.tcard.is-open .tcard-inner { transform: rotateY(180deg); }
+.tcard-face { position: absolute; inset: 0; overflow: hidden; border-radius: 10px; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55); }
+.tcard-back { background: url("/tarot/kart/arka.webp") center / cover; }
+.tcard-back.is-empty { border: 2px dashed rgba(243, 194, 107, 0.35); background: rgba(255, 255, 255, 0.03); box-shadow: none; }
+.tcard-front { transform: rotateY(180deg); background: #0c0a1e; }
+.tcard-front img { width: 100%; height: 100%; object-fit: cover; }
+.tcard.is-reversed .tcard-front img { transform: rotate(180deg); }
+.tcard.is-open { animation: glow 1.4s ease 0.6s; }
+@keyframes glow { 50% { filter: drop-shadow(0 0 18px rgba(255, 200, 100, 0.85)); } }
+
+/* Kart adı, resmin altındaki koyu bantta (resimlerde yazı yok). */
+.tname {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 2.2%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #f6dca0;
+  font-family: var(--serif);
+  font-size: clamp(0.62rem, calc(var(--tcard-w) * 0.105), 1.15rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow: 0 1px 3px #000;
+}
+
+.tname small { font-family: "Manrope", sans-serif; font-size: 0.62em; font-weight: 800; letter-spacing: 0.08em; color: #ffb3b3; }
+
+.table-actions { position: relative; display: flex; justify-content: center; gap: 12px; margin-top: 22px; }
+
+/* --- Yorum --- */
+
+.card-readings { display: flex; flex-direction: column; gap: 12px; margin: 0 0 14px; padding: 0; list-style: none; }
+
+.card-reading {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 14px;
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  background: var(--card);
+}
+
+.card-reading .tcard { cursor: zoom-in; }
+.card-reading .pos { color: var(--muted); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.card-reading h3 { margin: 2px 0 6px; font-family: var(--serif); font-size: 1.45rem; color: var(--gold); }
+.card-reading h3 small { margin-left: 6px; color: #ffb3b3; font-family: "Manrope", sans-serif; font-size: 0.72rem; font-weight: 800; }
+.card-reading p { font-size: 0.96rem; }
+
+.story { border-color: rgba(255, 122, 0, 0.45); background: linear-gradient(140deg, rgba(255, 122, 0, 0.1), var(--card)); }
+
+/* --- Deste --- */
+
+.deck-filter { margin-bottom: 14px; }
+.deck-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.deck-card { position: relative; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; transition: transform 0.2s; }
+.deck-card:hover { transform: translateY(-4px); }
+.deck-card img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 9px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); }
+.deck-card .tname { --tcard-w: 118px; }
+
+.card-dialog .dlg-head { grid-template-columns: 280px 1fr; align-items: start; }
+.card-dialog .dlg-head img { border-radius: 14px; }
+.card-dialog .card { margin-top: 12px; }
+.card-dialog .reversed { border-color: rgba(255, 150, 150, 0.3); }
+
+.journal-thumb.cards { display: flex; gap: 4px; justify-content: center; align-items: center; padding: 10px; }
+.journal-thumb.cards img { height: 100%; aspect-ratio: 2 / 3; border-radius: 4px; object-fit: cover; }
+.journal-thumb.cards img.is-reversed { transform: rotate(180deg); }
+
+@media (max-width: 960px) {
+  .spread-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 680px) {
+  :root { --tcard-w: 84px; }
+  .spread.uc { grid-template-columns: repeat(3, calc(var(--tcard-w) * 1.2)); }
+  .spread.ask { grid-template-columns: repeat(3, var(--tcard-w)); }
+  .spread.kelt {
+    grid-template-columns: repeat(3, var(--tcard-w));
+    grid-template-areas: none;
+  }
+  .spread.kelt .slot { grid-area: auto !important; transform: none !important; }
+  .spread.kelt .slot:nth-child(2) .slot-label { display: block; }
+  .card-reading { grid-template-columns: 80px 1fr; }
+  .card-dialog .dlg-head { grid-template-columns: 1fr; }
+  .card-dialog .dlg-head img { width: 220px; justify-self: center; }
+}

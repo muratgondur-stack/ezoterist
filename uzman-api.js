@@ -12,9 +12,13 @@ const NumVeri = require("./numeroloji-veri");
 const { ruyaKaydiOku } = require("./ruya-api");
 const { falKaydiOku, fotoYolu: kahveFotoYolu } = require("./fal-api");
 const { elKaydiOku, fotoYolu: elFotoYolu } = require("./el-fali-api");
+const { tarotKaydiOku } = require("./tarot-api");
+const { yuzKaydiOku, fotoYolu: yuzFotoYolu } = require("./yuz-okuma-api");
+const { analizKaydiOku, fotoYolu: analizFotoYolu } = require("./fotograf-analiz-api");
+const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
-const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu };
+const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu, "yuz-okuma": yuzFotoYolu, "fotograf-analizi": analizFotoYolu };
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } = yardimci;
 
@@ -108,6 +112,47 @@ const BOLUMLER = {
       baslik: k.fal.baslik,
       girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} falı · baskın el: ${k.girdi.baskinEl} · ${k.girdi.fotoSayisi} fotoğraf`,
       ozet: `${k.fal.elTipi ? `El tipi: ${k.fal.elTipi}. ` : ""}${k.girdi.soru ? `Sorusu: ${k.girdi.soru}` : "Soru belirtilmedi."}`,
+      kayitId: k.id,
+      fotoSayisi: k.girdi.fotoSayisi,
+    }),
+  },
+  tarot: {
+    ad: "tarot açılımı",
+    link: "/tarot#gunluk",
+    yukle: (dataDir, userId, body) => tarotKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => {
+      const acilim = TarotVeri.acilimlar[k.acilim];
+      return {
+        baslik: `${acilim.ad} · ${k.yorum.baslik}`,
+        girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} · ${acilim.ad}`,
+        ozet: `${k.soru ? `Sorusu: ${k.soru} — ` : ""}${k.kartlar
+          .map((c, i) => `${acilim.pozisyonlar[i]}: ${TarotVeri.kartlar.find((x) => x.id === c.id).ad}${c.ters ? " (ters)" : ""}`)
+          .join(" · ")}`,
+        kayitId: k.id,
+        kartlar: k.kartlar,
+      };
+    },
+  },
+  "yuz-okuma": {
+    ad: "yüz okuma",
+    link: "/yuz-okuma#gunluk",
+    yukle: (dataDir, userId, body) => yuzKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: k.fal.baslik,
+      girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} yüz okuması`,
+      ozet: `${k.fal.yuzSekli ? `Yüz şekli: ${k.fal.yuzSekli}. ` : ""}${k.fal.element ? `Element: ${k.fal.element}. ` : ""}${k.girdi.soru ? `Sorusu: ${k.girdi.soru}` : "Soru belirtilmedi."}`,
+      kayitId: k.id,
+      fotoSayisi: k.girdi.fotoSayisi,
+    }),
+  },
+  "fotograf-analizi": {
+    ad: "fotoğraf analizi",
+    link: "/fotograf-analizi#gunluk",
+    yukle: (dataDir, userId, body) => analizKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: k.fal.baslik,
+      girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} fotoğraf analizi`,
+      ozet: `${k.fal.gorulen} ${k.fal.cakra ? `Çakra: ${k.fal.cakra}. ` : ""}${k.girdi.soru ? `Sorusu: ${k.girdi.soru}` : ""}`.trim(),
       kayitId: k.id,
       fotoSayisi: k.girdi.fotoSayisi,
     }),
