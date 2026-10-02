@@ -35,7 +35,8 @@ const JSON_KALIBI = `{
   "niyet": "niyet varsa cevabı, yoksa boş",
   "tavsiye": "falcının kısa tavsiyesi, 1 cümle"
 }
-Fotoğraflarda içinde telve olan bir kahve fincanı ya da tabağı yoksa yalnızca {"fincanMi": false} yaz.`;
+Fotoğrafta bir kahve fincanı, fincanın içi ya da fincan tabağı görünüyorsa "fincanMi": true yaz ve fala bak; telve az ya da fincan dolu görünse bile gördüğün desenlerden yorumla. ` +
+  `Yalnızca fotoğrafta hiç fincan ya da tabak yoksa (ör. manzara, insan, hayvan, yazı) sadece {"fincanMi": false} yaz.`;
 
 function jsonAyikla(metin) {
   const bas = metin.indexOf("{");
