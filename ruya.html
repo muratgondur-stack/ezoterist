@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Rüya Yorumu: rüyanı anlat, geleneksel ve psikolojik yorumunu oku, rüyanın resmini gör." />
+    <title>Rüya Yorumu · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=5" />
+    <link rel="stylesheet" href="/ruya.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Rüya Yorumu</p>
+          <h1>Rüyan sana<br />ne fısıldıyor?</h1>
+          <p class="lead">Rüyanı yaz ya da sesle anlat. Geleneksel ve psikolojik yorumunu okuyalım, rüyanın resmini çizelim; dilersen sesli dinle.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#anlat">Rüyamı anlat</a>
+            <a class="btn btn-ghost" href="#sozluk">Rüya sözlüğü</a>
+          </div>
+        </div>
+        <div class="hero-art dream-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="dream-moon" src="/ruya/hilalde-uyuyan-kadin.webp" alt="" width="420" height="420" />
+        </div>
+      </section>
+
+      <section id="anlat" aria-labelledby="tellTitle">
+        <div class="section-head">
+          <h2 id="tellTitle">Rüyanı anlat</h2>
+          <p class="section-note" id="quota">Her gün 3 rüyanı yorumlayabilirsin.</p>
+        </div>
+        <form class="card dream-form" id="dreamForm">
+          <label class="dream-text">
+            <span>Rüyanda ne gördün?</span>
+            <textarea name="metin" rows="7" maxlength="3000" required placeholder="Rüyanı aklında kaldığı kadarıyla anlat: neredeydin, kimler vardı, neler oldu, neler hissettin…"></textarea>
+          </label>
+          <div class="mic-row">
+            <button type="button" class="mic" id="micButton" hidden>🎙️ Sesle anlat</button>
+            <span class="section-note" id="micStatus"></span>
+            <span class="char-count" id="charCount">0 / 3000</span>
+          </div>
+          <div class="feel-row">
+            <div>
+              <p class="feel-label">Rüyada ne hissettin?</p>
+              <div class="chips" id="dreamFeel" data-name="ruyaHissi"></div>
+            </div>
+            <div>
+              <p class="feel-label">Uyanınca ne hissettin?</p>
+              <div class="chips" id="wakeFeel" data-name="uyanisHissi"></div>
+            </div>
+          </div>
+          <label>
+            <span>Hayatında şu sıralar neler oluyor? (isteğe bağlı)</span>
+            <textarea name="durum" rows="2" maxlength="400" placeholder="Örneğin: iş değiştirmeyi düşünüyorum, yeni taşındım…"></textarea>
+          </label>
+          <button type="submit" class="btn btn-primary" id="dreamSubmit">Rüyamı yorumla</button>
+          <p class="form-hint">Rüyaların yalnızca senin günlüğünde saklanır; istediğini silebilirsin.</p>
+        </form>
+      </section>
+
+      <section class="dream-result" id="sonuc" hidden aria-labelledby="resultTitle">
+        <div class="result-layout">
+          <figure class="dream-picture" id="dreamPicture">
+            <div class="picture-wait"><span class="status-dot"></span><span>Rüyanın resmi çiziliyor…</span></div>
+            <img id="dreamImage" alt="" hidden />
+          </figure>
+          <div class="result-body">
+            <p class="eyebrow" id="resultDate"></p>
+            <h2 id="resultTitle"></h2>
+            <span class="badge" id="resultBadge"></span>
+            <p class="reading-text result-theme" id="resultTheme"></p>
+            <button type="button" class="listen" id="resultListen" hidden>🔊 Sesli dinle</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Rüyandaki semboller</h3>
+          <ul class="symbol-list" id="resultSymbols"></ul>
+        </div>
+        <div class="dlg-grid two">
+          <div class="card"><h3>Duygusal mesaj</h3><p id="resultMessage"></p></div>
+          <div class="card"><h3>Hayatına yansıması</h3><p id="resultReflection"></p></div>
+        </div>
+        <div class="card">
+          <h3>Kendine sorabileceğin sorular</h3>
+          <ul class="ticks" id="resultQuestions"></ul>
+        </div>
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Yorumun hazır. Dilersen baş numeroloğumuz bu rüyanı kendi gözüyle de yorumlasın; yanıtını sesli de dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3" placeholder="Örneğin: Bu rüyayı son haftalarda sık görüyorum."></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">Rüya günlüğüm</h2>
+          <p class="section-note" id="journalNote">Yorumladığın rüyalar burada saklanır.</p>
+        </div>
+        <div class="recurring" id="recurring" hidden></div>
+        <ul class="journal" id="journal"></ul>
+      </section>
+
+      <section id="sozluk" aria-labelledby="dictTitle">
+        <div class="section-head">
+          <h2 id="dictTitle">Rüya sözlüğü</h2>
+          <p class="section-note">En sık görülen rüya sembolleri; geleneksel ve psikolojik anlamlarıyla.</p>
+        </div>
+        <div class="card today-symbol" id="todaySymbol"></div>
+        <input class="dict-search" id="dictSearch" type="search" placeholder="Sembol ara: su, yılan, diş…" aria-label="Sembol ara" />
+        <ul class="dict-grid" id="dictGrid"></ul>
+      </section>
+
+      <p class="disclaimer">Rüya yorumu, kendini tanımak ve ilham almak için bir rehberdir. Seni yoran rüyalar sık tekrarlıyorsa bir uzmanla konuşmaktan çekinme.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/ruya-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=2"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/ruya-sayfa.js?v=1"></script>
+  </body>
+</html>

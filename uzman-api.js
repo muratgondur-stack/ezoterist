@@ -9,6 +9,7 @@ const { yardimci } = require("./astroloji-api");
 const Uzmanlar = require("./uzmanlar");
 const { numerolojiKullaniciDosyasi } = require("./numeroloji-api");
 const NumVeri = require("./numeroloji-veri");
+const { ruyaKaydiOku } = require("./ruya-api");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } = yardimci;
 
@@ -69,6 +70,18 @@ const BOLUMLER = {
       };
     },
   },
+  // Rüyada kullanıcı günlüğünden hangi rüyayı göndereceğini seçer (kayitId).
+  "ruya-yorumu": {
+    ad: "rüya yorumu",
+    link: "/ruya#gunluk",
+    yukle: (dataDir, userId, body) => ruyaKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: k.yorum.baslik,
+      girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} rüyası${k.girdi.ruyaHissi ? ` · rüyada: ${k.girdi.ruyaHissi}` : ""}${k.girdi.uyanisHissi ? ` · uyanınca: ${k.girdi.uyanisHissi}` : ""}`,
+      ozet: `Rüya: ${k.girdi.metin}${k.girdi.durum ? ` — Güncel durumu: ${k.girdi.durum}` : ""}`,
+      kayitId: k.id,
+    }),
+  },
 };
 
 // Eski astroloji taleplerinde özet alanları yoktu; yerleşimlerden üretilir.
@@ -95,7 +108,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const onceki = await kullanicininTalebi(user.id, bolumAdi);
     if (onceki && onceki.durum !== "hazir") throw hata("Uzmanımızda bu analiz için zaten bekleyen bir talebin var.", 409);
 
-    const analiz = await readCache(bolum.dosya(cfg, dataDir, user.id));
+    const analiz = bolum.yukle ? await bolum.yukle(dataDir, user.id, body) : await readCache(bolum.dosya(cfg, dataDir, user.id));
     if (!analiz?.metin) throw hata(`Önce ${bolum.ad} analizini çıkarmalısın.`);
 
     const simdi = Date.now();

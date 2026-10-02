@@ -1,0 +1,190 @@
+/* Rüya yorumu sayfası: astroloji.css'in üzerine. */
+
+.dream-art .dream-moon {
+  position: relative;
+  width: min(100%, 400px);
+  height: auto;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.6));
+  animation: float 7s ease-in-out infinite;
+}
+
+@keyframes float { 50% { transform: translateY(-12px) rotate(-1.5deg); } }
+
+/* --- Form --- */
+
+.dream-form { display: flex; flex-direction: column; gap: 16px; }
+.dream-form label { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; }
+
+.dream-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.dream-text textarea { font-size: 1.02rem; }
+.dream-form textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.25); }
+
+.mic-row { display: flex; align-items: center; gap: 12px; margin-top: -6px; }
+.char-count { margin-left: auto; color: var(--muted); font-size: 0.8rem; }
+
+.mic {
+  padding: 9px 16px;
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold);
+  background: rgba(243, 194, 107, 0.08);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mic.is-recording { color: #fff; border-color: #ff5a5a; background: rgba(255, 90, 90, 0.35); animation: pulse 1.4s ease-in-out infinite; }
+.mic:disabled { opacity: 0.6; cursor: progress; }
+
+.feel-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.feel-label { margin-bottom: 8px; font-size: 0.9rem; font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chips button {
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.04);
+  font: inherit;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.chips button[aria-pressed="true"] { border-color: var(--accent); background: rgba(255, 122, 0, 0.22); }
+.dream-form .btn-primary { align-self: flex-start; }
+
+/* --- Sonuç --- */
+
+.result-layout { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: center; margin-bottom: 16px; }
+
+.dream-picture {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid rgba(243, 194, 107, 0.4);
+  border-radius: 24px;
+  background: radial-gradient(circle at 50% 40%, rgba(120, 80, 220, 0.35), rgba(11, 13, 34, 0.9));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+.dream-picture img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: reveal 1.2s ease; }
+@keyframes reveal { from { opacity: 0; transform: scale(1.04); filter: blur(8px); } }
+
+.picture-wait { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.92rem; }
+.dream-picture.is-ready .picture-wait,
+.dream-picture.is-none .picture-wait { display: none; }
+.dream-picture.is-none { background: url("/ruya/bulutta-yatak.webp") center / 70% no-repeat, radial-gradient(circle, rgba(120, 80, 220, 0.3), rgba(11, 13, 34, 0.9)); }
+
+.result-body h2 { margin: 6px 0 8px; font-size: clamp(2rem, 4.4vw, 2.8rem); }
+.result-theme { margin-top: 12px; font-size: 1.08rem; }
+
+.symbol-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.symbol-list li { padding: 12px 14px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; background: rgba(255, 255, 255, 0.03); }
+.symbol-list b { display: block; margin-bottom: 6px; color: var(--gold); font-family: var(--serif); font-size: 1.3rem; }
+.symbol-list p { font-size: 0.9rem; }
+.symbol-list p + p { margin-top: 6px; color: var(--muted); }
+.symbol-list small { color: var(--foreground); font-weight: 800; }
+
+.dlg-grid.two { grid-template-columns: repeat(2, 1fr); margin: 12px 0; }
+.dream-result .card + .card { margin-top: 12px; }
+
+/* --- Günlük --- */
+
+.recurring { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; color: var(--muted); font-size: 0.9rem; }
+.recurring span { padding: 4px 12px; border: 1px solid var(--gold-soft); border-radius: 999px; color: var(--gold); font-weight: 700; }
+
+.journal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0; padding: 0; list-style: none; }
+
+.journal-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  background: var(--card);
+}
+
+.journal-open { display: flex; flex-direction: column; width: 100%; padding: 0; border: 0; color: inherit; background: none; font: inherit; text-align: left; cursor: pointer; }
+.journal-thumb { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; background: radial-gradient(circle, rgba(120, 80, 220, 0.35), rgba(11, 13, 34, 0.9)); }
+.journal-meta { padding: 12px 14px 14px; }
+.journal-meta b { display: block; font-family: var(--serif); font-size: 1.25rem; }
+.journal-meta small { color: var(--muted); font-size: 0.8rem; }
+.journal-meta p { margin-top: 6px; color: #d8d3e8; font-size: 0.86rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.journal-item.is-current { border-color: var(--accent); }
+
+.journal-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.journal-empty { color: var(--muted); }
+
+/* --- Sözlük --- */
+
+.today-symbol { display: grid; grid-template-columns: 110px 1fr; gap: 18px; align-items: center; margin-bottom: 16px; border-color: rgba(255, 122, 0, 0.45); }
+.today-symbol img { width: 110px; height: 110px; object-fit: contain; }
+.today-symbol b { display: block; font-family: var(--serif); font-size: 1.6rem; color: var(--gold); }
+.today-symbol p { font-size: 0.92rem; }
+.today-symbol p + p { margin-top: 4px; color: var(--muted); }
+
+.dict-search {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 14px;
+  padding: 11px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+}
+
+.dict-search:focus { outline: none; border-color: var(--accent); }
+
+.dict-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.dict-grid li { padding: 14px 16px; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); }
+.dict-grid b { display: block; margin-bottom: 6px; font-family: var(--serif); font-size: 1.3rem; color: var(--gold); }
+.dict-grid p { font-size: 0.88rem; }
+.dict-grid p + p { margin-top: 6px; color: var(--muted); }
+.dict-grid small { color: var(--foreground); font-weight: 800; }
+
+@media (max-width: 960px) {
+  .result-layout { grid-template-columns: 1fr; }
+  .dream-picture { max-width: 460px; width: 100%; justify-self: center; }
+  .journal, .dict-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 680px) {
+  .feel-row, .symbol-list, .dlg-grid.two, .journal, .dict-grid { grid-template-columns: 1fr; }
+  .today-symbol { grid-template-columns: 72px 1fr; }
+  .today-symbol img { width: 72px; height: 72px; }
+  .dream-art .dream-moon { width: min(64vw, 260px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dream-art .dream-moon { animation: none; }
+}

@@ -1,6 +1,7 @@
 // "İstersen uzmanımıza da yorumlat" kartı: astroloji ve numeroloji sayfaları ortak kullanır.
 // Sayfada #expertCard, #expertGrid, #expertForm ve #expertStatus öğeleri bulunur.
-window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast }) {
+// ekVeri: talebe eklenecek bölüme özel bilgi (ör. rüyada hangi kayıt).
+window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
   const $ = (id) => document.getElementById(id);
   let talep = null;
   let secili = Uzmanlar.find((u) => u.aktif)?.id;
@@ -69,7 +70,7 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ uzman: secili, bolum, soru: $("expertForm").elements.soru.value }),
+        body: JSON.stringify({ uzman: secili, bolum, soru: $("expertForm").elements.soru.value, ...(ekVeri ? ekVeri() : {}) }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Talep gönderilemedi.");

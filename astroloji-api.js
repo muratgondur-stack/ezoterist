@@ -73,11 +73,11 @@ function once(key, task) {
   return inFlight.get(key);
 }
 
-async function askLlm(system, user) {
+async function askLlm(system, user, { maxTokens = 700, temperature = 0.85 } = {}) {
   const body = {
     model: llm.model,
-    temperature: 0.85,
-    max_tokens: 700,
+    temperature,
+    max_tokens: maxTokens,
     messages: [{ role: "system", content: system }, { role: "user", content: user }],
   };
   if (/^gemma/i.test(llm.model)) body.reasoning_effort = "none";
