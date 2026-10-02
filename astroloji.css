@@ -589,3 +589,90 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
   .hero-wheel { animation: none; }
   html { scroll-behavior: auto; }
 }
+
+/* --- Uzman yorumu (isteğe bağlı) --- */
+
+.expert { border-style: dashed; background: rgba(11, 13, 34, 0.55); }
+.expert-lead { color: var(--muted); font-size: 0.92rem; }
+
+.expert-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.expert-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 12px 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.03);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.expert-slot img,
+.expert-slot .expert-q {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.expert-slot .expert-q {
+  display: grid;
+  place-items: center;
+  border: 2px dashed rgba(243, 194, 107, 0.35);
+  color: var(--gold);
+  font-family: var(--serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+}
+
+.expert-slot b { font-size: 0.9rem; }
+.expert-slot small { color: var(--muted); font-size: 0.75rem; }
+.expert-slot[aria-pressed="true"] { border-color: var(--accent); background: rgba(255, 122, 0, 0.1); }
+.expert-slot:disabled { cursor: default; opacity: 0.55; }
+
+.expert-form { display: flex; flex-direction: column; gap: 10px; }
+.expert-form label { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; font-weight: 700; }
+
+.expert-form textarea,
+.panel-editor textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+  resize: vertical;
+}
+
+.expert-form textarea:focus,
+.panel-editor textarea:focus { outline: none; border-color: var(--accent); }
+.expert-form .btn { align-self: flex-start; }
+
+.expert-status { margin-top: 6px; }
+.expert-status .status-line { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.92rem; }
+.expert-status .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.3; } }
+
+.expert-answer { margin-top: 4px; padding: 16px; border-left: 3px solid var(--gold); border-radius: 12px; background: rgba(243, 194, 107, 0.07); }
+.expert-answer-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.expert-answer-head img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.expert-answer-head b { display: block; }
+.expert-answer-head small { color: var(--muted); }
+
+@media (max-width: 680px) {
+  .expert-grid { grid-template-columns: repeat(2, 1fr); }
+}

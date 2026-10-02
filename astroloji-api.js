@@ -1,4 +1,4 @@
-// Astroloji bölümünün sunucu uçları: günlük yorum, doğum haritası yorumu ve Alev'in sesi (Piper).
+// Astroloji bölümünün sunucu uçları: günlük yorum, doğum haritası yorumu ve seslendirme (Piper, arabella sesi).
 // Yapay zekâ ve ses isteğe bağlıdır: LLM_URL/LLM_TOKEN/LLM_MODEL ve TTS_URL yoksa sabit metin, ses yok.
 // İkisi de V100'de (ses2.quiz.ist): Gemma /llm/v1/chat/completions, Piper /tts/synthesize; ezoter.ist'e özel anahtarla.
 const crypto = require("node:crypto");
@@ -17,7 +17,7 @@ const llmEnabled = Boolean(llm.url && llm.token);
 const tts = {
   url: (process.env.TTS_URL || "").trim(),
   token: (process.env.TTS_TOKEN || process.env.LLM_TOKEN || "").trim(),
-  voice: (process.env.TTS_VOICE || "alev").trim(),
+  voice: (process.env.TTS_VOICE || "arabella").trim(),
 };
 
 const TIME_ZONE = "Europe/Istanbul";
@@ -240,7 +240,7 @@ async function haritaOlustur(cfg, userId, girdi) {
   return haritaCevabi(yeni);
 }
 
-// --- Ses (V100'deki Piper, Alev) ---
+// --- Ses (V100'deki Piper, arabella sesi) ---
 
 const sesVar = () => Boolean(tts.url && tts.token);
 
@@ -365,4 +365,5 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   };
 }
 
-module.exports = { createHandler };
+// Uzman talepleri (uzman-api.js) aynı önbellek, ses ve kayıt yardımcılarını kullanır.
+module.exports = { createHandler, yardimci: { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } };

@@ -78,7 +78,7 @@ function bindListen(button, getUrl) {
     if (!url) return;
     activeListen = button;
     button.disabled = true;
-    button.textContent = "⏳ Alev hazırlanıyor…";
+    button.textContent = "⏳ Ses hazırlanıyor…";
     voice.src = url;
     voice.play().catch(() => {
       toast("Ses çalınamadı. Lütfen tekrar deneyin.");
@@ -286,6 +286,9 @@ function showSaved(kayit) {
   if (kayit.yeniHaritaTarihi) notlar.push(`Farklı bilgilerle yeni harita ${shortDate(kayit.yeniHaritaTarihi)} tarihinden itibaren çıkarılabilir.`);
   $("chartNote").textContent = notlar.join(" ");
   bindListen($("chartListen"), () => `/api/astroloji/ses?tur=harita&id=${kayit.id}`);
+  $("expertCard").hidden = false;
+  renderExperts();
+  renderExpertStatus();
 }
 
 async function requestChart(girdi) {
@@ -330,6 +333,83 @@ form.addEventListener("submit", (event) => {
 });
 
 
+// --- Uzman yorumu (isteğe bağlı) ---
+
+let uzmanTalebi = null;
+let seciliUzman = Uzmanlar.find((u) => u.aktif)?.id;
+const uzmanBul = (id) => Uzmanlar.find((u) => u.id === id) || Uzmanlar[0];
+const longDate = (ms) => new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(ms));
+
+function renderExperts() {
+  $("expertGrid").replaceChildren(...Uzmanlar.map((u) => {
+    const li = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "expert-slot";
+    button.disabled = !u.aktif;
+    button.setAttribute("aria-pressed", String(u.id === seciliUzman));
+    button.innerHTML = u.resim ? `<img src="${u.resim}" alt="" width="84" height="84" />` : '<span class="expert-q">?</span>';
+    const ad = document.createElement("b");
+    ad.textContent = u.ad;
+    const unvan = document.createElement("small");
+    unvan.textContent = u.unvan;
+    button.append(ad, unvan);
+    button.addEventListener("click", () => { seciliUzman = u.id; renderExperts(); });
+    li.append(button);
+    return li;
+  }));
+}
+
+function renderExpertStatus() {
+  const status = $("expertStatus");
+  const t = uzmanTalebi;
+  const bekliyor = t && t.durum !== "hazir";
+  $("expertForm").hidden = Boolean(bekliyor);
+  $("expertGrid").hidden = Boolean(bekliyor);
+  if (!t) { status.hidden = true; return; }
+  status.hidden = false;
+  const uzman = uzmanBul(t.uzman);
+
+  if (bekliyor) {
+    status.innerHTML = `<p class="status-line"><span class="status-dot"></span><span></span></p>`;
+    status.querySelector("span:last-child").textContent = t.durum === "inceleniyor"
+      ? `${uzman.ad} şu an haritanı inceliyor. Yorumun en geç ${longDate(t.sonTarih)} tarihinde hazır olacak.`
+      : `Talebin ${uzman.ad} için sıraya alındı. Yorumun en geç ${longDate(t.sonTarih)} tarihinde hazır olacak; hazır olunca e-posta ile haber vereceğiz.`;
+    return;
+  }
+
+  status.innerHTML = `<div class="expert-answer"><div class="expert-answer-head">${uzman.resim ? `<img src="${uzman.resim}" alt="" />` : ""}<div><b></b><small></small></div></div>
+    <p class="reading-text"></p><button type="button" class="listen" id="expertListen">🔊 Sesli dinle</button></div>`;
+  status.querySelector(".expert-answer-head b").textContent = `${uzman.ad} yorumladı`;
+  status.querySelector(".expert-answer-head small").textContent = longDate(t.cevap.tarih);
+  status.querySelector(".reading-text").textContent = t.cevap.metin;
+  bindListen($("expertListen"), () => `/api/uzman/ses?id=${t.id}`);
+}
+
+$("expertForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = event.submitter || $("expertForm").querySelector("button");
+  button.disabled = true;
+  try {
+    const response = await fetch("/api/uzman/talep", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ uzman: seciliUzman, soru: $("expertForm").elements.soru.value }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Talep gönderilemedi.");
+    uzmanTalebi = data.talep;
+    $("expertForm").reset();
+    renderExpertStatus();
+    toast("Talebin uzmanımıza iletildi.");
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    button.disabled = false;
+  }
+});
+
 // --- Sözlük ---
 
 function renderGlossary() {
@@ -369,6 +449,15 @@ async function init() {
   }
   $("topbarUser").textContent = me.user.name || me.user.email;
   durum = await fetch("/api/astroloji/durum", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : durum)).catch(() => durum);
+  const uzmanDurum = await fetch("/api/uzman/durum", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  uzmanTalebi = uzmanDurum?.talep || null;
+  if (uzmanDurum?.uzman) {
+    const link = document.createElement("a");
+    link.href = "/uzman";
+    link.className = "topbar-back";
+    link.textContent = "Uzman Paneli";
+    $("topbarUser").replaceChildren(link);
+  }
   const kayit = await fetch("/api/astroloji/harita", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (kayit?.id) showSaved(kayit);
 }

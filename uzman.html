@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="robots" content="noindex" />
+    <title>Uzman Paneli · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=4" />
+    <link rel="stylesheet" href="/uzman.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/astroloji">← Astroloji</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section>
+        <div class="section-head">
+          <h2>Uzman Paneli</h2>
+          <p class="section-note" id="panelSummary">Talepler yükleniyor…</p>
+        </div>
+        <p class="card panel-denied" id="panelDenied" hidden>Bu sayfa yalnızca uzmanlarımız içindir.</p>
+
+        <div class="panel-layout" id="panelLayout" hidden>
+          <ul class="panel-list" id="panelList" aria-label="Talepler"></ul>
+
+          <article class="card panel-detail" id="panelDetail">
+            <p class="panel-empty">Soldan bir talep seç.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <template id="detailTemplate">
+      <div class="panel-detail-head">
+        <div>
+          <p class="eyebrow" data-f="durum"></p>
+          <h3 data-f="kisi"></h3>
+          <p class="section-note" data-f="dogum"></p>
+        </div>
+        <p class="panel-deadline" data-f="sure"></p>
+      </div>
+      <div class="panel-block">
+        <h4>Harita</h4>
+        <p data-f="harita"></p>
+      </div>
+      <div class="panel-block" data-f="soruKutu">
+        <h4>Kullanıcının notu</h4>
+        <p class="panel-question" data-f="soru"></p>
+      </div>
+      <div class="panel-block">
+        <div class="reading-head">
+          <h4>Yapay zekâ yorumu</h4>
+          <button type="button" class="listen" data-f="taslak">↓ Taslak olarak kullan</button>
+        </div>
+        <p class="reading-text panel-ai" data-f="ai"></p>
+      </div>
+      <form class="panel-editor" data-f="form">
+        <label>
+          <span>Senin yorumun</span>
+          <textarea name="metin" rows="12" minlength="40" maxlength="6000" required placeholder="Haritayı kendi gözünle yorumla. Teslim edince kullanıcıya e-posta gider; yorum sesli de dinlenebilir."></textarea>
+        </label>
+        <div class="panel-actions">
+          <button type="submit" class="btn btn-primary">Teslim et</button>
+          <span class="section-note" data-f="sayac"></span>
+        </div>
+      </form>
+      <div class="panel-block" data-f="teslimKutu">
+        <div class="reading-head">
+          <h4>Teslim edilen yorum</h4>
+          <button type="button" class="listen" data-f="dinle">🔊 Sesli dinle</button>
+        </div>
+        <p class="reading-text" data-f="cevap"></p>
+      </div>
+    </template>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=1"></script>
+    <script src="/uzman.js?v=1"></script>
+  </body>
+</html>

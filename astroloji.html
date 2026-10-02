@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/astroloji.css?v=3" />
+    <link rel="stylesheet" href="/astroloji.css?v=4" />
   </head>
   <body>
     <header class="topbar">
@@ -25,7 +25,7 @@
         <div class="hero-text">
           <p class="eyebrow">Ezoter.ist · Astroloji</p>
           <h1>Gökyüzü bugün<br />senin için ne söylüyor?</h1>
-          <p class="lead">Gezegenlerin şu anki yerleri gerçek gök hesabıyla çıkarıldı. Burcunu seç, günün yorumunu oku ve Alev'in sesinden dinle; doğum haritanla Güneş, Ay ve yükselenini keşfet.</p>
+          <p class="lead">Gezegenlerin şu anki yerleri gerçek gök hesabıyla çıkarıldı. Burcunu seç, günün yorumunu oku ve sesli dinle; doğum haritanla Güneş, Ay ve yükselenini keşfet.</p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="#burclar">Burcumu seç</a>
             <a class="btn btn-ghost" href="#harita">Doğum haritamı çıkar</a>
@@ -104,7 +104,23 @@
               </div>
               <p class="reading-text" id="chartReading">Yorum hazırlanıyor…</p>
               <p class="chart-note" id="chartNote"></p>
-              <button type="button" class="listen" id="chartListen" hidden>🔊 Alev'den dinle</button>
+              <button type="button" class="listen" id="chartListen" hidden>🔊 Sesli dinle</button>
+            </div>
+            <div class="card expert" id="expertCard" hidden>
+              <div class="reading-head">
+                <h3>İstersen uzmanımıza da yorumlat</h3>
+                <span class="badge">Ücretsiz · 48 saat</span>
+              </div>
+              <p class="expert-lead">Analizin hazır. Dilersen baş numeroloğumuz haritanı kendi gözüyle de yorumlasın; yanıtını sesli de dinleyebilirsin.</p>
+              <div class="expert-status" id="expertStatus" hidden></div>
+              <ul class="expert-grid" id="expertGrid"></ul>
+              <form class="expert-form" id="expertForm">
+                <label>
+                  <span>Uzmanına notun (isteğe bağlı)</span>
+                  <textarea name="soru" maxlength="600" rows="3" placeholder="Örneğin: Bu yıl iş hayatımda nelere dikkat etmeliyim?"></textarea>
+                </label>
+                <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+              </form>
             </div>
             <div class="card">
               <h3>Gezegen yerleşimleri</h3>
@@ -138,7 +154,7 @@
           <p class="dlg-dates" id="dlgDates"></p>
           <h2 id="dlgName"></h2>
           <ul class="facts" id="dlgFacts"></ul>
-          <button type="button" class="listen" id="dlgListenSign" hidden>🔊 Burcu Alev'den dinle</button>
+          <button type="button" class="listen" id="dlgListenSign" hidden>🔊 Burcu sesli dinle</button>
         </div>
       </div>
       <div class="card reading today">
@@ -168,6 +184,7 @@
 
     <script src="/astro.js?v=1"></script>
     <script src="/astroloji-veri.js?v=1"></script>
-    <script src="/astroloji-sayfa.js?v=2"></script>
+    <script src="/uzmanlar.js?v=1"></script>
+    <script src="/astroloji-sayfa.js?v=3"></script>
   </body>
 </html>

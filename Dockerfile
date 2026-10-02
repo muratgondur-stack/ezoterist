@@ -6,6 +6,8 @@ COPY server.js auth.js eposta.js ./
 COPY index.html styles.css app.js login.html login.css login.js favicon.svg favicon.png apple-touch-icon.png ezoterist-bg.png ezoterist-bg-landscape.png ezoterist-bg-portrait.mp4 ezoterist-bg-landscape.mp4 README.md ./
 
 COPY astro.js astroloji-veri.js astroloji-api.js astroloji.html astroloji.css astroloji-sayfa.js ./
+COPY uzman-api.js uzmanlar.js uzman.html uzman.css uzman.js ./
+COPY uzman ./uzman
 COPY astroloji ./astroloji
 COPY menu ./menu
 COPY audio/anamenu.m4a ./audio/

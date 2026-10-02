@@ -1,0 +1,54 @@
+.panel-layout { display: grid; grid-template-columns: 320px 1fr; gap: 18px; align-items: start; }
+
+.panel-list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+.panel-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  color: inherit;
+  background: var(--card);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.panel-item[aria-current="true"] { border-color: var(--accent); background: rgba(255, 122, 0, 0.1); }
+.panel-item b { font-size: 0.98rem; }
+.panel-item small { color: var(--muted); font-size: 0.8rem; }
+
+.chip {
+  align-self: flex-start;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.chip-sirada { background: rgba(243, 194, 107, 0.18); color: var(--gold); }
+.chip-inceleniyor { background: rgba(120, 160, 255, 0.18); color: #a9c2ff; }
+.chip-hazir { background: rgba(90, 210, 140, 0.18); color: #9be3b8; }
+.late { color: #ff9b9b !important; font-weight: 700; }
+
+.panel-detail { display: flex; flex-direction: column; gap: 16px; }
+.panel-empty { color: var(--muted); }
+.panel-detail-head { display: flex; justify-content: space-between; gap: 12px; }
+.panel-detail-head h3 { font-family: var(--serif); font-size: 1.7rem; margin: 2px 0; }
+.panel-deadline { color: var(--muted); font-size: 0.86rem; text-align: right; }
+.panel-block h4 { margin: 0 0 6px; color: var(--gold); font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.panel-block .reading-head .listen { margin-top: 0; }
+.panel-question { font-style: italic; }
+.panel-ai { max-height: 320px; overflow-y: auto; padding-right: 6px; color: #d8d3e8; }
+.panel-editor { display: flex; flex-direction: column; gap: 10px; }
+.panel-editor label { display: flex; flex-direction: column; gap: 6px; font-weight: 700; }
+.panel-actions { display: flex; align-items: center; gap: 14px; }
+.panel-denied { color: var(--muted); }
+
+@media (max-width: 860px) {
+  .panel-layout { grid-template-columns: 1fr; }
+}
+.panel-deadline { white-space: pre-line; }
