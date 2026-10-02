@@ -25,8 +25,8 @@ const JSON_KALIBI = `{
   "soru": "soru varsa cevabı, yoksa boş",
   "tavsiye": "kısa tavsiye, 1 cümle"
 }
-Fotoğrafta tek bir yetişkin insanın yüzü önden net görünüyorsa "uygun": true yaz ve oku. ` +
-  `Yüz yoksa, birden fazla kişi varsa ya da kişi çocuk ya da genç görünüyorsa yalnızca {"uygun": false} yaz.`;
+Fotoğrafta tek bir insanın yüzü önden ya da yarı profilden görünüyorsa (fotoğraf, çizim ya da portre fark etmez) "uygun": true yaz ve oku. ` +
+  `Yalnızca yüz hiç yoksa, birden fazla kişinin yüzü varsa ya da kişi açıkça 18 yaşından küçük (çocuk ya da ergen) görünüyorsa sadece {"uygun": false} yaz.`;
 
 const ELEMENTLER = ["ağaç", "ateş", "toprak", "metal", "su"];
 const SEKILLER = ["oval", "yuvarlak", "kare", "kalp", "uzun", "elmas"];
