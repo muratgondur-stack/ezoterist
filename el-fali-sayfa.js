@@ -189,7 +189,9 @@ function showKayit(kayit, kaydir = false) {
   $("resultTitle").textContent = f.baslik;
   $("handType").hidden = !f.elTipi;
   $("handType").textContent = f.elTipi ? `${TIP_IKON[f.elTipi] || ""} ${f.elTipi[0].toLocaleUpperCase("tr-TR")}${f.elTipi.slice(1)} eli` : "";
-  $("resultTypeText").textContent = f.elTipiYorum;
+  // Yorum boş gelirse rehberdeki el tipi açıklaması kullanılır.
+  const tipBilgi = elTipleri.find(([ad]) => ad.toLocaleLowerCase("tr-TR").startsWith(f.elTipi));
+  $("resultTypeText").textContent = f.elTipiYorum || (tipBilgi ? tipBilgi[3] : "");
   $("resultLines").replaceChildren(...f.cizgiler.map((c) => {
     const li = document.createElement("li");
     li.innerHTML = '<b></b><span class="gorunum"></span><p></p>';
