@@ -1,6 +1,7 @@
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
+const { handleAuthRequest, dataDir } = require("./auth");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -72,7 +73,7 @@ function sendFile(request, response, filePath) {
 
     const headers = {
       "Content-Type": contentTypes[path.extname(filePath)] || "application/octet-stream",
-      "Cache-Control": path.basename(filePath) === "index.html" ? "no-cache" : "public, max-age=3600",
+      "Cache-Control": path.extname(filePath) === ".html" ? "no-cache" : "public, max-age=3600",
       "Accept-Ranges": "bytes",
       "Last-Modified": stats.mtime.toUTCString(),
     };
@@ -98,26 +99,53 @@ function sendFile(request, response, filePath) {
   });
 }
 
+const pageRoutes = {
+  "/login": "login.html",
+  "/register": "login.html",
+  "/forgot-password": "login.html",
+};
+
 const server = http.createServer((request, response) => {
+  let url;
+  let requestPath;
+  try {
+    url = new URL(request.url, "http://localhost");
+    requestPath = decodeURIComponent(url.pathname);
+  } catch {
+    response.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Invalid URL");
+    return;
+  }
+
+  if (handleAuthRequest(request, response, url)) return;
+
   if (request.method !== "GET" && request.method !== "HEAD") {
     response.writeHead(405, { Allow: "GET, HEAD" });
     response.end("Method not allowed");
     return;
   }
 
-  let requestPath;
-  try {
-    requestPath = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
-  } catch {
-    response.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
-    response.end("Invalid URL");
+  if (pageRoutes[requestPath]) {
+    sendFile(request, response, path.join(root, pageRoutes[requestPath]));
     return;
   }
+
   const requestedFile = path.resolve(root, `.${requestPath}`);
 
   if (requestedFile !== root && !requestedFile.startsWith(root + path.sep)) {
     response.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
     response.end("Invalid path");
+    return;
+  }
+
+  // Kullanıcı verisini ve gizli dosyaları asla statik olarak sunma.
+  const isPrivate =
+    requestedFile === dataDir ||
+    requestedFile.startsWith(dataDir + path.sep) ||
+    requestPath.split("/").some((segment) => segment.startsWith("."));
+  if (isPrivate) {
+    response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Not found");
     return;
   }
 
