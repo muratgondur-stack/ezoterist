@@ -365,5 +365,8 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   };
 }
 
-// Uzman talepleri (uzman-api.js) aynı önbellek, ses ve kayıt yardımcılarını kullanır.
-module.exports = { createHandler, yardimci: { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } };
+// Uzman talepleri (uzman-api.js) ve numeroloji (numeroloji-api.js) aynı önbellek, ses ve yapay zekâ yardımcılarını kullanır.
+module.exports = {
+  createHandler,
+  yardimci: { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri, askLlm, once, bugun, llmEnabled },
+};

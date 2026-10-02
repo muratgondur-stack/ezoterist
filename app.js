@@ -75,7 +75,7 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
   .catch(() => null);
 
 // Hazır olan bölümlerin kendi sayfaları var; diğerleri "çok yakında" der.
-const SECTION_PAGES = { "#astroloji": "/astroloji" };
+const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji" };
 
 const openSection = (button) => {
   const page = SECTION_PAGES[button.getAttribute("href")];

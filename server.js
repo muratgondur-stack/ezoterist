@@ -4,6 +4,7 @@ const path = require("node:path");
 const { handleAuthRequest, dataDir, currentUser } = require("./auth");
 const { createHandler: createAstrolojiHandler } = require("./astroloji-api");
 const { createHandler: createUzmanHandler } = require("./uzman-api");
+const { createHandler: createNumerolojiHandler } = require("./numeroloji-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -120,10 +121,12 @@ const pageRoutes = {
   "/forgot-password": "login.html",
   "/astroloji": "astroloji.html",
   "/uzman": "uzman.html",
+  "/numeroloji": "numeroloji.html",
 };
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
 const handleUzmanRequest = createUzmanHandler({ dataDir, currentUser, sendFile });
+const handleNumerolojiRequest = createNumerolojiHandler({ dataDir, currentUser, sendFile });
 
 const server = http.createServer((request, response) => {
   let url;
@@ -139,6 +142,7 @@ const server = http.createServer((request, response) => {
 
   if (handleAstrolojiRequest(request, response, url)) return;
   if (handleUzmanRequest(request, response, url)) return;
+  if (handleNumerolojiRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {

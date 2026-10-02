@@ -1,5 +1,4 @@
 const $ = (id) => document.getElementById(id);
-const { burclar } = AstrolojiVeri;
 const DURUM = { sirada: "Sırada", inceleniyor: "İnceleniyor", hazir: "Teslim edildi" };
 
 let talepler = [];
@@ -55,7 +54,7 @@ function renderList() {
     button.innerHTML = `<span class="chip chip-${t.durum}">${DURUM[t.durum]}</span><b></b><small></small><small></small>`;
     const [ad, burc, sure] = button.querySelectorAll("b, small");
     ad.textContent = kisiAdi(t);
-    burc.textContent = `Güneş ${burclar[t.kaynak.yerlesim.sun].ad} · Ay ${burclar[t.kaynak.yerlesim.moon].ad}${t.kaynak.yukselen ? ` · Yükselen ${burclar[t.kaynak.yukselen].ad}` : ""}`;
+    burc.textContent = `${t.bolumAdi[0].toLocaleUpperCase("tr-TR")}${t.bolumAdi.slice(1)} · ${t.kaynak.baslik}`;
     if (t.durum === "hazir") sure.textContent = `Teslim: ${tarih(t.cevap.tarih)}`;
     else {
       sure.textContent = `Son teslim ${tarih(t.sonTarih)} · ${kalanSure(t.sonTarih)}`;
@@ -90,13 +89,12 @@ async function sec(id) {
 function renderDetail(t) {
   const node = $("detailTemplate").content.cloneNode(true);
   const f = (name) => node.querySelector(`[data-f="${name}"]`);
-  const g = t.kaynak.girdi || {};
 
-  f("durum").textContent = DURUM[t.durum];
+  f("durum").textContent = `${DURUM[t.durum]} · ${t.bolumAdi}`;
   f("kisi").textContent = kisiAdi(t);
-  f("dogum").textContent = `${g.tarih || "?"} · ${g.saatYok ? "saat bilinmiyor" : g.saat} · ${g.sehir || "?"} — ${t.userEmail}`;
+  f("dogum").textContent = `${t.kaynak.girdiMetni} — ${t.userEmail}`;
   f("sure").textContent = t.durum === "hazir" ? `Teslim edildi: ${tarih(t.cevap.tarih)}` : `Son teslim: ${tarih(t.sonTarih)}\n${kalanSure(t.sonTarih)}`;
-  f("harita").textContent = t.haritaOzeti;
+  f("harita").textContent = t.kaynak.ozet;
   if (t.soru) f("soru").textContent = t.soru;
   else f("soruKutu").remove();
   f("ai").textContent = t.kaynak.aiMetin;

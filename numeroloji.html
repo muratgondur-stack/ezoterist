@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Numeroloji: günün sayısı, yaşam yolu, kader ve ruh güdüsü sayıların, baş numeroloğumuzun yorumu." />
+    <title>Numeroloji · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=4" />
+    <link rel="stylesheet" href="/numeroloji.css?v=2" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Numeroloji</p>
+          <h1>Sayıların dilinde<br />sen kimsin?</h1>
+          <p class="lead">Adının harfleri ve doğum tarihinin rakamları sana özel bir şifre taşır. Yaşam yolunu, kaderini ve ruhunun isteğini keşfet; baş numeroloğumuz sana sesli anlatsın.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#profil">Sayılarımı hesapla</a>
+            <a class="btn btn-ghost" href="#bugun">Bugünün sayısı</a>
+          </div>
+        </div>
+        <figure class="numerolog" id="numerolog">
+          <div class="numerolog-glow" aria-hidden="true"></div>
+          <div class="numerolog-frame">
+            <img src="/uzman/bas-numerolog.webp" alt="Baş numeroloğumuz" width="411" height="420" />
+            <video id="numerologVideo" src="/numeroloji/numerolog-konusma.mp4" muted loop playsinline webkit-playsinline preload="none" aria-hidden="true"></video>
+          </div>
+          <figcaption><b>Baş Numeroloğumuz</b><span id="numerologCaption">Yorumlarını sesli dinlediğinde seninle konuşur.</span></figcaption>
+        </figure>
+      </section>
+
+      <section class="today-section" id="bugun" aria-labelledby="todayTitle">
+        <div class="section-head">
+          <h2 id="todayTitle">Bugünün sayısı</h2>
+          <p class="section-note" id="todayDate"></p>
+        </div>
+        <div class="today-layout">
+          <article class="card universal">
+            <p class="sky-label">Evrensel gün</p>
+            <p class="big-number" id="universalNumber">—</p>
+            <p id="universalText"></p>
+          </article>
+          <article class="card reading personal-day">
+            <div class="reading-head">
+              <h3 id="personalTitle">Kişisel günün</h3>
+              <span class="badge" id="personalBadge"></span>
+            </div>
+            <div class="cycle-chips" id="cycleChips"></div>
+            <p class="reading-text" id="personalText">Kişisel günün için önce aşağıdan sayılarını hesapla.</p>
+            <button type="button" class="listen" id="personalListen" hidden>🔊 Sesli dinle</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="profile" id="profil" aria-labelledby="profileTitle">
+        <div class="section-head">
+          <h2 id="profileTitle">Numeroloji profilim</h2>
+          <p class="section-note">Doğumdaki tam adın ve doğum tarihinle sayıların hesaplanır.</p>
+        </div>
+        <div class="chart-layout">
+          <form class="chart-form card" id="profileForm">
+            <img class="chart-art" src="/numeroloji/sayi-cemberi.webp" alt="" width="360" height="360" loading="lazy" />
+            <label>
+              <span>Doğumdaki tam adın</span>
+              <input type="text" name="adSoyad" autocomplete="name" placeholder="Ad ve soyad" maxlength="80" required />
+            </label>
+            <label>
+              <span>Doğum tarihi</span>
+              <input type="date" name="tarih" min="1900-01-01" max="2049-12-31" required />
+            </label>
+            <button type="submit" class="btn btn-primary">Sayılarımı hesapla</button>
+            <p class="form-hint">Profilin hesabına kaydedilir; farklı bilgilerle yeni profil 3 günde bir çıkarılabilir.</p>
+          </form>
+
+          <div class="chart-result" id="profileResult" hidden>
+            <ul class="core-grid" id="coreGrid"></ul>
+            <div class="card reading">
+              <div class="reading-head">
+                <h3>Baş numeroloğumuzun yorumu</h3>
+                <span class="badge" id="profileBadge"></span>
+              </div>
+              <p class="reading-text" id="profileReading">Sayıların yorumlanıyor…</p>
+              <p class="chart-note" id="profileNote"></p>
+              <button type="button" class="listen" id="profileListen" hidden>🔊 Sesli dinle</button>
+            </div>
+            <div class="card expert" id="expertCard" hidden>
+              <div class="reading-head">
+                <h3>İstersen uzmanımıza da yorumlat</h3>
+                <span class="badge">Ücretsiz · 48 saat</span>
+              </div>
+              <p class="expert-lead">Analizin hazır. Dilersen baş numeroloğumuz sayılarını kendi gözüyle de yorumlasın; yanıtını sesli de dinleyebilirsin.</p>
+              <div class="expert-status" id="expertStatus" hidden></div>
+              <ul class="expert-grid" id="expertGrid"></ul>
+              <form class="expert-form" id="expertForm">
+                <label>
+                  <span>Uzmanına notun (isteğe bağlı)</span>
+                  <textarea name="soru" maxlength="600" rows="3" placeholder="Örneğin: Bu yıl hangi konulara odaklanmalıyım?"></textarea>
+                </label>
+                <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+              </form>
+            </div>
+            <div class="grid-row">
+              <div class="card">
+                <h3>Lo Shu ızgaran</h3>
+                <p class="section-note small">Doğum tarihindeki rakamlar; boş kareler geliştireceğin alanlar.</p>
+                <div class="loshu" id="loshu"></div>
+              </div>
+              <div class="card">
+                <h3>Karmik dersler</h3>
+                <ul class="ticks" id="lessons"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="numbersTitle">
+        <div class="section-head">
+          <h2 id="numbersTitle">Sayıların anlamları</h2>
+          <p class="section-note">Bir sayıya dokun: karakteri, aşkı ve işi.</p>
+        </div>
+        <ul class="sign-grid number-grid" id="numberGrid"></ul>
+      </section>
+
+      <section aria-labelledby="conceptsTitle">
+        <div class="section-head">
+          <h2 id="conceptsTitle">Temel kavramlar</h2>
+        </div>
+        <ul class="modality-grid concept-grid" id="conceptGrid"></ul>
+      </section>
+
+      <p class="disclaimer">Numeroloji, kendini tanımak ve ilham almak için bir rehberdir; önemli kararlarını yalnızca ona göre verme.</p>
+    </main>
+
+    <dialog class="sign-dialog" id="numberDialog" aria-labelledby="dlgName">
+      <form method="dialog" class="dlg-close-form"><button class="dlg-close" aria-label="Kapat">✕</button></form>
+      <div class="dlg-head">
+        <img id="dlgImage" src="" alt="" width="360" height="360" />
+        <div>
+          <p class="dlg-dates" id="dlgKeywords"></p>
+          <h2 id="dlgName"></h2>
+          <p class="dlg-position" id="dlgPosition"></p>
+          <button type="button" class="listen" id="dlgListen" hidden>🔊 Sesli dinle</button>
+        </div>
+      </div>
+      <div class="dlg-grid">
+        <div class="card"><h3>Karakter</h3><p id="dlgSummary"></p></div>
+        <div class="card"><h3>Güçlü yanlar</h3><ul class="ticks" id="dlgStrong"></ul></div>
+        <div class="card"><h3>Gelişim alanları</h3><ul class="ticks shadow" id="dlgShadow"></ul></div>
+        <div class="card"><h3>Aşkta</h3><p id="dlgLove"></p></div>
+        <div class="card"><h3>İş hayatında</h3><p id="dlgCareer"></p></div>
+      </div>
+    </dialog>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/numeroloji-hesap.js?v=1"></script>
+    <script src="/numeroloji-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=1"></script>
+    <script src="/uzman-kart.js?v=1"></script>
+    <script src="/numeroloji-sayfa.js?v=1"></script>
+  </body>
+</html>

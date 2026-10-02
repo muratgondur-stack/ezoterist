@@ -7,6 +7,8 @@ const path = require("node:path");
 const { epostaYolla, epostaSablon, htmlKacis } = require("./eposta");
 const { yardimci } = require("./astroloji-api");
 const Uzmanlar = require("./uzmanlar");
+const { numerolojiKullaniciDosyasi } = require("./numeroloji-api");
+const NumVeri = require("./numeroloji-veri");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } = yardimci;
 
@@ -30,21 +32,55 @@ async function tumTalepler(dir) {
 
 // Kullanıcıya gösterilen hâli: kişisel e-posta ya da iç alanlar gitmez.
 const kullaniciGorunumu = (t) =>
-  t && { id: t.id, uzman: t.uzman, soru: t.soru, durum: t.durum, olusturma: t.olusturma, sonTarih: t.sonTarih, cevap: t.cevap || null };
+  t && { id: t.id, uzman: t.uzman, bolum: t.bolum || "astroloji-harita", soru: t.soru, durum: t.durum, olusturma: t.olusturma, sonTarih: t.sonTarih, cevap: t.cevap || null };
 
-const haritaOzeti = (kaynak) => {
-  const satirlar = Object.entries(kaynak.yerlesim || {}).map(([k, s]) => `${Veri.gezegenler[k].ad}: ${Veri.burclar[s].ad}`);
-  if (kaynak.yukselen) satirlar.push(`Yükselen: ${Veri.burclar[kaynak.yukselen].ad}`);
-  return satirlar.join(" · ");
+// Uzmana gönderilebilen analizler. Her bölüm kayıtlı analizi okur ve uzmana gösterilecek özeti hazırlar.
+const BOLUMLER = {
+  "astroloji-harita": {
+    ad: "doğum haritası",
+    link: "/astroloji#harita",
+    dosya: (cfg, dataDir, userId) => kullaniciDosyasi(cfg, userId),
+    kaynak: (k) => {
+      const satirlar = Object.entries(k.yerlesim || {}).map(([g, s]) => `${Veri.gezegenler[g].ad}: ${Veri.burclar[s].ad}`);
+      if (k.yukselen) satirlar.push(`Yükselen: ${Veri.burclar[k.yukselen].ad}`);
+      return {
+        baslik: `Güneş ${Veri.burclar[k.yerlesim.sun].ad} · Ay ${Veri.burclar[k.yerlesim.moon].ad}${k.yukselen ? ` · Yükselen ${Veri.burclar[k.yukselen].ad}` : ""}`,
+        girdiMetni: `${k.girdi.tarih} · ${k.girdi.saatYok ? "saat bilinmiyor" : k.girdi.saat} · ${k.girdi.sehir}`,
+        ozet: satirlar.join(" · "),
+      };
+    },
+  },
+  "numeroloji-profil": {
+    ad: "numeroloji profili",
+    link: "/numeroloji#profil",
+    dosya: (cfg, dataDir, userId) => numerolojiKullaniciDosyasi(dataDir, userId),
+    kaynak: (k) => {
+      const s = k.sayilar;
+      const ek = [];
+      if (k.karmikBorclar?.length) ek.push(`Karmik borç: ${k.karmikBorclar.join(", ")}`);
+      if (k.eksik?.length) ek.push(`Eksik sayılar: ${k.eksik.join(", ")}`);
+      return {
+        baslik: `Yaşam Yolu ${s.yasamYolu} · Kader ${s.kader} · Ruh ${s.ruh}`,
+        girdiMetni: `${k.girdi.adSoyad} · ${k.girdi.tarih}`,
+        ozet: [
+          `Yaşam Yolu: ${s.yasamYolu} (${NumVeri.sayilar[s.yasamYolu].ad})`, `Kader: ${s.kader}`, `Ruh Güdüsü: ${s.ruh}`, `Kişilik: ${s.kisilik}`,
+          `Doğum Günü: ${s.dogumGunu}`, `Olgunluk: ${s.olgunluk}`, `Kişisel Yıl: ${s.kisiselYil}`, ...ek,
+        ].join(" · "),
+      };
+    },
+  },
 };
+
+// Eski astroloji taleplerinde özet alanları yoktu; yerleşimlerden üretilir.
+const talepKaynagi = (t) => (t.kaynak.ozet ? t.kaynak : { ...t.kaynak, ...BOLUMLER["astroloji-harita"].kaynak(t.kaynak) });
 
 function createHandler({ dataDir, currentUser, sendFile }) {
   const dir = talepDizini(dataDir);
   const cfg = setup(dataDir);
   const talepDosyasi = (id) => path.join(dir, `${id}.json`);
 
-  async function kullanicininTalebi(userId) {
-    const hepsi = (await tumTalepler(dir)).filter((t) => t.userId === userId);
+  async function kullanicininTalebi(userId, bolum) {
+    const hepsi = (await tumTalepler(dir)).filter((t) => t.userId === userId && (t.bolum || "astroloji-harita") === bolum);
     return hepsi.sort((a, b) => b.olusturma - a.olusturma)[0] || null;
   }
 
@@ -52,12 +88,15 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const uzman = Uzmanlar.find((u) => u.id === String(body?.uzman || "") && u.aktif);
     if (!uzman) throw hata("Bu uzman henüz hizmet vermiyor.");
     const soru = String(body?.soru || "").trim().slice(0, 600);
+    const bolumAdi = String(body?.bolum || "astroloji-harita");
+    const bolum = BOLUMLER[bolumAdi];
+    if (!bolum) throw hata("Geçersiz bölüm.");
 
-    const onceki = await kullanicininTalebi(user.id);
-    if (onceki && onceki.durum !== "hazir") throw hata("Uzmanımızda zaten bekleyen bir talebin var.", 409);
+    const onceki = await kullanicininTalebi(user.id, bolumAdi);
+    if (onceki && onceki.durum !== "hazir") throw hata("Uzmanımızda bu analiz için zaten bekleyen bir talebin var.", 409);
 
-    const harita = await readCache(kullaniciDosyasi(cfg, user.id));
-    if (!harita?.metin) throw hata("Önce doğum haritanı çıkarmalısın.");
+    const analiz = await readCache(bolum.dosya(cfg, dataDir, user.id));
+    if (!analiz?.metin) throw hata(`Önce ${bolum.ad} analizini çıkarmalısın.`);
 
     const simdi = Date.now();
     const talep = {
@@ -66,9 +105,9 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       userEmail: user.email,
       userName: user.name || "",
       uzman: uzman.id,
-      bolum: "astroloji-harita",
+      bolum: bolumAdi,
       soru,
-      kaynak: { girdi: harita.girdi, yerlesim: harita.yerlesim, yukselen: harita.yukselen, aiMetin: harita.metin },
+      kaynak: { girdi: analiz.girdi, ...bolum.kaynak(analiz), aiMetin: analiz.metin },
       durum: "sirada",
       olusturma: simdi,
       sonTarih: simdi + TESLIM_SURESI_MS,
@@ -79,10 +118,10 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       void epostaYolla({
         kime,
         konu: "Ezoter.ist: yeni uzman yorumu talebi",
-        metin: `${talep.userName || talep.userEmail} doğum haritası için yorum istedi.${soru ? ` Sorusu: ${soru}` : ""} Panel: ${SITE}/uzman`,
+        metin: `${talep.userName || talep.userEmail} ${bolum.ad} için yorum istedi.${soru ? ` Sorusu: ${soru}` : ""} Panel: ${SITE}/uzman`,
         html: epostaSablon(
           "Yeni uzman yorumu talebi",
-          `<p><b>${htmlKacis(talep.userName || talep.userEmail)}</b> doğum haritası için yorumunu bekliyor.</p>` +
+          `<p><b>${htmlKacis(talep.userName || talep.userEmail)}</b> ${bolum.ad} için yorumunu bekliyor.</p>` +
             (soru ? `<p>Sorusu: <i>${htmlKacis(soru)}</i></p>` : "") +
             `<p>Söz verilen teslim: 48 saat içinde.</p>`,
           { url: `${SITE}/uzman`, yazi: "Uzman paneline git" },
@@ -102,14 +141,15 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     talep.teslimEden = user.email;
     await writeCache(talepDosyasi(talep.id), talep);
 
+    const bolum = BOLUMLER[talep.bolum] || BOLUMLER["astroloji-harita"];
     void epostaYolla({
       kime: talep.userEmail,
       konu: "Ezoter.ist: uzman yorumun hazır",
-      metin: `Merhaba ${talep.userName || ""}, baş numeroloğumuz doğum haritanı yorumladı. Okumak ve sesli dinlemek için: ${SITE}/astroloji#harita`,
+      metin: `Merhaba ${talep.userName || ""}, baş numeroloğumuz ${bolum.ad} analizini yorumladı. Okumak ve sesli dinlemek için: ${SITE}${bolum.link}`,
       html: epostaSablon(
         "Uzman yorumun hazır ✨",
-        `<p>Merhaba ${htmlKacis(talep.userName || "")},</p><p>Baş numeroloğumuz doğum haritanı kendi gözüyle yorumladı. Yorumunu okuyabilir, sesli dinleyebilirsin.</p>`,
-        { url: `${SITE}/astroloji#harita`, yazi: "Yorumumu aç" },
+        `<p>Merhaba ${htmlKacis(talep.userName || "")},</p><p>Baş numeroloğumuz ${bolum.ad} analizini kendi gözüyle yorumladı. Yorumunu okuyabilir, sesli dinleyebilirsin.</p>`,
+        { url: `${SITE}${bolum.link}`, yazi: "Yorumumu aç" },
       ),
     }).catch(() => {});
     return talep;
@@ -129,7 +169,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
 
     const routes = {
       "GET /api/uzman/durum": async () => {
-        const talep = await kullanicininTalebi(user.id);
+        const talep = await kullanicininTalebi(user.id, String(url.searchParams.get("bolum") || "astroloji-harita"));
         sendJson(response, 200, { uzman: uzmanMi(user), ses: sesVar(), talep: kullaniciGorunumu(talep) });
       },
       "POST /api/uzman/talep": async () => {
@@ -142,7 +182,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         const talepler = (await tumTalepler(dir)).sort(
           (a, b) => sira[a.durum] - sira[b.durum] || (a.durum === "hazir" ? b.olusturma - a.olusturma : a.sonTarih - b.sonTarih),
         );
-        sendJson(response, 200, { talepler: talepler.map((t) => ({ ...t, haritaOzeti: haritaOzeti(t.kaynak) })) });
+        sendJson(response, 200, { talepler: talepler.map((t) => ({ ...t, bolum: t.bolum || "astroloji-harita", bolumAdi: (BOLUMLER[t.bolum] || BOLUMLER["astroloji-harita"]).ad, kaynak: talepKaynagi(t) })) });
       },
       "POST /api/uzman/panel/incele": async () => {
         sadeceUzman();
