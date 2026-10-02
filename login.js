@@ -202,3 +202,11 @@ fetch("/api/me", { credentials: "same-origin" })
     if (response.ok) window.location.replace(nextUrl);
   })
   .catch(() => {});
+
+// Geri: siteden gelindiyse önceki sayfaya, yoksa ana sayfaya dön.
+document.getElementById("authBack").addEventListener("click", (event) => {
+  if (document.referrer.startsWith(window.location.origin) && window.history.length > 1) {
+    event.preventDefault();
+    window.history.back();
+  }
+});

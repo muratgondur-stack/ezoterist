@@ -1,4 +1,56 @@
 const toast = document.getElementById("toast");
+
+// Banner'ı üst butonların arasına, menü butonlarını da ekrana sığdır.
+const fitLayout = () => {
+  const root = document.documentElement;
+  const grid = document.querySelector(".menu-grid");
+  const firstButton = grid?.querySelector(".menu-button");
+  const leftEdge = document.getElementById("faceToggle")?.getBoundingClientRect().right || 110;
+  const bar = document.getElementById("authBar")?.getBoundingClientRect();
+  const side = Math.max(leftEdge, bar ? window.innerWidth - bar.left : 0) + 12;
+  const between = window.innerWidth - 2 * side;
+  const below = between < 280;
+  document.body.classList.toggle("banner-below", below);
+  root.style.setProperty("--banner-w", `${Math.min(680, below ? window.innerWidth - 32 : between)}px`);
+
+  if (!grid || !firstButton) return;
+  const count = grid.children.length;
+  const gridStyle = getComputedStyle(grid);
+  const rowGap = parseFloat(gridStyle.rowGap) || 0;
+  const colGap = parseFloat(gridStyle.columnGap) || 0;
+  const buttonStyle = getComputedStyle(firstButton);
+  const padX = parseFloat(buttonStyle.paddingLeft) + parseFloat(buttonStyle.paddingRight);
+  // Uzun etiketler iki satıra inebilir; en yüksek etiketli butona göre hesapla.
+  const extraY = Math.max(
+    ...[...grid.querySelectorAll(".menu-button")].map(
+      (button) => button.getBoundingClientRect().height - button.querySelector("img").getBoundingClientRect().height,
+    ),
+  );
+  const width = grid.parentElement.clientWidth;
+  const height = window.innerHeight - (grid.getBoundingClientRect().top + window.scrollY) - 16;
+
+  let best = { cols: 5, size: 0 };
+  for (let cols = 2; cols <= 10; cols += 1) {
+    const rows = Math.ceil(count / cols);
+    const byWidth = (width - (cols - 1) * colGap) / cols - padX;
+    const byHeight = ((height - (rows - 1) * rowGap) / rows - extraY) / 0.9;
+    const size = Math.min(byWidth, byHeight, 220);
+    if (size > best.size) best = { cols, size };
+  }
+  const size = Math.max(56, Math.floor(best.size));
+  root.style.setProperty("--cols", best.cols);
+  root.style.setProperty("--btn", `${size + padX}px`);
+};
+
+// İkinci geçiş: yeni boyutta etiketler farklı satıra inebilir, ölçüleri tazele.
+const refit = () => {
+  fitLayout();
+  requestAnimationFrame(fitLayout);
+};
+
+refit();
+window.addEventListener("resize", refit);
+document.fonts?.ready.then(refit);
 let toastTimer;
 
 const authBar = document.getElementById("authBar");
@@ -75,6 +127,7 @@ currentUser.then((user) => {
   });
 
   authBar.replaceChildren(name, logout);
+  refit();
 });
 
 // Arka plan müziği: çok kısık, döngüde. Tarayıcılar sesi ilk dokunuş/tıklamadan önce başlatmaz.

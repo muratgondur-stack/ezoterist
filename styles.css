@@ -15,7 +15,7 @@ html, body { min-height: 100%; }
 body {
   min-height: 100vh;
   margin: 0;
-  padding: 72px 16px 32px;
+  padding: 16px;
   font-family: "Manrope", system-ui, sans-serif;
   color: var(--foreground);
   background: #070914;
@@ -35,14 +35,16 @@ body::before {
 
 .home {
   width: 100%;
-  max-width: 1120px;
   margin: 0 auto;
 }
 
 .home-header {
-  margin-bottom: 28px;
+  margin-bottom: 8px;
   text-align: center;
 }
+
+/* Banner geniş ekranda üst butonların arasındaki satıra sığar; dar ekranda altlarına iner. */
+body.banner-below { padding-top: 68px; }
 
 .home-header h1 {
   margin: 0;
@@ -68,24 +70,35 @@ body::before {
   pointer-events: none;
 }
 
+.home-header h1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  line-height: 0;
+}
+
 .home-banner {
   display: block;
-  width: 100%;
+  width: var(--banner-w, 100%);
+  max-width: 100%;
   height: auto;
   border-radius: 14px;
   box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
 }
 
 .home-header p {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: var(--muted);
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 24px 20px;
+  grid-template-columns: repeat(var(--cols, 5), var(--btn, minmax(0, 1fr)));
+  justify-content: center;
+  gap: 12px 14px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -106,8 +119,8 @@ body::before {
 }
 
 .menu-button img {
-  width: 100%;
-  max-width: 200px;
+  width: var(--btn, 100%);
+  max-width: 100%;
   height: auto;
   aspect-ratio: 10 / 9;
   object-fit: contain;
@@ -137,18 +150,10 @@ body::before {
   outline-offset: 2px;
 }
 
-@media (max-width: 900px) {
-  .menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
 @media (max-width: 680px) {
-  .menu-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 10px; }
-  .menu-button { padding: 2px; gap: 6px; }
-  .menu-button span { padding: 3px 8px; font-size: 0.75rem; }
-}
-
-@media (max-width: 340px) {
-  .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .menu-grid { gap: 8px 8px; }
+  .menu-button { padding: 2px; gap: 4px; }
+  .menu-button span { padding: 2px 8px; font-size: 0.72rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
