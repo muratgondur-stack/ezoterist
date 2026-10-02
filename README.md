@@ -17,7 +17,11 @@ Node.js 20 veya üzeri ile:
 npm start
 ```
 
-Sunucu, Railway'in otomatik olarak verdiği `PORT` değişkenini kullanır ve `0.0.0.0` adresinde dinler. Railway üzerinde ayrıca özel bir komut tanımlamanız gerekmez; `npm start` otomatik olarak çalışır.
+Sunucu `PORT` değişkenini kullanır (varsayılan `3000`) ve `0.0.0.0` adresinde dinler. Ortam değişkenlerini bir `.env` dosyasına yazıp ek paket olmadan şöyle başlatabilirsiniz:
+
+```bash
+node --env-file=.env server.js
+```
 
 ## Giriş ve kayıt
 
@@ -26,7 +30,7 @@ Ek paket gerektirmez. Kullanıcılar `data/users.json` dosyasında saklanır (ş
 | Değişken | Açıklama |
 | --- | --- |
 | `SESSION_SECRET` | Oturum çerezlerini imzalamak için uzun, rastgele bir değer. Tanımlanmazsa her yeniden başlatmada oturumlar düşer. |
-| `DATA_DIR` | Kullanıcı dosyasının klasörü (varsayılan `./data`). Railway'de kalıcı olması için bir Volume bağlayıp yolunu buraya yazın. |
+| `DATA_DIR` | Kullanıcı dosyasının klasörü (varsayılan `./data`). Deploy sırasında silinmemesi için proje dışında bir klasör verin (ör. `/var/lib/ezoterist`); Docker'da bu klasörü volume olarak bağlayın. |
 | `EPOSTA_TOKEN` | Şifre yenileme kodlarını göndermek için Cloudflare API tokenı ("Email Sending: Edit" yetkili). Tanımlı değilse üretimde kod gönderilemez; geliştirmede kod sunucu loguna yazılır. |
 | `EPOSTA_GONDEREN` | İsteğe bağlı gönderen. Varsayılan `Ezoter.ist <bilgi@ezoter.ist>`. |
 | `GOOGLE_CLIENT_ID` | Google Cloud Console → APIs & Services → Credentials → OAuth client ID (Web application). |
@@ -41,7 +45,7 @@ E-postalar Cloudflare Email Service SMTP relay'i (`smtp.mx.cloudflare.net:465`, 
 
 1. Cloudflare → ezoter.ist alan adı → **Email → Email Sending** bölümünden gönderimi etkinleştirin; SPF/DKIM/DMARC kayıtlarını Cloudflare'in önerdiği şekilde ekleyin.
 2. Cloudflare → My Profile → API Tokens'tan **Email Sending: Edit** yetkili bir token oluşturun.
-3. Bu tokenı Railway'de `EPOSTA_TOKEN` değişkeni olarak tanımlayın.
+3. Bu tokenı sunucuda `EPOSTA_TOKEN` değişkeni olarak tanımlayın. Sunucudan dışarıya 465 portunun açık olduğundan emin olun (`nc -vz smtp.mx.cloudflare.net 465`).
 
 Kayıt akışı: ad, e-posta ve şifre girilince e-postaya 6 haneli doğrulama kodu gider; hesap ancak kod doğrulanınca açılır ve hoş geldin e-postası gönderilir.
 
