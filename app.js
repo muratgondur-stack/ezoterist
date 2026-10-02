@@ -138,8 +138,8 @@ const music = new Audio("/audio/anamenu.m4a?v=1");
 music.loop = true;
 music.preload = "auto";
 
+// Müzik her açılışta açık başlar; kullanıcı kapatırsa yalnızca bu ziyaret boyunca kapalı kalır.
 let musicMuted = false;
-try { musicMuted = localStorage.getItem("ezo_muzik") === "kapali"; } catch {}
 
 let audioContext;
 const startMusic = () => {
@@ -157,26 +157,37 @@ const startMusic = () => {
   music.play().catch(() => {});
 };
 
+// İkon gerçekten çalıp çalmadığını gösterir (tarayıcı ilk dokunuşa kadar sesi engelleyebilir).
 const renderMusicToggle = () => {
-  musicToggle.classList.toggle("is-muted", musicMuted);
-  musicToggle.setAttribute("aria-label", musicMuted ? "Müziği aç" : "Müziği kapat");
-  musicToggle.setAttribute("aria-pressed", String(musicMuted));
+  const silent = music.paused;
+  musicToggle.classList.toggle("is-muted", silent);
+  musicToggle.setAttribute("aria-label", silent ? "Müziği aç" : "Müziği kapat");
+  musicToggle.setAttribute("aria-pressed", String(silent));
 };
+music.addEventListener("play", renderMusicToggle);
+music.addEventListener("pause", renderMusicToggle);
 
 musicToggle.addEventListener("click", (event) => {
   event.stopPropagation();
-  musicMuted = !musicMuted;
-  try { localStorage.setItem("ezo_muzik", musicMuted ? "kapali" : "acik"); } catch {}
-  renderMusicToggle();
-  if (musicMuted) music.pause();
-  else startMusic();
+  if (music.paused) {
+    musicMuted = false;
+    startMusic();
+  } else {
+    musicMuted = true;
+    music.pause();
+  }
 });
 
 renderMusicToggle();
 startMusic();
-["pointerdown", "keydown", "touchstart"].forEach((type) =>
-  document.addEventListener(type, startMusic, { once: true, capture: true }),
-);
+
+// Tarayıcı sesi engellediyse sayfadaki ilk dokunuş/tuşla başlat (hoparlör butonu kendi işini yapar).
+const unlockMusic = (event) => {
+  if (musicToggle.contains(event.target)) return;
+  ["pointerdown", "keydown", "touchstart"].forEach((type) => document.removeEventListener(type, unlockMusic, true));
+  startMusic();
+};
+["pointerdown", "keydown", "touchstart"].forEach((type) => document.addEventListener(type, unlockMusic, true));
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) music.pause();
   else if (!musicMuted && audioContext) startMusic();

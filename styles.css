@@ -50,7 +50,8 @@ body:has(.home) {
 
 .home .menu-grid {
   flex: 1;
-  align-content: center;
+  align-content: space-evenly;
+  justify-content: space-evenly;
 }
 
 .home-header {
