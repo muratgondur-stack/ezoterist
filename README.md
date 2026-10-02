@@ -43,4 +43,6 @@ E-postalar Cloudflare Email Service SMTP relay'i (`smtp.mx.cloudflare.net:465`, 
 2. Cloudflare → My Profile → API Tokens'tan **Email Sending: Edit** yetkili bir token oluşturun.
 3. Bu tokenı Railway'de `EPOSTA_TOKEN` değişkeni olarak tanımlayın.
 
+Kayıt akışı: ad, e-posta ve şifre girilince e-postaya 6 haneli doğrulama kodu gider; hesap ancak kod doğrulanınca açılır ve hoş geldin e-postası gönderilir.
+
 Şifremi unuttum akışı: e-postaya 6 haneli kod gider (10 dakika geçerli, 1 dakikada bir istenebilir, en fazla 5 deneme). Kod ve yeni şifre girilince şifre güncellenir, eski oturumlar kapanır ve kullanıcı giriş yapmış olur.

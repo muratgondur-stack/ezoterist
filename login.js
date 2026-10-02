@@ -1,6 +1,7 @@
 const forms = {
   login: document.getElementById("loginForm"),
   register: document.getElementById("registerForm"),
+  verify: document.getElementById("verifyForm"),
   forgot: document.getElementById("forgotForm"),
   reset: document.getElementById("resetForm"),
 };
@@ -13,9 +14,11 @@ const subtitle = document.getElementById("authSubtitle");
 const googleLabel = document.getElementById("googleLabel");
 const switchText = document.getElementById("authSwitch");
 const resendButton = document.getElementById("resendCode");
+const resendRegisterButton = document.getElementById("resendRegisterCode");
 
-const modePaths = { login: "/login", register: "/register", forgot: "/forgot-password", reset: "/forgot-password" };
+const modePaths = { login: "/login", register: "/register", verify: "/register", forgot: "/forgot-password", reset: "/forgot-password" };
 let resetEmail = "";
+let pendingRegistration = null;
 
 const errorMessages = {
   google: "Google ile giriş tamamlanamadı. Lütfen tekrar deneyin.",
@@ -31,18 +34,20 @@ const showMessage = (text, type = "error") => {
 
 const setMode = (mode, { updateUrl = true } = {}) => {
   const isRecovery = mode === "forgot" || mode === "reset";
+  const isVerify = mode === "verify";
 
   Object.entries(forms).forEach(([name, form]) => {
     form.hidden = name !== mode;
   });
-  tabList.hidden = isRecovery;
-  socialLogin.hidden = isRecovery;
+  tabList.hidden = isRecovery || isVerify;
+  socialLogin.hidden = isRecovery || isVerify;
   tabs.forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.mode === mode)));
 
-  title.textContent = isRecovery ? "Şifremi Unuttum" : "Ezoter.ist Girişi";
+  title.textContent = isRecovery ? "Şifremi Unuttum" : isVerify ? "E-postanı Doğrula" : "Ezoter.ist Girişi";
   subtitle.textContent = {
     login: "Hesabına giriş yap ve kaldığın yerden devam et.",
     register: "Birkaç saniyede ücretsiz hesabını oluştur.",
+    verify: `Kaydını tamamlamak için ${pendingRegistration?.email || ""} adresine gelen 6 haneli kodu gir.`,
     forgot: "Kayıtlı e-posta adresini yaz; şifreni yenilemen için 6 haneli bir kod gönderelim.",
     reset: `${resetEmail} adresine gelen kodu ve yeni şifreni gir.`,
   }[mode];
@@ -50,6 +55,7 @@ const setMode = (mode, { updateUrl = true } = {}) => {
   switchText.innerHTML = {
     login: 'Hesabın yok mu? <a href="/register" data-mode="register">Kayıt ol</a>',
     register: 'Zaten hesabın var mı? <a href="/login" data-mode="login">Giriş yap</a>',
+    verify: '<a href="/register" data-mode="register">← Bilgilerimi düzelt</a>',
     forgot: '<a href="/login" data-mode="login">← Giriş sayfasına dön</a>',
     reset: '<a href="/forgot-password" data-mode="forgot">← Farklı bir e-posta dene</a>',
   }[mode];
@@ -116,10 +122,28 @@ forms.register.addEventListener("submit", (event) => {
     return;
   }
 
-  submit(submitButton(forms.register), "/api/register", {
+  pendingRegistration = {
     name: fields.get("name"),
-    email: fields.get("email"),
+    email: String(fields.get("email") || "").trim(),
     password: fields.get("password"),
+  };
+  requestRegisterCode(submitButton(forms.register));
+});
+
+// Kayıt bilgileri gönderilir; sunucu e-postaya kod yollar, hesap kod doğrulanınca açılır.
+const requestRegisterCode = (button) =>
+  submit(button, "/api/register", pendingRegistration, (data) => {
+    if (forms.verify.hidden) setMode("verify");
+    showMessage(data.message || "Kod gönderildi.", "success");
+  });
+
+resendRegisterButton.addEventListener("click", () => requestRegisterCode(resendRegisterButton));
+
+forms.verify.addEventListener("submit", (event) => {
+  event.preventDefault();
+  submit(submitButton(forms.verify), "/api/register/verify", {
+    email: pendingRegistration?.email,
+    code: new FormData(forms.verify).get("code"),
   });
 });
 
