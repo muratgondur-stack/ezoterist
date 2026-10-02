@@ -33,9 +33,24 @@ body::before {
   body::before { background-image: linear-gradient(rgba(5, 6, 18, 0.55), rgba(5, 6, 18, 0.7)), url("/ezoterist-bg.png"); }
 }
 
+body:has(.home) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* Menü butonları başlığın altında kalan alanda dikey ve yatay ortalanır. */
 .home {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   width: 100%;
   margin: 0 auto;
+}
+
+.home .menu-grid {
+  flex: 1;
+  align-content: center;
 }
 
 .home-header {
