@@ -17,7 +17,11 @@ Node.js 20 veya üzeri ile:
 npm start
 ```
 
-Sunucu, Railway'in otomatik olarak verdiği `PORT` değişkenini kullanır ve `0.0.0.0` adresinde dinler. Railway üzerinde ayrıca özel bir komut tanımlamanız gerekmez; `npm start` otomatik olarak çalışır.
+Sunucu, platformun verdiği `PORT` değişkenini kullanır (varsayılan 3000) ve `0.0.0.0` adresinde dinler.
+
+## Yayın
+
+ezoter.ist **rzc sunucusunda Coolify ile** yayınlanır (https://konsol.razece.com → ezoterist). `main` dalına her push GitHub webhook'u ile otomatik olarak yeniden yayınlanır. Ortam değişkenleri Coolify'da tanımlıdır; Railway'deki servis yalnızca yedek kopyadır.
 
 ## Giriş ve kayıt
 
@@ -41,7 +45,7 @@ E-postalar Cloudflare Email Service SMTP relay'i (`smtp.mx.cloudflare.net:465`, 
 
 1. Cloudflare → ezoter.ist alan adı → **Email → Email Sending** bölümünden gönderimi etkinleştirin; SPF/DKIM/DMARC kayıtlarını Cloudflare'in önerdiği şekilde ekleyin.
 2. Cloudflare → My Profile → API Tokens'tan **Email Sending: Edit** yetkili bir token oluşturun.
-3. Bu tokenı Railway'de `EPOSTA_TOKEN` değişkeni olarak tanımlayın.
+3. Bu tokenı Coolify'da (rzc) `EPOSTA_TOKEN` değişkeni olarak tanımlayın.
 
 Kayıt akışı: ad, e-posta ve şifre girilince e-postaya 6 haneli doğrulama kodu gider; hesap ancak kod doğrulanınca açılır ve hoş geldin e-postası gönderilir.
 
