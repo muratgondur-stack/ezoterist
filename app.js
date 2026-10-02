@@ -1,52 +1,15 @@
-const panel = document.getElementById("videoPanel");
-const toggle = document.querySelector(".panel-toggle");
-const video = document.getElementById("backgroundVideo");
-const portraitQuery = window.matchMedia("(orientation: portrait)");
+const toast = document.getElementById("toast");
+let toastTimer;
 
-let isOpen = false;
-
-const sourceForViewport = () =>
-  (portraitQuery.matches || window.innerHeight > window.innerWidth)
-    ? "/ezoterist-bg-portrait.mp4?v=5"
-    : "/ezoterist-bg-landscape.mp4?v=5";
-
-const loadVideo = (shouldPlay = false) => {
-  const source = sourceForViewport();
-  if (video.dataset.source === source) {
-    if (shouldPlay) video.play().catch(() => {});
-    return;
-  }
-
-  video.dataset.source = source;
-  video.src = source;
-  video.loop = true;
-  video.muted = true;
-  video.defaultMuted = true;
-  video.playsInline = true;
-  video.load();
-
-  if (shouldPlay) video.play().catch(() => {});
-};
-
-toggle?.addEventListener("click", () => {
-  isOpen = !isOpen;
-  panel?.classList.toggle("is-open", isOpen);
-  panel?.setAttribute("aria-hidden", String(!isOpen));
-  toggle.setAttribute("aria-expanded", String(isOpen));
-  toggle.textContent = isOpen ? "Videoyu Kapat" : "Videoyu Aç";
-
-  if (isOpen) {
-    loadVideo(true);
-  } else {
-    video.pause();
-  }
+document.querySelectorAll(".menu-button").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    toast.textContent = `${button.dataset.title} çok yakında.`;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.hidden = true; }, 2200);
+  });
 });
-
-portraitQuery.addEventListener("change", () => {
-  loadVideo(isOpen);
-});
-
-loadVideo();
 
 const authBar = document.getElementById("authBar");
 

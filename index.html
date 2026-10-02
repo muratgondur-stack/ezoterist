@@ -10,15 +10,41 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=16" />
+    <link rel="stylesheet" href="/styles.css?v=17" />
   </head>
   <body>
     <nav class="auth-bar" id="authBar" aria-label="Hesap">
       <a class="auth-bar-link" href="/login">Giriş Yap</a>
     </nav>
-    <main id="videoPanel" class="video-panel" aria-hidden="true">
-      <video id="backgroundVideo" class="background-video" muted playsinline webkit-playsinline preload="metadata" poster="/ezoterist-bg.png?v=2" aria-hidden="true"></video>
+    <main class="home">
+      <header class="home-header">
+        <h1>Ezoter.ist</h1>
+        <p>Kendini keşfetmek için bir kapı seç.</p>
+      </header>
+      <ul class="menu-grid" aria-label="Ana menü">
+        <li><a class="menu-button" href="#astroloji" data-title="Astroloji"><img src="/menu/buton_A.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Astroloji</span></a></li>
+        <li><a class="menu-button" href="#numeroloji" data-title="Numeroloji"><img src="/menu/buton_B.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Numeroloji</span></a></li>
+        <li><a class="menu-button" href="#ruya-yorumu" data-title="Rüya Yorumu"><img src="/menu/buton_C.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Rüya Yorumu</span></a></li>
+        <li><a class="menu-button" href="#tarot" data-title="Tarot"><img src="/menu/buton_D.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Tarot</span></a></li>
+        <li><a class="menu-button" href="#fotograf-analizi" data-title="Fotoğraf Analizi"><img src="/menu/buton_E.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Fotoğraf Analizi</span></a></li>
+        <li><a class="menu-button" href="#kahve-fali" data-title="Kahve Falı"><img src="/menu/buton_F.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Kahve Falı</span></a></li>
+        <li><a class="menu-button" href="#el-fali" data-title="El Falı"><img src="/menu/buton_G.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>El Falı</span></a></li>
+        <li><a class="menu-button" href="#yuz-okuma" data-title="Yüz Okuma"><img src="/menu/buton_H.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Yüz Okuma</span></a></li>
+        <li><a class="menu-button" href="#ask-uyumu" data-title="Aşk Uyumu"><img src="/menu/buton_I.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Aşk Uyumu</span></a></li>
+        <li><a class="menu-button" href="#dogum-haritasi" data-title="Doğum Haritası"><img src="/menu/buton_J.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Doğum Haritası</span></a></li>
+        <li><a class="menu-button" href="#kristaller" data-title="Kristaller"><img src="/menu/buton_K.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Kristaller</span></a></li>
+        <li><a class="menu-button" href="#i-ching" data-title="I Ching"><img src="/menu/buton_L.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>I Ching</span></a></li>
+        <li><a class="menu-button" href="#run-taslari" data-title="Rün Taşları"><img src="/menu/buton_M.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Rün Taşları</span></a></li>
+        <li><a class="menu-button" href="#ruhsal-gunluk" data-title="Ruhsal Günlük"><img src="/menu/buton_N.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Ruhsal Günlük</span></a></li>
+        <li><a class="menu-button" href="#ay-takvimi" data-title="Ay Takvimi"><img src="/menu/buton_O.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Ay Takvimi</span></a></li>
+        <li><a class="menu-button" href="#melek-sayilari" data-title="Melek Sayıları"><img src="/menu/buton_P.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Melek Sayıları</span></a></li>
+        <li><a class="menu-button" href="#semboller" data-title="Semboller"><img src="/menu/buton_Q.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Semboller</span></a></li>
+        <li><a class="menu-button" href="#cakralar" data-title="Çakralar"><img src="/menu/buton_R.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Çakralar</span></a></li>
+        <li><a class="menu-button" href="#kisisel-arsiv" data-title="Kişisel Arşiv"><img src="/menu/buton_S.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Kişisel Arşiv</span></a></li>
+        <li><a class="menu-button" href="#ezoterik-asistan" data-title="Ezoterik Asistan"><img src="/menu/buton_T.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Ezoterik Asistan</span></a></li>
+      </ul>
     </main>
-    <script src="/app.js?v=13"></script>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="/app.js?v=14"></script>
   </body>
 </html>
