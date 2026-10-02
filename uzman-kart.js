@@ -15,7 +15,9 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast }) {
       button.className = "expert-slot";
       button.disabled = !u.aktif;
       button.setAttribute("aria-pressed", String(u.id === secili));
-      button.innerHTML = u.resim ? `<img src="${u.resim}" alt="" width="84" height="84" />` : '<span class="expert-q">?</span>';
+      button.innerHTML = u.resim
+        ? `<span class="expert-face"><img src="${u.resim}" alt="" width="84" height="84" />${u.video ? `<video src="${u.video}" muted loop playsinline preload="none" aria-hidden="true"></video>` : ""}</span>`
+        : '<span class="expert-q">?</span>';
       const ad = document.createElement("b");
       ad.textContent = u.ad;
       const unvan = document.createElement("small");
@@ -23,6 +25,12 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast }) {
       button.append(ad, unvan);
       button.addEventListener("click", () => { secili = u.id; renderUzmanlar(); });
       li.append(button);
+      // Fare üzerine gelince (ya da dokununca) numeroloğun kısa videosu oynar.
+      const video = button.querySelector("video");
+      if (video) {
+        li.addEventListener("pointerenter", () => { video.play().then(() => li.classList.add("is-playing")).catch(() => {}); });
+        li.addEventListener("pointerleave", () => { video.pause(); li.classList.remove("is-playing"); });
+      }
       return li;
     }));
   }

@@ -11,7 +11,8 @@
     resim: "/uzman/bas-numerolog.webp",
     aktif: true,
   },
-  { id: "uzman-2", ad: "?", unvan: "Yakında", tanitim: "", resim: "", aktif: false },
-  { id: "uzman-3", ad: "?", unvan: "Yakında", tanitim: "", resim: "", aktif: false },
-  { id: "uzman-4", ad: "?", unvan: "Yakında", tanitim: "", resim: "", aktif: false },
+  // Diğer numeroloğlarımız (Murat 2026-10-02): görselleri hazır, isimleri gelince "?" yerine yazılır ve aktif edilir.
+  { id: "uzman-2", ad: "?", unvan: "Numerolog · yakında", tanitim: "", resim: "/uzman/numerolog-b.webp", video: "/uzman/numerolog-b.mp4", aktif: false },
+  { id: "uzman-3", ad: "?", unvan: "Numerolog · yakında", tanitim: "", resim: "/uzman/numerolog-c.webp", video: "/uzman/numerolog-c.mp4", aktif: false },
+  { id: "uzman-4", ad: "?", unvan: "Numerolog · yakında", tanitim: "", resim: "/uzman/numerolog-d.webp", video: "/uzman/numerolog-d.mp4", aktif: false },
 ]);

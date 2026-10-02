@@ -676,3 +676,12 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
 @media (max-width: 680px) {
   .expert-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Uzman yüzü: portre, üzerine gelince kısa video (uzman-kart.js) */
+.expert-face { position: relative; display: block; width: 84px; height: 84px; overflow: hidden; border-radius: 50%; border: 2px solid rgba(243, 194, 107, 0.45); }
+.expert-face img,
+.expert-face video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.expert-face video { opacity: 0; transition: opacity 0.3s ease; }
+.is-playing .expert-face video { opacity: 1; }
+.expert-slot:disabled .expert-face { filter: saturate(0.75); }
+.expert-slot:disabled { opacity: 0.8; }
