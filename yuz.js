@@ -4,12 +4,13 @@ const VISION_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1";
 const MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
 
-const TURN_THRESHOLD = 0.09; // nötr duruştan bu kadar sapma bir yön sayılır
-const MOVE_REPEAT_MS = 650; // baş çevrik kaldıkça seçim bu aralıkla ilerler
+const TURN_THRESHOLD = 0.14; // nötr duruştan bu kadar sapma bir yön sayılır
+const MOVE_REPEAT_MS = 1100; // baş çevrik kaldıkça seçim bu aralıkla ilerler
 const SMILE_THRESHOLD = 0.6;
 const SMILE_HOLD_MS = 350;
 const CLICK_COOLDOWN_MS = 2000;
 const CALIBRATION_FRAMES = 20;
+const SMOOTHING = 0.25; // titremeyi azaltmak için baş pozisyonu yumuşatılır (0–1, küçük = daha sakin)
 
 const toggle = document.getElementById("faceToggle");
 const preview = document.getElementById("facePreview");
@@ -27,6 +28,7 @@ let lastMove = 0;
 let smileSince = 0;
 let lastClick = 0;
 let lastVideoTime = -1;
+let smoothed = null;
 
 const say = (text) => {
   toast.textContent = text;
@@ -68,7 +70,11 @@ const handle = (result, now) => {
   const points = result.faceLandmarks?.[0];
   if (!points) return;
 
-  const pose = headPose(points);
+  const raw = headPose(points);
+  smoothed = smoothed
+    ? { x: smoothed.x + (raw.x - smoothed.x) * SMOOTHING, y: smoothed.y + (raw.y - smoothed.y) * SMOOTHING }
+    : raw;
+  const pose = smoothed;
   if (!neutral) {
     calibration.push(pose);
     if (calibration.length >= CALIBRATION_FRAMES) {
@@ -141,6 +147,7 @@ const start = async () => {
 
     neutral = null;
     calibration = [];
+    smoothed = null;
     running = true;
     toggle.classList.add("is-active");
     toggle.setAttribute("aria-pressed", "true");

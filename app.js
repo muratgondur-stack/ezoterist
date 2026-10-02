@@ -79,7 +79,7 @@ currentUser.then((user) => {
 
 // Arka plan müziği: çok kısık, döngüde. Tarayıcılar sesi ilk dokunuş/tıklamadan önce başlatmaz.
 // iPhone'da audio.volume değiştirilemediği için ses seviyesi Web Audio ile kısılır.
-const MUSIC_VOLUME = 0.2;
+const MUSIC_VOLUME = 0.1;
 const musicToggle = document.getElementById("musicToggle");
 const music = new Audio("/audio/anamenu.m4a?v=1");
 music.loop = true;
