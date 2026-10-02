@@ -61,10 +61,10 @@ body::before {
 .home-header h1::before {
   content: "";
   position: absolute;
-  inset: -40px -6%;
+  inset: -70px -8%;
   z-index: -1;
-  background: radial-gradient(ellipse at center, rgba(200, 204, 214, 0.38) 0%, rgba(170, 175, 190, 0.18) 45%, transparent 72%);
-  filter: blur(18px);
+  background: radial-gradient(ellipse at center, rgba(225, 228, 236, 0.75) 0%, rgba(200, 205, 218, 0.45) 40%, rgba(180, 186, 200, 0.18) 62%, transparent 78%);
+  filter: blur(22px);
   pointer-events: none;
 }
 
@@ -214,9 +214,15 @@ body::before {
   border: 2px solid var(--border);
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.62);
-  font-size: 1.1rem;
-  line-height: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #fff;
   cursor: pointer;
 }
+
+.music-toggle .music-off { display: none; }
+.music-toggle.is-muted .music-wave { display: none; }
+.music-toggle.is-muted .music-off { display: inline; }
 
 .music-toggle:hover { background: rgba(255, 122, 0, 0.3); }
