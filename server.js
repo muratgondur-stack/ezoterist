@@ -1,7 +1,8 @@
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
-const { handleAuthRequest, dataDir } = require("./auth");
+const { handleAuthRequest, dataDir, currentUser } = require("./auth");
+const { createHandler: createAstrolojiHandler } = require("./astroloji-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -17,6 +18,9 @@ const contentTypes = {
   ".jpeg": "image/jpeg",
   ".mp4": "video/mp4",
   ".m4a": "audio/mp4",
+  ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
+  ".webp": "image/webp",
   ".json": "application/json; charset=utf-8",
 };
 
@@ -113,7 +117,10 @@ const pageRoutes = {
   "/login": "login.html",
   "/register": "login.html",
   "/forgot-password": "login.html",
+  "/astroloji": "astroloji.html",
 };
+
+const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
 
 const server = http.createServer((request, response) => {
   let url;
@@ -127,6 +134,7 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  if (handleAstrolojiRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Astroloji: bugünün gökyüzü, 12 burç, günlük yorumlar ve doğum haritası." />
+    <title>Astroloji · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_D.png?v=1" alt="Ezoter.ist" width="1247" height="77" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Astroloji</p>
+          <h1>Gökyüzü bugün<br />senin için ne söylüyor?</h1>
+          <p class="lead">Gezegenlerin şu anki yerleri gerçek gök hesabıyla çıkarıldı. Burcunu seç, günün yorumunu oku ve Alev'in sesinden dinle; doğum haritanla Güneş, Ay ve yükselenini keşfet.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#burclar">Burcumu seç</a>
+            <a class="btn btn-ghost" href="#harita">Doğum haritamı çıkar</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="hero-wheel" src="/astroloji/cark.webp" alt="" width="640" height="640" />
+        </div>
+      </section>
+
+      <section class="sky" aria-labelledby="skyTitle">
+        <div class="section-head">
+          <h2 id="skyTitle">Gökyüzü şu an</h2>
+          <p class="section-note" id="skyTime"></p>
+        </div>
+        <div class="sky-cards">
+          <article class="sky-card">
+            <span class="sky-icon">☉</span>
+            <div><p class="sky-label">Güneş</p><p class="sky-value" id="skySun">—</p></div>
+          </article>
+          <article class="sky-card">
+            <span class="sky-icon" id="skyMoonIcon">☽</span>
+            <div><p class="sky-label">Ay</p><p class="sky-value" id="skyMoon">—</p><p class="sky-sub" id="skyMoonPhase"></p></div>
+          </article>
+          <article class="sky-card">
+            <span class="sky-icon">🌕</span>
+            <div><p class="sky-label">Sıradaki dolunay</p><p class="sky-value" id="skyFull">—</p><p class="sky-sub" id="skyNew"></p></div>
+          </article>
+        </div>
+        <ul class="planets" id="planetList" aria-label="Gezegenlerin bugünkü burçları"></ul>
+      </section>
+
+      <section class="signs" id="burclar" aria-labelledby="signsTitle">
+        <div class="section-head">
+          <h2 id="signsTitle">12 Burç</h2>
+          <p class="section-note">Bir burca dokun: karakteri, aşkı, işi ve bugünün yorumu.</p>
+        </div>
+        <ul class="sign-grid" id="signGrid"></ul>
+      </section>
+
+      <section class="chart" id="harita" aria-labelledby="chartTitle">
+        <div class="section-head">
+          <h2 id="chartTitle">Doğum Haritam</h2>
+          <p class="section-note">Doğduğun anın gökyüzü: Güneş, Ay, yükselen ve tüm gezegenler.</p>
+        </div>
+        <div class="chart-layout">
+          <form class="chart-form card" id="chartForm">
+            <img class="chart-art" src="/astroloji/harita.webp" alt="" width="520" height="520" loading="lazy" />
+            <label>
+              <span>Doğum tarihi</span>
+              <input type="date" name="tarih" min="1900-01-01" max="2049-12-31" required />
+            </label>
+            <label>
+              <span>Doğum saati</span>
+              <input type="time" name="saat" />
+            </label>
+            <label class="check">
+              <input type="checkbox" name="saatYok" />
+              <span>Doğum saatimi bilmiyorum</span>
+            </label>
+            <label>
+              <span>Doğum yeri</span>
+              <select name="sehir" required></select>
+            </label>
+            <button type="submit" class="btn btn-primary">Haritamı hesapla</button>
+            <p class="form-hint">Bilgilerin yalnızca bu cihazda hatırlanır.</p>
+          </form>
+
+          <div class="chart-result" id="chartResult" hidden>
+            <div class="big-three" id="bigThree"></div>
+            <div class="card reading">
+              <div class="reading-head">
+                <h3>Harita yorumun</h3>
+                <span class="badge" id="chartBadge"></span>
+              </div>
+              <p class="reading-text" id="chartReading">Yorum hazırlanıyor…</p>
+              <button type="button" class="listen" id="chartListen" hidden>🔊 Alev'den dinle</button>
+            </div>
+            <div class="card">
+              <h3>Gezegen yerleşimleri</h3>
+              <ul class="placements" id="placements"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="glossary" aria-labelledby="glossaryTitle">
+        <div class="section-head">
+          <h2 id="glossaryTitle">Astroloji sözlüğü</h2>
+          <p class="section-note">Haritanı okurken işine yarayacak temel kavramlar.</p>
+        </div>
+        <h3 class="sub-title">Elementler</h3>
+        <ul class="element-grid" id="elementGrid"></ul>
+        <h3 class="sub-title">Nitelikler</h3>
+        <ul class="modality-grid" id="modalityGrid"></ul>
+        <h3 class="sub-title">Gezegenler</h3>
+        <ul class="planet-grid" id="planetGrid"></ul>
+      </section>
+
+      <p class="disclaimer">Astroloji, kendini tanımak ve ilham almak için bir rehberdir; önemli kararlarını yalnızca ona göre verme.</p>
+    </main>
+
+    <dialog class="sign-dialog" id="signDialog" aria-labelledby="dlgName">
+      <form method="dialog" class="dlg-close-form"><button class="dlg-close" aria-label="Kapat">✕</button></form>
+      <div class="dlg-head">
+        <img id="dlgImage" src="" alt="" width="360" height="360" />
+        <div>
+          <p class="dlg-dates" id="dlgDates"></p>
+          <h2 id="dlgName"></h2>
+          <ul class="facts" id="dlgFacts"></ul>
+          <button type="button" class="listen" id="dlgListenSign" hidden>🔊 Burcu Alev'den dinle</button>
+        </div>
+      </div>
+      <div class="card reading today">
+        <div class="reading-head">
+          <h3>Bugün</h3>
+          <span class="badge" id="dlgBadge"></span>
+        </div>
+        <p class="reading-text" id="dlgToday">Yorum hazırlanıyor…</p>
+        <button type="button" class="listen" id="dlgListenToday" hidden>🔊 Günün yorumunu dinle</button>
+      </div>
+      <div class="dlg-grid">
+        <div class="card"><h3>Karakter</h3><p id="dlgSummary"></p></div>
+        <div class="card"><h3>Güçlü yanlar</h3><ul class="ticks" id="dlgStrong"></ul></div>
+        <div class="card"><h3>Gelişim alanları</h3><ul class="ticks shadow" id="dlgShadow"></ul></div>
+        <div class="card"><h3>Aşkta</h3><p id="dlgLove"></p></div>
+        <div class="card"><h3>İş hayatında</h3><p id="dlgCareer"></p></div>
+        <div class="card"><h3>Mitoloji</h3><p id="dlgMyth"></p></div>
+      </div>
+      <div class="card">
+        <h3>En uyumlu burçlar</h3>
+        <ul class="match" id="dlgMatch"></ul>
+      </div>
+    </dialog>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astro.js?v=1"></script>
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/astroloji-sayfa.js?v=1"></script>
+  </body>
+</html>

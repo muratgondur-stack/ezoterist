@@ -74,7 +74,15 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
   .then((data) => data?.user || null)
   .catch(() => null);
 
+// Hazır olan bölümlerin kendi sayfaları var; diğerleri "çok yakında" der.
+const SECTION_PAGES = { "#astroloji": "/astroloji" };
+
 const openSection = (button) => {
+  const page = SECTION_PAGES[button.getAttribute("href")];
+  if (page) {
+    window.location.assign(page);
+    return;
+  }
   toast.textContent = `${button.dataset.title} çok yakında.`;
   toast.hidden = false;
   clearTimeout(toastTimer);
@@ -89,7 +97,7 @@ menuButtons.forEach((button) => {
     currentUser.then((user) => {
       // Giriş yapılmamışsa giriş penceresini aç; girişten sonra bu bölüme dönülür.
       if (!user) {
-        const next = `/${button.getAttribute("href")}`;
+        const next = SECTION_PAGES[button.getAttribute("href")] || `/${button.getAttribute("href")}`;
         window.location.assign(`/login?next=${encodeURIComponent(next)}`);
         return;
       }

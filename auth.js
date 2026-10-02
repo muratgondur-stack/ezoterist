@@ -597,4 +597,4 @@ function handleAuthRequest(request, response, url) {
   return true;
 }
 
-module.exports = { handleAuthRequest, dataDir };
+module.exports = { handleAuthRequest, dataDir, currentUser };
