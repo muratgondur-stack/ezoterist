@@ -92,7 +92,16 @@ p { margin: 0; }
 
 .topbar-back:hover { background: rgba(255, 122, 0, 0.25); }
 
-.topbar-logo img { display: block; width: min(420px, 42vw); height: auto; border-radius: 6px; }
+/* Banner çubuğun yüksekliğine göre ölçeklenir (genişliğe göre değil), çubukla orantılı durur. */
+.topbar-logo img {
+  display: block;
+  width: auto;
+  height: 54px;
+  max-width: 46vw;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+}
 
 .topbar-user {
   justify-self: end;
@@ -570,7 +579,7 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
   .sign-dialog { padding: 16px; }
   .topbar { grid-template-columns: auto 1fr; }
   .topbar-logo { justify-self: end; }
-  .topbar-logo img { width: min(220px, 48vw); }
+  .topbar-logo img { height: 40px; max-width: 58vw; }
   .topbar-user { display: none; }
 }
 
