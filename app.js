@@ -1,5 +1,7 @@
 const toast = document.getElementById("toast");
 
+const mobilePortrait = window.matchMedia("(orientation: portrait) and (max-width: 600px)");
+
 // Banner'ı üst butonların arasına, menü butonlarını da ekrana sığdır.
 const fitLayout = () => {
   const root = document.documentElement;
@@ -7,11 +9,22 @@ const fitLayout = () => {
   const firstButton = grid?.querySelector(".menu-button");
   const leftEdge = document.getElementById("faceToggle")?.getBoundingClientRect().right || 110;
   const bar = document.getElementById("authBar")?.getBoundingClientRect();
-  const side = Math.max(leftEdge, bar ? window.innerWidth - bar.left : 0) + 12;
-  const between = window.innerWidth - 2 * side;
-  const below = between < 280;
-  document.body.classList.toggle("banner-below", below);
-  root.style.setProperty("--banner-w", `${Math.min(680, below ? window.innerWidth - 32 : between)}px`);
+  const barLeft = bar ? bar.left : window.innerWidth;
+
+  if (mobilePortrait.matches) {
+    // Telefon dikeyde ezo_E banner'ı kamera butonu ile Giriş butonu arasındaki boşluğa ortalanır.
+    const gap = 8;
+    document.body.classList.remove("banner-below");
+    root.style.setProperty("--banner-w", `${Math.max(0, barLeft - leftEdge - 2 * gap)}px`);
+    root.style.setProperty("--banner-shift", `${(leftEdge + barLeft) / 2 - window.innerWidth / 2}px`);
+  } else {
+    const side = Math.max(leftEdge, window.innerWidth - barLeft) + 12;
+    const between = window.innerWidth - 2 * side;
+    const below = between < 280;
+    document.body.classList.toggle("banner-below", below);
+    root.style.setProperty("--banner-w", `${Math.min(680, below ? window.innerWidth - 32 : between)}px`);
+    root.style.setProperty("--banner-shift", "0px");
+  }
 
   if (!grid || !firstButton) return;
   const count = grid.children.length;

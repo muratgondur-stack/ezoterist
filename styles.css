@@ -59,6 +59,11 @@ body:has(.home) {
   text-align: center;
 }
 
+@media (orientation: portrait) and (max-width: 600px) {
+  .not-mobile-portrait { display: none; }
+  .home-banner { border-radius: 6px; }
+}
+
 /* Banner geniş ekranda üst butonların arasındaki satıra sığar; dar ekranda altlarına iner. */
 body.banner-below { padding-top: 68px; }
 
@@ -96,6 +101,7 @@ body.banner-below { padding-top: 68px; }
 
 .home-banner {
   display: block;
+  transform: translateX(var(--banner-shift, 0px));
   width: var(--banner-w, 100%);
   max-width: 100%;
   height: auto;
