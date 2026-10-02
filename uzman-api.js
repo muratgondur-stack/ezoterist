@@ -10,6 +10,7 @@ const Uzmanlar = require("./uzmanlar");
 const { numerolojiKullaniciDosyasi } = require("./numeroloji-api");
 const NumVeri = require("./numeroloji-veri");
 const { ruyaKaydiOku } = require("./ruya-api");
+const { falKaydiOku, fotoYolu } = require("./fal-api");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } = yardimci;
 
@@ -80,6 +81,19 @@ const BOLUMLER = {
       girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} rüyası${k.girdi.ruyaHissi ? ` · rüyada: ${k.girdi.ruyaHissi}` : ""}${k.girdi.uyanisHissi ? ` · uyanınca: ${k.girdi.uyanisHissi}` : ""}`,
       ozet: `Rüya: ${k.girdi.metin}${k.girdi.durum ? ` — Güncel durumu: ${k.girdi.durum}` : ""}`,
       kayitId: k.id,
+    }),
+  },
+  // Kahve falında uzman fincan fotoğraflarını da görür (/api/uzman/foto).
+  "kahve-fali": {
+    ad: "kahve falı",
+    link: "/kahve-fali#gunluk",
+    yukle: (dataDir, userId, body) => falKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: k.fal.baslik,
+      girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} falı · ${k.girdi.fotoSayisi} fotoğraf${k.girdi.tabakVar ? " (tabak dahil)" : ""}`,
+      ozet: k.girdi.niyet ? `Niyeti: ${k.girdi.niyet}` : "Niyet belirtilmedi.",
+      kayitId: k.id,
+      fotoSayisi: k.girdi.fotoSayisi,
     }),
   },
 };
@@ -212,6 +226,16 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       "POST /api/uzman/panel/teslim": async () => {
         sadeceUzman();
         sendJson(response, 200, { talep: await teslimEt(user, await readJson(request)) });
+      },
+      // Kahve falı talebinin fincan fotoğrafı: yalnız talep sahibi ve uzman görür.
+      "GET /api/uzman/foto": async () => {
+        const talep = await readCache(talepDosyasi(String(url.searchParams.get("id") || "").replace(/[^0-9a-f]/g, "")));
+        if (!talep || talep.bolum !== "kahve-fali" || (talep.userId !== user.id && !uzmanMi(user))) throw hata("Fotoğraf bulunamadı.", 404);
+        const n = Number(url.searchParams.get("n") || 0);
+        if (!Number.isInteger(n) || n < 0 || n >= (talep.kaynak.fotoSayisi || 0)) throw hata("Fotoğraf bulunamadı.", 404);
+        const dosya = fotoYolu(dataDir, talep.userId, talep.kaynak.kayitId, n);
+        if (!fs.existsSync(dosya)) throw hata("Kullanıcı bu falı silmiş.", 404);
+        sendFile(request, response, dosya);
       },
       // Uzman yorumu seslendirilir; talep sahibi ve uzman dinleyebilir.
       "GET /api/uzman/ses": async () => {

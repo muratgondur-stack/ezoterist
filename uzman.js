@@ -95,6 +95,16 @@ function renderDetail(t) {
   f("dogum").textContent = `${t.kaynak.girdiMetni} — ${t.userEmail}`;
   f("sure").textContent = t.durum === "hazir" ? `Teslim edildi: ${tarih(t.cevap.tarih)}` : `Son teslim: ${tarih(t.sonTarih)}\n${kalanSure(t.sonTarih)}`;
   f("harita").textContent = t.kaynak.ozet;
+  if (t.kaynak.fotoSayisi) {
+    f("fotolar").replaceChildren(...[...Array(t.kaynak.fotoSayisi).keys()].map((n) => {
+      const a = document.createElement("a");
+      a.href = `/api/uzman/foto?id=${t.id}&n=${n}`;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.innerHTML = `<img src="/api/uzman/foto?id=${t.id}&n=${n}" alt="Fincan fotoğrafı ${n + 1}" loading="lazy" />`;
+      return a;
+    }));
+  } else f("fotoKutu").remove();
   if (t.soru) f("soru").textContent = t.soru;
   else f("soruKutu").remove();
   f("ai").textContent = t.kaynak.aiMetin;

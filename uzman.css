@@ -52,3 +52,6 @@
   .panel-layout { grid-template-columns: 1fr; }
 }
 .panel-deadline { white-space: pre-line; }
+
+.panel-photos { display: flex; flex-wrap: wrap; gap: 10px; }
+.panel-photos img { width: 180px; height: 180px; object-fit: cover; border: 1px solid var(--card-border); border-radius: 14px; }

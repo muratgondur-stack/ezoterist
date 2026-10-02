@@ -11,6 +11,8 @@ COPY numeroloji-hesap.js numeroloji-veri.js numeroloji-api.js numeroloji.html nu
 COPY numeroloji ./numeroloji
 COPY ruya-veri.js ruya-api.js ruya.html ruya.css ruya-sayfa.js ./
 COPY ruya ./ruya
+COPY fal-veri.js fal-api.js fal.html fal.css fal-sayfa.js ./
+COPY fal ./fal
 COPY uzman ./uzman
 COPY astroloji ./astroloji
 COPY menu ./menu
