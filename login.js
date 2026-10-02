@@ -17,6 +17,12 @@ const resendButton = document.getElementById("resendCode");
 const resendRegisterButton = document.getElementById("resendRegisterCode");
 
 const modePaths = { login: "/login", register: "/register", verify: "/register", forgot: "/forgot-password", reset: "/forgot-password" };
+// Girişten sonra dönülecek site içi adres (ör. "/#astroloji"); sunucudaki safeNext ile aynı kural.
+const nextParam = new URLSearchParams(window.location.search).get("next") || "";
+const nextUrl = /^\/(?!\/)[A-Za-z0-9\-._~\/#?=&%]*$/.test(nextParam) ? nextParam : "/";
+const nextQuery = nextUrl === "/" ? "" : `?next=${encodeURIComponent(nextUrl)}`;
+document.querySelector(".google-button").href = `/auth/google${nextQuery}`;
+
 let resetEmail = "";
 let pendingRegistration = null;
 
@@ -61,7 +67,7 @@ const setMode = (mode, { updateUrl = true } = {}) => {
   }[mode];
 
   showMessage("");
-  if (updateUrl) history.replaceState(null, "", modePaths[mode]);
+  if (updateUrl) history.replaceState(null, "", modePaths[mode] + nextQuery);
   forms[mode].querySelector("input")?.focus();
 };
 
@@ -84,7 +90,7 @@ const postJson = async (endpoint, payload) => {
 };
 
 // Butonu kilitler, isteği atar; hata mesajını gösterir ve başarıda onSuccess'i çağırır.
-const submit = async (button, endpoint, payload, onSuccess = () => window.location.assign("/")) => {
+const submit = async (button, endpoint, payload, onSuccess = () => window.location.assign(nextUrl)) => {
   button.disabled = true;
   showMessage("");
 
@@ -110,6 +116,7 @@ forms.login.addEventListener("submit", (event) => {
   submit(submitButton(forms.login), "/api/login", {
     email: fields.get("email"),
     password: fields.get("password"),
+    remember: fields.get("remember") === "on",
   });
 });
 
@@ -189,9 +196,9 @@ setMode(initialMode, { updateUrl: false });
 const errorCode = new URLSearchParams(window.location.search).get("error");
 if (errorCode) showMessage(errorMessages[errorCode] || errorMessages.google);
 
-// Zaten giriş yapılmışsa ana sayfaya dön.
+// Zaten giriş yapılmışsa dönülecek sayfaya geç.
 fetch("/api/me", { credentials: "same-origin" })
   .then((response) => {
-    if (response.ok) window.location.replace("/");
+    if (response.ok) window.location.replace(nextUrl);
   })
   .catch(() => {});

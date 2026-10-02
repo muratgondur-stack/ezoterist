@@ -9,22 +9,41 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
   .then((data) => data?.user || null)
   .catch(() => null);
 
-document.querySelectorAll(".menu-button").forEach((button) => {
+const openSection = (button) => {
+  toast.textContent = `${button.dataset.title} çok yakında.`;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.hidden = true; }, 2200);
+};
+
+const menuButtons = document.querySelectorAll(".menu-button");
+
+menuButtons.forEach((button) => {
   button.addEventListener("click", (event) => {
     event.preventDefault();
     currentUser.then((user) => {
-      // Giriş yapılmamışsa giriş penceresini aç.
+      // Giriş yapılmamışsa giriş penceresini aç; girişten sonra bu bölüme dönülür.
       if (!user) {
-        window.location.assign("/login");
+        const next = `/${button.getAttribute("href")}`;
+        window.location.assign(`/login?next=${encodeURIComponent(next)}`);
         return;
       }
-      toast.textContent = `${button.dataset.title} çok yakında.`;
-      toast.hidden = false;
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => { toast.hidden = true; }, 2200);
+      openSection(button);
     });
   });
 });
+
+// Girişten "/#bolum" adresine dönüldüyse o bölümü aç.
+const returnedTo = [...menuButtons].find((button) => button.getAttribute("href") === window.location.hash);
+if (returnedTo) {
+  currentUser.then((user) => {
+    history.replaceState(null, "", "/");
+    if (!user) return;
+    returnedTo.scrollIntoView({ block: "center" });
+    returnedTo.focus({ preventScroll: true });
+    openSection(returnedTo);
+  });
+}
 
 currentUser.then((user) => {
   if (!user || !authBar) return;

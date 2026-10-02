@@ -11,7 +11,10 @@ const usersFile = path.join(dataDir, "users.json");
 
 const SESSION_COOKIE = "ezo_session";
 const STATE_COOKIE = "ezo_oauth_state";
+const NEXT_COOKIE = "ezo_oauth_next";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
+// "Beni hatırla" seçilmezse oturum tarayıcı kapanınca biter, en geç 1 günde düşer.
+const SHORT_SESSION_MAX_AGE = 60 * 60 * 24;
 const MAX_BODY_BYTES = 10 * 1024;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
@@ -101,8 +104,8 @@ async function verifyPassword(password, stored) {
 const sign = (value) => crypto.createHmac("sha256", sessionSecret).update(value).digest("base64url");
 
 // Şifre değişince user.sessionVersion artar ve önceki oturumlar geçersiz olur.
-function createSessionToken(user) {
-  const payload = `${user.id}.${user.sessionVersion || 0}.${Math.floor(Date.now() / 1000) + SESSION_MAX_AGE}`;
+function createSessionToken(user, maxAge) {
+  const payload = `${user.id}.${user.sessionVersion || 0}.${Math.floor(Date.now() / 1000) + maxAge}`;
   return `${payload}.${sign(payload)}`;
 }
 
@@ -145,8 +148,16 @@ function cookie(request, name, value, { maxAge, path: cookiePath = "/" } = {}) {
   return parts.join("; ");
 }
 
-const sessionCookie = (request, user) =>
-  cookie(request, SESSION_COOKIE, createSessionToken(user), { maxAge: SESSION_MAX_AGE });
+const sessionCookie = (request, user, remember = true) =>
+  remember
+    ? cookie(request, SESSION_COOKIE, createSessionToken(user, SESSION_MAX_AGE), { maxAge: SESSION_MAX_AGE })
+    : cookie(request, SESSION_COOKIE, createSessionToken(user, SHORT_SESSION_MAX_AGE));
+
+// Girişten sonra dönülecek adres yalnızca site içi bir yol olabilir ("//" ile başlayan başka siteye gider).
+const safeNext = (value) => {
+  const next = String(value || "");
+  return /^\/(?!\/)[A-Za-z0-9\-._~\/#?=&%]*$/.test(next) ? next : "/";
+};
 
 const currentUser = (request) => readSessionToken(parseCookies(request)[SESSION_COOKIE]);
 
@@ -373,7 +384,7 @@ async function handleLogin(request, response) {
     return;
   }
 
-  sendJson(response, 200, { user: publicUser(user) }, { "Set-Cookie": sessionCookie(request, user) });
+  sendJson(response, 200, { user: publicUser(user) }, { "Set-Cookie": sessionCookie(request, user, body.remember !== false) });
 }
 
 // --- Şifremi unuttum: e-postaya 6 haneli kod → kod + yeni şifre (quiz.ist ile aynı akış) ---
@@ -471,7 +482,7 @@ function googleRedirectUri(request) {
   return `${proto}://${request.headers.host}/auth/google/callback`;
 }
 
-function handleGoogleStart(request, response) {
+function handleGoogleStart(request, response, url) {
   if (!googleEnabled) {
     redirect(response, "/login?error=google_disabled");
     return;
@@ -488,12 +499,18 @@ function handleGoogleStart(request, response) {
   });
 
   redirect(response, `https://accounts.google.com/o/oauth2/v2/auth?${params}`, {
-    "Set-Cookie": cookie(request, STATE_COOKIE, state, { maxAge: 600, path: "/auth/google" }),
+    "Set-Cookie": [
+      cookie(request, STATE_COOKIE, state, { maxAge: 600, path: "/auth/google" }),
+      cookie(request, NEXT_COOKIE, safeNext(url.searchParams.get("next")), { maxAge: 600, path: "/auth/google" }),
+    ],
   });
 }
 
 async function handleGoogleCallback(request, response, url) {
-  const clearState = cookie(request, STATE_COOKIE, "", { maxAge: 0, path: "/auth/google" });
+  const clearState = [
+    cookie(request, STATE_COOKIE, "", { maxAge: 0, path: "/auth/google" }),
+    cookie(request, NEXT_COOKIE, "", { maxAge: 0, path: "/auth/google" }),
+  ];
   const fail = (reason) => redirect(response, `/login?error=${reason}`, { "Set-Cookie": clearState });
 
   if (!googleEnabled) return fail("google_disabled");
@@ -536,7 +553,8 @@ async function handleGoogleCallback(request, response, url) {
       await saveUsers();
     }
 
-    redirect(response, "/", { "Set-Cookie": [clearState, sessionCookie(request, user)] });
+    const next = safeNext(parseCookies(request)[NEXT_COOKIE]);
+    redirect(response, next, { "Set-Cookie": [...clearState, sessionCookie(request, user)] });
   } catch (error) {
     console.error("Google ile giriş başarısız:", error);
     fail("google");

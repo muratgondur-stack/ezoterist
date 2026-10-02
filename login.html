@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/login.css?v=3" />
+    <link rel="stylesheet" href="/login.css?v=4" />
   </head>
   <body>
     <main class="auth-card">
@@ -52,7 +52,13 @@
           <span>Şifre</span>
           <input type="password" name="password" autocomplete="current-password" placeholder="Şifreniz" required />
         </label>
-        <a class="auth-forgot" href="/forgot-password" data-mode="forgot">Şifremi unuttum?</a>
+        <div class="auth-options">
+          <label class="auth-remember">
+            <input type="checkbox" name="remember" checked />
+            <span>Beni hatırla</span>
+          </label>
+          <a class="auth-forgot" href="/forgot-password" data-mode="forgot">Şifremi unuttum?</a>
+        </div>
         <button type="submit" class="auth-submit">Giriş Yap</button>
       </form>
 
@@ -112,6 +118,6 @@
 
       <p class="auth-switch" id="authSwitch"></p>
     </main>
-    <script src="/login.js?v=3"></script>
+    <script src="/login.js?v=4"></script>
   </body>
 </html>
