@@ -25,7 +25,9 @@ function jsonAyikla(metin) {
   const bas = metin.indexOf("{");
   const son = metin.lastIndexOf("}");
   if (bas === -1 || son <= bas) throw new Error("Yorum JSON değil");
-  return JSON.parse(metin.slice(bas, son + 1));
+  // Model bazen görünmez boşluk (U+00A0 vb.) ya da sondaki fazladan virgül ekler; JSON.parse bunlara takılır.
+  const temiz = metin.slice(bas, son + 1).replace(/[\u00a0\u2000-\u200b\u202f\u3000\ufeff]/g, " ").replace(/,\s*([}\]])/g, "$1");
+  return JSON.parse(temiz);
 }
 
 // Kriptografik karıştırma: kullanıcının seçtiği sıralar bu desteden kart alır.
