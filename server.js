@@ -73,10 +73,19 @@ function sendFile(request, response, filePath) {
 
     const headers = {
       "Content-Type": contentTypes[path.extname(filePath)] || "application/octet-stream",
-      "Cache-Control": path.extname(filePath) === ".html" ? "no-cache" : "public, max-age=3600",
+      // HTML, CSS ve JS her açılışta sunucuya sorulur (değişmediyse 304, gövdesiz). Yayın sırasında eski
+      // stil dosyası yeni sürüm adıyla 1 saat önbellekte kalıp sayfayı bozuyordu (2026-10-02).
+      "Cache-Control": [".html", ".css", ".js"].includes(path.extname(filePath)) ? "no-cache" : "public, max-age=3600",
       "Accept-Ranges": "bytes",
       "Last-Modified": stats.mtime.toUTCString(),
     };
+
+    const since = Date.parse(request.headers["if-modified-since"] || "");
+    if (!range && !Number.isNaN(since) && Math.floor(stats.mtimeMs / 1000) <= Math.floor(since / 1000)) {
+      response.writeHead(304, headers);
+      response.end();
+      return;
+    }
 
     if (range) {
       headers["Content-Range"] = `bytes ${range.start}-${range.end}/${stats.size}`;
