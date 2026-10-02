@@ -1,9 +1,9 @@
 // Astroloji bölümünün sunucu uçları: günlük yorum, doğum haritası yorumu ve Alev'in sesi (Piper).
-// Yapay zekâ ve ses isteğe bağlıdır: LLM_URL/LLM_TOKEN/LLM_MODEL ve Piper sesi yoksa sabit metinler kullanılır.
+// Yapay zekâ ve ses isteğe bağlıdır: LLM_URL/LLM_TOKEN/LLM_MODEL ve TTS_URL yoksa sabit metin, ses yok.
+// İkisi de V100'de (ses2.quiz.ist): Gemma /llm/v1/chat/completions, Piper /tts/synthesize; ezoter.ist'e özel anahtarla.
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-const { spawn } = require("node:child_process");
 const Astro = require("./astro");
 const Veri = require("./astroloji-veri");
 
@@ -14,14 +14,17 @@ const llm = {
 };
 const llmEnabled = Boolean(llm.url && llm.token);
 
+const tts = {
+  url: (process.env.TTS_URL || "").trim(),
+  token: (process.env.TTS_TOKEN || process.env.LLM_TOKEN || "").trim(),
+  voice: (process.env.TTS_VOICE || "alev").trim(),
+};
+
 const HARITA_GUNLUK_SINIR = 20;
 const TIME_ZONE = "Europe/Istanbul";
 
 function setup(dataDir) {
-  const base = path.join(dataDir, "astroloji");
-  const piperBin = process.env.PIPER_BIN || "/opt/piper/piper";
-  const piperVoice = process.env.PIPER_VOICE || path.join(dataDir, "piper", "tr_TR-alev-medium.onnx");
-  return { base, piperBin, piperVoice };
+  return { base: path.join(dataDir, "astroloji") };
 }
 
 const bugun = (date = new Date()) =>
@@ -211,26 +214,9 @@ async function haritaYorum(cfg, harita, userId) {
   });
 }
 
-// --- Ses (Piper, Alev) ---
+// --- Ses (V100'deki Piper, Alev) ---
 
-const sesVar = (cfg) => fs.existsSync(cfg.piperBin) && fs.existsSync(cfg.piperVoice);
-
-function run(command, args, input) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: ["pipe", "ignore", "pipe"] });
-    let stderr = "";
-    child.stderr.on("data", (d) => { stderr += d; });
-    const timer = setTimeout(() => child.kill("SIGKILL"), 120_000);
-    child.on("error", (error) => { clearTimeout(timer); reject(error); });
-    child.on("close", (code) => {
-      clearTimeout(timer);
-      if (code === 0) resolve();
-      else reject(new Error(`${path.basename(command)} ${code}: ${stderr.slice(-200)}`));
-    });
-    if (input) child.stdin.end(input);
-    else child.stdin.end();
-  });
-}
+const sesVar = () => Boolean(tts.url && tts.token);
 
 // Sesli okumada sembol, emoji ve kısaltmalar takılmasın.
 const sesMetni = (text) =>
@@ -240,26 +226,28 @@ const sesMetni = (text) =>
     .replace(/\s+/g, " ")
     .trim();
 
+// Üretilen ses önbelleğe yazılır; aynı metin ikinci kez V100'e gitmez.
 async function sesDosyasi(cfg, text) {
   const clean = sesMetni(text).slice(0, 4000);
-  const hash = crypto.createHash("sha1").update(`alev|${clean}`).digest("hex");
+  const hash = crypto.createHash("sha1").update(`${tts.voice}|${clean}`).digest("hex");
   const dir = path.join(cfg.base, "ses");
   const mp3 = path.join(dir, `${hash}.mp3`);
-  const wav = path.join(dir, `${hash}.wav`);
   if (fs.existsSync(mp3)) return mp3;
-  if (fs.existsSync(wav)) return wav;
   return once(`ses:${hash}`, async () => {
+    const result = await fetch(tts.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tts.token}` },
+      body: JSON.stringify({ text: clean, voice: tts.voice, format: "mp3" }),
+      signal: AbortSignal.timeout(120_000),
+    });
+    if (!result.ok) throw new Error(`TTS ${result.status}`);
+    if (!/audio\/mpeg/.test(result.headers.get("content-type") || "")) throw new Error("TTS mp3 döndürmedi");
+    const audio = Buffer.from(await result.arrayBuffer());
     await fs.promises.mkdir(dir, { recursive: true });
-    const tmpWav = `${wav}.${process.pid}.tmp.wav`;
-    await run(cfg.piperBin, ["--model", cfg.piperVoice, "--output_file", tmpWav, "--length_scale", "1.05", "--sentence_silence", "0.35"], `${clean}\n`);
-    try {
-      await run("lame", ["--quiet", "-b", "64", tmpWav, mp3]);
-      await fs.promises.unlink(tmpWav).catch(() => {});
-      return mp3;
-    } catch {
-      await fs.promises.rename(tmpWav, wav);
-      return wav;
-    }
+    const tmp = `${mp3}.${process.pid}.tmp`;
+    await fs.promises.writeFile(tmp, audio);
+    await fs.promises.rename(tmp, mp3);
+    return mp3;
   });
 }
 
@@ -296,7 +284,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     };
 
     const routes = {
-      "GET /api/astroloji/durum": async () => sendJson(response, 200, { ai: llmEnabled, ses: sesVar(cfg) }),
+      "GET /api/astroloji/durum": async () => sendJson(response, 200, { ai: llmEnabled, ses: sesVar() }),
       "GET /api/astroloji/gunluk": async () => sendJson(response, 200, await gunlukYorum(cfg, burcParam())),
       "POST /api/astroloji/harita": async () => {
         const harita = haritaDogrula(await readJson(request));
@@ -304,7 +292,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         sendJson(response, 200, await haritaYorum(cfg, harita, user.id));
       },
       "GET /api/astroloji/ses": async () => {
-        if (!sesVar(cfg)) throw Object.assign(new Error("Seslendirme henüz hazır değil."), { status: 503 });
+        if (!sesVar()) throw Object.assign(new Error("Seslendirme henüz hazır değil."), { status: 503 });
         const tur = url.searchParams.get("tur");
         let text;
         if (tur === "burc") text = burcSesMetni(burcParam());
