@@ -203,3 +203,20 @@ body::before {
 }
 
 .auth-bar-link:hover { background: rgba(255, 122, 0, 0.3); }
+
+.music-toggle {
+  position: fixed;
+  z-index: 4;
+  top: 16px;
+  left: 16px;
+  width: 42px;
+  height: 42px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.62);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.music-toggle:hover { background: rgba(255, 122, 0, 0.3); }

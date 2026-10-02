@@ -76,3 +76,55 @@ currentUser.then((user) => {
 
   authBar.replaceChildren(name, logout);
 });
+
+// Arka plan müziği: çok kısık, döngüde. Tarayıcılar sesi ilk dokunuş/tıklamadan önce başlatmaz.
+// iPhone'da audio.volume değiştirilemediği için ses seviyesi Web Audio ile kısılır.
+const MUSIC_VOLUME = 0.12;
+const musicToggle = document.getElementById("musicToggle");
+const music = new Audio("/audio/anamenu.m4a?v=1");
+music.loop = true;
+music.preload = "auto";
+
+let musicMuted = false;
+try { musicMuted = localStorage.getItem("ezo_muzik") === "kapali"; } catch {}
+
+let audioContext;
+const startMusic = () => {
+  if (musicMuted) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!audioContext && AudioContextClass) {
+    audioContext = new AudioContextClass();
+    const gain = audioContext.createGain();
+    gain.gain.value = MUSIC_VOLUME;
+    audioContext.createMediaElementSource(music).connect(gain).connect(audioContext.destination);
+  } else if (!AudioContextClass) {
+    music.volume = MUSIC_VOLUME;
+  }
+  audioContext?.resume().catch(() => {});
+  music.play().catch(() => {});
+};
+
+const renderMusicToggle = () => {
+  musicToggle.textContent = musicMuted ? "🔇" : "🔊";
+  musicToggle.setAttribute("aria-label", musicMuted ? "Müziği aç" : "Müziği kapat");
+  musicToggle.setAttribute("aria-pressed", String(musicMuted));
+};
+
+musicToggle.addEventListener("click", (event) => {
+  event.stopPropagation();
+  musicMuted = !musicMuted;
+  try { localStorage.setItem("ezo_muzik", musicMuted ? "kapali" : "acik"); } catch {}
+  renderMusicToggle();
+  if (musicMuted) music.pause();
+  else startMusic();
+});
+
+renderMusicToggle();
+startMusic();
+["pointerdown", "keydown", "touchstart"].forEach((type) =>
+  document.addEventListener(type, startMusic, { once: true, capture: true }),
+);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) music.pause();
+  else if (!musicMuted && audioContext) startMusic();
+});
