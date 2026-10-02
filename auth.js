@@ -2,6 +2,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const { promisify } = require("node:util");
+const { epostaYolla, epostaSablon, htmlKacis } = require("./eposta");
 
 const scrypt = promisify(crypto.scrypt);
 
@@ -14,6 +15,9 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 const MAX_BODY_BYTES = 10 * 1024;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
+const RESET_CODE_TTL_MS = 10 * 60 * 1000;
+const RESET_CODE_COOLDOWN_MS = 60 * 1000;
+const RESET_CODE_MAX_ATTEMPTS = 5;
 
 let sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
@@ -96,21 +100,24 @@ async function verifyPassword(password, stored) {
 
 const sign = (value) => crypto.createHmac("sha256", sessionSecret).update(value).digest("base64url");
 
-function createSessionToken(userId) {
-  const payload = `${userId}.${Math.floor(Date.now() / 1000) + SESSION_MAX_AGE}`;
+// Şifre değişince user.sessionVersion artar ve önceki oturumlar geçersiz olur.
+function createSessionToken(user) {
+  const payload = `${user.id}.${user.sessionVersion || 0}.${Math.floor(Date.now() / 1000) + SESSION_MAX_AGE}`;
   return `${payload}.${sign(payload)}`;
 }
 
 function readSessionToken(token) {
   if (!token) return null;
   const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  const [userId, expires, signature] = parts;
-  const expected = Buffer.from(sign(`${userId}.${expires}`));
+  if (parts.length !== 4) return null;
+  const [userId, version, expires, signature] = parts;
+  const expected = Buffer.from(sign(`${userId}.${version}.${expires}`));
   const actual = Buffer.from(signature);
   if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return null;
   if (Number(expires) < Date.now() / 1000) return null;
-  return findUserById(userId) || null;
+  const user = findUserById(userId);
+  if (!user || String(user.sessionVersion || 0) !== version) return null;
+  return user;
 }
 
 function parseCookies(request) {
@@ -139,7 +146,7 @@ function cookie(request, name, value, { maxAge, path: cookiePath = "/" } = {}) {
 }
 
 const sessionCookie = (request, user) =>
-  cookie(request, SESSION_COOKIE, createSessionToken(user.id), { maxAge: SESSION_MAX_AGE });
+  cookie(request, SESSION_COOKIE, createSessionToken(user), { maxAge: SESSION_MAX_AGE });
 
 const currentUser = (request) => readSessionToken(parseCookies(request)[SESSION_COOKIE]);
 
@@ -263,6 +270,105 @@ async function handleLogin(request, response) {
   sendJson(response, 200, { user: publicUser(user) }, { "Set-Cookie": sessionCookie(request, user) });
 }
 
+// --- Şifremi unuttum: e-postaya 6 haneli kod → kod + yeni şifre (quiz.ist ile aynı akış) ---
+
+const resetPending = new Map();
+
+async function handleForgotPassword(request, response) {
+  if (isRateLimited(request)) {
+    sendJson(response, 429, { error: "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin." });
+    return;
+  }
+
+  const body = await readJsonBody(request);
+  const email = normalizeEmail(body.email);
+  if (!EMAIL_PATTERN.test(email)) {
+    sendJson(response, 400, { error: "Geçerli bir e-posta adresi girin." });
+    return;
+  }
+
+  const user = findUserByEmail(email);
+  if (!user) {
+    sendJson(response, 404, { error: "Bu e-posta adresiyle kayıtlı bir hesap yok." });
+    return;
+  }
+  if (!user.passwordHash) {
+    sendJson(response, 400, { error: "Bu hesap Google ile açılmış; şifresi yok. Lütfen \"Google ile giriş yap\" seçeneğini kullanın." });
+    return;
+  }
+
+  const previous = resetPending.get(email);
+  if (previous && Date.now() - previous.sentAt < RESET_CODE_COOLDOWN_MS) {
+    sendJson(response, 429, { error: "Kod az önce gönderildi; 1 dakika sonra tekrar isteyebilirsiniz." });
+    return;
+  }
+
+  const code = String(crypto.randomInt(100000, 1000000));
+  const name = String(user.name || "").split(" ")[0] || "Merhaba";
+  const sent = await epostaYolla({
+    kime: email,
+    konu: `Ezoter.ist şifre yenileme kodun: ${code}`,
+    metin: `${name}, Ezoter.ist şifreni yenilemek için kodun: ${code}\n10 dakika geçerli. Bu isteği sen yapmadıysan görmezden gel; şifren değişmez.`,
+    html: epostaSablon(
+      `${htmlKacis(name)}, şifre yenileme kodun`,
+      `<p>Sitedeki kutuya bu kodu yazıp yeni şifreni belirle:</p>
+       <p style="font-size:32px;letter-spacing:8px;font-weight:900;margin:14px 0">${code}</p>
+       <p style="color:#666">Kod 10 dakika geçerli. Bu isteği sen yapmadıysan görmezden gel; şifren değişmez.</p>`,
+    ),
+  });
+  if (!sent) {
+    sendJson(response, 503, { error: "E-posta gönderilemedi; lütfen biraz sonra tekrar deneyin." });
+    return;
+  }
+
+  resetPending.set(email, { userId: user.id, code, expiresAt: Date.now() + RESET_CODE_TTL_MS, attempts: 0, sentAt: Date.now() });
+  if (resetPending.size > 5000) {
+    for (const [key, entry] of resetPending) if (Date.now() > entry.expiresAt) resetPending.delete(key);
+  }
+  sendJson(response, 200, { message: `Şifre yenileme kodu ${email} adresine gönderildi.` });
+}
+
+async function handleResetPassword(request, response) {
+  const body = await readJsonBody(request);
+  const email = normalizeEmail(body.email);
+  const code = String(body.code || "").replace(/\D/g, "");
+  const password = String(body.password || "");
+
+  if (password.length < MIN_PASSWORD_LENGTH || password.length > 200) {
+    sendJson(response, 400, { error: `Şifre en az ${MIN_PASSWORD_LENGTH} karakter olmalı.` });
+    return;
+  }
+
+  const pending = resetPending.get(email);
+  if (!pending || code.length !== 6 || Date.now() > pending.expiresAt) {
+    if (pending) resetPending.delete(email);
+    sendJson(response, 400, { error: "Kod hatalı veya süresi geçti." });
+    return;
+  }
+  pending.attempts += 1;
+  if (pending.attempts > RESET_CODE_MAX_ATTEMPTS) {
+    resetPending.delete(email);
+    sendJson(response, 400, { error: "Çok fazla yanlış deneme; yeni kod isteyin." });
+    return;
+  }
+  if (pending.code !== code) {
+    sendJson(response, 400, { error: "Kod hatalı veya süresi geçti." });
+    return;
+  }
+
+  resetPending.delete(email);
+  const user = findUserById(pending.userId);
+  if (!user) {
+    sendJson(response, 400, { error: "Kod hatalı veya süresi geçti." });
+    return;
+  }
+
+  user.passwordHash = await hashPassword(password);
+  user.sessionVersion = (user.sessionVersion || 0) + 1;
+  await saveUsers();
+  sendJson(response, 200, { user: publicUser(user) }, { "Set-Cookie": sessionCookie(request, user) });
+}
+
 function handleLogout(request, response) {
   sendJson(response, 200, { ok: true }, { "Set-Cookie": cookie(request, SESSION_COOKIE, "", { maxAge: 0 }) });
 }
@@ -363,6 +469,8 @@ const routes = {
   "POST /api/register": handleRegister,
   "POST /api/login": handleLogin,
   "POST /api/logout": handleLogout,
+  "POST /api/forgot-password": handleForgotPassword,
+  "POST /api/reset-password": handleResetPassword,
   "GET /auth/google": handleGoogleStart,
   "GET /auth/google/callback": handleGoogleCallback,
 };

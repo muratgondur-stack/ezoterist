@@ -102,6 +102,7 @@ function sendFile(request, response, filePath) {
 const pageRoutes = {
   "/login": "login.html",
   "/register": "login.html",
+  "/forgot-password": "login.html",
 };
 
 const server = http.createServer((request, response) => {

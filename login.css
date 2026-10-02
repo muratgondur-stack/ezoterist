@@ -136,6 +136,12 @@ h1 {
   font-size: 0.92rem;
 }
 
+.auth-message[data-type="success"] {
+  border-color: #4fd18b;
+  color: #7be3aa;
+  background: rgba(79, 209, 139, 0.1);
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -204,3 +210,24 @@ h1 {
   .auth-card { padding: 26px 20px; border-radius: 18px; }
   h1 { font-size: 1.5rem; }
 }
+
+.auth-forgot,
+.auth-link-button {
+  align-self: flex-end;
+  margin-top: -4px;
+  padding: 0;
+  border: 0;
+  color: var(--accent-strong);
+  background: none;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.auth-link-button { align-self: center; margin-top: 0; }
+
+.auth-forgot:hover,
+.auth-link-button:hover { text-decoration: underline; }
+.auth-link-button:disabled { opacity: 0.6; cursor: progress; }
