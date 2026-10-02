@@ -12,7 +12,7 @@ const toast = (text) => {
 };
 const shortDate = (ms) => new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long" }).format(new Date(ms));
 
-// --- Ses: baş numeroloğumuz konuşurken videosu oynar ---
+// --- Ses: baş numeroloğumuz Burcu konuşurken videosu oynar ---
 
 const voice = $("voice");
 const numerologVideo = $("numerologVideo");
@@ -94,7 +94,7 @@ async function renderPersonalDay() {
     if (!response.ok) throw new Error();
     const data = await response.json();
     $("personalText").textContent = `${data.metin}\n\nYılın teması: ${kisiselYil[kYil]}`;
-    $("personalBadge").textContent = data.kaynak === "ai" ? "✨ Baş numeroloğumuzun yorumu" : "🔢 Sayıların anlamı";
+    $("personalBadge").textContent = data.kaynak === "ai" ? "✨ Kişisel yorum" : "🔢 Sayıların anlamı";
     bindListen($("personalListen"), () => `/api/numeroloji/ses?tur=gunluk&sayi=${kGun}&gun=${data.tarih}`);
   } catch {
     $("personalText").textContent = `${gunEnerjisi[kGun]}\n\nYılın teması: ${kisiselYil[kYil]}`;

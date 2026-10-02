@@ -90,7 +90,7 @@ function renderDetail(t) {
   const node = $("detailTemplate").content.cloneNode(true);
   const f = (name) => node.querySelector(`[data-f="${name}"]`);
 
-  f("durum").textContent = `${DURUM[t.durum]} · ${t.bolumAdi}`;
+  f("durum").textContent = `${DURUM[t.durum]} · ${t.bolumAdi} · ${(Uzmanlar.find((u) => u.id === t.uzman) || Uzmanlar[0]).ad}`;
   f("kisi").textContent = kisiAdi(t);
   f("dogum").textContent = `${t.kaynak.girdiMetni} — ${t.userEmail}`;
   f("sure").textContent = t.durum === "hazir" ? `Teslim edildi: ${tarih(t.cevap.tarih)}` : `Son teslim: ${tarih(t.sonTarih)}\n${kalanSure(t.sonTarih)}`;

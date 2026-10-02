@@ -131,10 +131,10 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       void epostaYolla({
         kime,
         konu: "Ezoter.ist: yeni uzman yorumu talebi",
-        metin: `${talep.userName || talep.userEmail} ${bolum.ad} için yorum istedi.${soru ? ` Sorusu: ${soru}` : ""} Panel: ${SITE}/uzman`,
+        metin: `${talep.userName || talep.userEmail} ${bolum.ad} için yorum istedi (seçtiği numerolog: ${uzman.ad}).${soru ? ` Sorusu: ${soru}` : ""} Panel: ${SITE}/uzman`,
         html: epostaSablon(
           "Yeni uzman yorumu talebi",
-          `<p><b>${htmlKacis(talep.userName || talep.userEmail)}</b> ${bolum.ad} için yorumunu bekliyor.</p>` +
+          `<p><b>${htmlKacis(talep.userName || talep.userEmail)}</b> ${bolum.ad} için yorum bekliyor. Seçtiği numerolog: <b>${htmlKacis(uzman.ad)}</b>.</p>` +
             (soru ? `<p>Sorusu: <i>${htmlKacis(soru)}</i></p>` : "") +
             `<p>Söz verilen teslim: 48 saat içinde.</p>`,
           { url: `${SITE}/uzman`, yazi: "Uzman paneline git" },
@@ -155,13 +155,14 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     await writeCache(talepDosyasi(talep.id), talep);
 
     const bolum = BOLUMLER[talep.bolum] || BOLUMLER["astroloji-harita"];
+    const uzmanAdi = (Uzmanlar.find((u) => u.id === talep.uzman) || Uzmanlar[0]).ad;
     void epostaYolla({
       kime: talep.userEmail,
       konu: "Ezoter.ist: uzman yorumun hazır",
-      metin: `Merhaba ${talep.userName || ""}, baş numeroloğumuz ${bolum.ad} analizini yorumladı. Okumak ve sesli dinlemek için: ${SITE}${bolum.link}`,
+      metin: `Merhaba ${talep.userName || ""}, numeroloğumuz ${uzmanAdi} ${bolum.ad} analizini yorumladı. Okumak ve sesli dinlemek için: ${SITE}${bolum.link}`,
       html: epostaSablon(
         "Uzman yorumun hazır ✨",
-        `<p>Merhaba ${htmlKacis(talep.userName || "")},</p><p>Baş numeroloğumuz ${bolum.ad} analizini kendi gözüyle yorumladı. Yorumunu okuyabilir, sesli dinleyebilirsin.</p>`,
+        `<p>Merhaba ${htmlKacis(talep.userName || "")},</p><p>Numeroloğumuz ${htmlKacis(uzmanAdi)} ${bolum.ad} analizini kendi gözüyle yorumladı. Yorumunu okuyabilir, sesli dinleyebilirsin.</p>`,
         { url: `${SITE}${bolum.link}`, yazi: "Yorumumu aç" },
       ),
     }).catch(() => {});
