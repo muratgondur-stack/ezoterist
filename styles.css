@@ -52,6 +52,14 @@ body::before {
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
 }
 
+.home-banner {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
+}
+
 .home-header p {
   margin: 6px 0 0;
   color: var(--muted);
