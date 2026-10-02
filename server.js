@@ -7,6 +7,7 @@ const { createHandler: createUzmanHandler } = require("./uzman-api");
 const { createHandler: createNumerolojiHandler } = require("./numeroloji-api");
 const { createHandler: createRuyaHandler } = require("./ruya-api");
 const { createHandler: createFalHandler } = require("./fal-api");
+const { createHandler: createElFaliHandler } = require("./el-fali-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -126,6 +127,7 @@ const pageRoutes = {
   "/numeroloji": "numeroloji.html",
   "/ruya": "ruya.html",
   "/kahve-fali": "fal.html",
+  "/el-fali": "el-fali.html",
 };
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
@@ -133,6 +135,7 @@ const handleUzmanRequest = createUzmanHandler({ dataDir, currentUser, sendFile }
 const handleNumerolojiRequest = createNumerolojiHandler({ dataDir, currentUser, sendFile });
 const handleRuyaRequest = createRuyaHandler({ dataDir, currentUser, sendFile });
 const handleFalRequest = createFalHandler({ dataDir, currentUser, sendFile });
+const handleElFaliRequest = createElFaliHandler({ dataDir, currentUser, sendFile });
 
 const server = http.createServer((request, response) => {
   let url;
@@ -151,6 +154,7 @@ const server = http.createServer((request, response) => {
   if (handleNumerolojiRequest(request, response, url)) return;
   if (handleRuyaRequest(request, response, url)) return;
   if (handleFalRequest(request, response, url)) return;
+  if (handleElFaliRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {

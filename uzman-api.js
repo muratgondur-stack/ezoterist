@@ -10,7 +10,11 @@ const Uzmanlar = require("./uzmanlar");
 const { numerolojiKullaniciDosyasi } = require("./numeroloji-api");
 const NumVeri = require("./numeroloji-veri");
 const { ruyaKaydiOku } = require("./ruya-api");
-const { falKaydiOku, fotoYolu } = require("./fal-api");
+const { falKaydiOku, fotoYolu: kahveFotoYolu } = require("./fal-api");
+const { elKaydiOku, fotoYolu: elFotoYolu } = require("./el-fali-api");
+
+// Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
+const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu };
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } = yardimci;
 
@@ -92,6 +96,18 @@ const BOLUMLER = {
       baslik: k.fal.baslik,
       girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} falı · ${k.girdi.fotoSayisi} fotoğraf${k.girdi.tabakVar ? " (tabak dahil)" : ""}`,
       ozet: k.girdi.niyet ? `Niyeti: ${k.girdi.niyet}` : "Niyet belirtilmedi.",
+      kayitId: k.id,
+      fotoSayisi: k.girdi.fotoSayisi,
+    }),
+  },
+  "el-fali": {
+    ad: "el falı",
+    link: "/el-fali#gunluk",
+    yukle: (dataDir, userId, body) => elKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: k.fal.baslik,
+      girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} falı · baskın el: ${k.girdi.baskinEl} · ${k.girdi.fotoSayisi} fotoğraf`,
+      ozet: `${k.fal.elTipi ? `El tipi: ${k.fal.elTipi}. ` : ""}${k.girdi.soru ? `Sorusu: ${k.girdi.soru}` : "Soru belirtilmedi."}`,
       kayitId: k.id,
       fotoSayisi: k.girdi.fotoSayisi,
     }),
@@ -227,14 +243,14 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         sadeceUzman();
         sendJson(response, 200, { talep: await teslimEt(user, await readJson(request)) });
       },
-      // Kahve falı talebinin fincan fotoğrafı: yalnız talep sahibi ve uzman görür.
+      // Fotoğraflı talebin (kahve falı, el falı) fotoğrafı: yalnız talep sahibi ve uzman görür.
       "GET /api/uzman/foto": async () => {
         const talep = await readCache(talepDosyasi(String(url.searchParams.get("id") || "").replace(/[^0-9a-f]/g, "")));
-        if (!talep || talep.bolum !== "kahve-fali" || (talep.userId !== user.id && !uzmanMi(user))) throw hata("Fotoğraf bulunamadı.", 404);
+        if (!talep || !FOTO_YOLLARI[talep.bolum] || (talep.userId !== user.id && !uzmanMi(user))) throw hata("Fotoğraf bulunamadı.", 404);
         const n = Number(url.searchParams.get("n") || 0);
         if (!Number.isInteger(n) || n < 0 || n >= (talep.kaynak.fotoSayisi || 0)) throw hata("Fotoğraf bulunamadı.", 404);
-        const dosya = fotoYolu(dataDir, talep.userId, talep.kaynak.kayitId, n);
-        if (!fs.existsSync(dosya)) throw hata("Kullanıcı bu falı silmiş.", 404);
+        const dosya = FOTO_YOLLARI[talep.bolum](dataDir, talep.userId, talep.kaynak.kayitId, n);
+        if (!fs.existsSync(dosya)) throw hata("Kullanıcı bu kaydı silmiş.", 404);
         sendFile(request, response, dosya);
       },
       // Uzman yorumu seslendirilir; talep sahibi ve uzman dinleyebilir.

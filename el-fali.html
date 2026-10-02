@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#070914" />
-    <meta name="description" content="Ezoter.ist Kahve Falı: fincanının fotoğrafını çek, falcımız geleneksel kurallarla falına baksın." />
-    <title>Kahve Falı · Ezoter.ist</title>
+    <meta name="description" content="Ezoter.ist El Falı: avucunun fotoğrafını çek; el tipin, çizgilerin ve tepelerin yorumlansın." />
+    <title>El Falı · Ezoter.ist</title>
     <link rel="icon" href="/favicon.png?v=1" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,74 +25,79 @@
     <main class="page">
       <section class="hero">
         <div class="hero-text">
-          <p class="eyebrow">Ezoter.ist · Kahve Falı</p>
-          <h1>Fincanında<br />neler var?</h1>
-          <p class="lead">Kahveni iç, niyetini tut, fincanını kapat. Soğuyunca fotoğrafını çek; falcımız telvede gördüklerini geleneksel kurallarla yorumlasın, sen de sesli dinle.</p>
+          <p class="eyebrow">Ezoter.ist · El Falı</p>
+          <h1>Avucunda<br />yazanlar</h1>
+          <p class="lead">Elinin şekli, çizgilerin ve tepelerin sana dair bir hikâye anlatır. Avucunun fotoğrafını çek; falcımız el tipini, çizgilerini ve yeteneklerini yorumlasın, sen de sesli dinle.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="#bak">Falıma bak</a>
-            <a class="btn btn-ghost" href="#rehber">Fincan rehberi</a>
+            <a class="btn btn-primary" href="#bak">Elime bak</a>
+            <a class="btn btn-ghost" href="#rehber">El rehberi</a>
           </div>
         </div>
         <div class="hero-art dream-art" aria-hidden="true">
           <div class="hero-glow"></div>
-          <img class="dream-moon" src="/fal/kahve-fali.webp" alt="" width="440" height="440" />
+          <img class="dream-moon" src="/el-fali/el.webp" alt="" width="440" height="440" />
         </div>
       </section>
 
       <section id="bak" aria-labelledby="readTitle">
         <div class="section-head">
-          <h2 id="readTitle">Falına bakalım</h2>
-          <p class="section-note" id="quota">Her gün 3 fincanına bakabiliriz.</p>
+          <h2 id="readTitle">Elini göster</h2>
+          <p class="section-note" id="quota">Her gün 3 el falı bakabiliriz.</p>
         </div>
-        <ol class="steps">
-          <li><b>1</b><span>Kahveni iç, niyetini tut ve fincanı tabağa kapat.</span></li>
-          <li><b>2</b><span>Birkaç dakika soğusun; fincanı aç ve içini yukarıdan, aydınlık bir yerde çek.</span></li>
-          <li><b>3</b><span>İstersen başka bir açıdan ve tabağın da fotoğrafını ekle.</span></li>
-        </ol>
+        <ol class="steps" id="tips"></ol>
         <form class="card dream-form" id="falForm">
-          <div class="photo-slots" id="photoSlots"></div>
+          <div>
+            <p class="feel-label">Hangi elinle yazı yazıyorsun?</p>
+            <div class="chips" id="handChips"></div>
+          </div>
+          <div class="photo-slots two" id="photoSlots"></div>
           <label>
-            <span>Niyetin (isteğe bağlı)</span>
-            <textarea name="niyet" rows="2" maxlength="300" placeholder="Örneğin: Yeni işimde neler olacak?"></textarea>
+            <span>Merak ettiğin bir şey var mı? (isteğe bağlı)</span>
+            <textarea name="soru" rows="2" maxlength="300" placeholder="Örneğin: Kariyerimde hangi yöne gitmeliyim?"></textarea>
           </label>
-          <button type="submit" class="btn btn-primary" id="falSubmit">Falıma bak</button>
+          <button type="submit" class="btn btn-primary" id="falSubmit">Elime bak</button>
           <p class="form-hint">Fotoğrafların ve falın yalnızca senin günlüğünde saklanır; istediğini silebilirsin.</p>
         </form>
       </section>
 
       <section class="dream-result" id="sonuc" hidden aria-labelledby="resultTitle">
         <div class="result-layout">
-          <div class="cup-photos" id="cupPhotos"></div>
+          <div class="cup-photos" id="handPhotos"></div>
           <div class="result-body">
             <p class="eyebrow" id="resultDate"></p>
             <h2 id="resultTitle"></h2>
-            <p class="reading-text result-theme" id="resultGeneral"></p>
+            <span class="badge" id="handType"></span>
+            <p class="reading-text result-theme" id="resultTypeText"></p>
             <button type="button" class="listen" id="resultListen" hidden>🔊 Sesli dinle</button>
           </div>
         </div>
         <div class="card">
-          <h3>Fincanında gördüklerim</h3>
-          <ul class="symbol-list" id="resultSymbols"></ul>
+          <h3>Çizgilerin</h3>
+          <ul class="symbol-list" id="resultLines"></ul>
+        </div>
+        <div class="card" id="mountsCard">
+          <h3>Belirgin tepelerin</h3>
+          <ul class="ticks" id="resultMounts"></ul>
         </div>
         <div class="dlg-grid">
           <div class="card"><h3>💞 Aşk</h3><p id="resultLove"></p></div>
-          <div class="card"><h3>💼 İş ve kısmet</h3><p id="resultWork"></p></div>
-          <div class="card"><h3>🔮 Yakın gelecek</h3><p id="resultFuture"></p></div>
+          <div class="card"><h3>💼 Kariyer</h3><p id="resultWork"></p></div>
+          <div class="card"><h3>✨ Yeteneklerin</h3><p id="resultTalents"></p></div>
         </div>
-        <div class="card wish" id="wishCard"><h3>🕯️ Niyetinin cevabı</h3><p id="resultWish"></p></div>
+        <div class="card wish" id="wishCard"><h3>🕯️ Sorunun cevabı</h3><p id="resultWish"></p></div>
         <p class="advice" id="resultAdvice"></p>
         <div class="card expert" id="expertCard" hidden>
           <div class="reading-head">
             <h3>İstersen uzmanımıza da baktır</h3>
             <span class="badge">Ücretsiz · 48 saat</span>
           </div>
-          <p class="expert-lead">Falın hazır. Dilersen uzmanlarımızdan birini seç; fincanının fotoğraflarına kendi gözüyle de baksın, yanıtını sesli dinleyebilirsin.</p>
+          <p class="expert-lead">Falın hazır. Dilersen uzmanlarımızdan birini seç; avucunun fotoğraflarına kendi gözüyle de baksın, yanıtını sesli dinleyebilirsin.</p>
           <div class="expert-status" id="expertStatus" hidden></div>
           <ul class="expert-grid" id="expertGrid"></ul>
           <form class="expert-form" id="expertForm">
             <label>
               <span>Uzmanına notun (isteğe bağlı)</span>
-              <textarea name="soru" maxlength="600" rows="3" placeholder="Örneğin: Fincanın dibindeki şekli merak ediyorum."></textarea>
+              <textarea name="soru" maxlength="600" rows="3" placeholder="Örneğin: Kalp çizgimdeki çatallanmayı merak ediyorum."></textarea>
             </label>
             <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
           </form>
@@ -101,31 +106,34 @@
 
       <section id="gunluk" aria-labelledby="journalTitle">
         <div class="section-head">
-          <h2 id="journalTitle">Fal günlüğüm</h2>
-          <p class="section-note" id="journalNote">Baktırdığın fallar burada saklanır.</p>
+          <h2 id="journalTitle">El falı günlüğüm</h2>
+          <p class="section-note" id="journalNote">Baktırdığın el falları burada saklanır.</p>
         </div>
         <ul class="journal" id="journal"></ul>
       </section>
 
       <section id="rehber" aria-labelledby="guideTitle">
         <div class="section-head">
-          <h2 id="guideTitle">Fincan rehberi</h2>
-          <p class="section-note">Falcılar fincanı nasıl okur, telvedeki şekiller ne anlatır?</p>
+          <h2 id="guideTitle">El rehberi</h2>
+          <p class="section-note">El tipleri, çizgiler ve tepeler ne anlatır?</p>
         </div>
-        <ul class="modality-grid rules" id="rules"></ul>
-        <input class="dict-search" id="dictSearch" type="search" placeholder="Şekil ara: kuş, yol, balık…" aria-label="Şekil ara" />
-        <ul class="dict-grid" id="dictGrid"></ul>
+        <h3 class="sub-title">El tipleri</h3>
+        <ul class="element-grid" id="handTypes"></ul>
+        <h3 class="sub-title">Çizgiler</h3>
+        <ul class="dict-grid" id="lineGuide"></ul>
+        <h3 class="sub-title">Tepeler</h3>
+        <ul class="dict-grid" id="mountGuide"></ul>
       </section>
 
-      <p class="disclaimer">Kahve falı, keyifli bir sohbet ve kendine dair bir ilham kaynağıdır; önemli kararlarını yalnızca ona göre verme.</p>
+      <p class="disclaimer">El falı, kendini tanımak ve ilham almak için keyifli bir rehberdir; çizgiler ömrü ya da sağlığı göstermez, önemli kararlarını yalnızca ona göre verme.</p>
     </main>
 
     <audio id="voice" preload="none"></audio>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="/fal-veri.js?v=1"></script>
+    <script src="/el-fali-veri.js?v=1"></script>
     <script src="/uzmanlar.js?v=3"></script>
     <script src="/uzman-kart.js?v=3"></script>
-    <script src="/fal-sayfa.js?v=1"></script>
+    <script src="/el-fali-sayfa.js?v=1"></script>
   </body>
 </html>
