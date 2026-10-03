@@ -36,6 +36,7 @@ const BOLUMLER = [
   { id: "ruhsal-gunluk", ad: "Ruhsal Günlük", sayfa: "/ruhsal-gunluk", api: "/api/ruhsal/", dizin: "ruhsal-gunluk", sinir: 3 },
   { id: "asistan", ad: "Ezoterik Asistan", sayfa: "/asistan", api: "/api/asistan/", dizin: "asistan", sinir: 30 },
   { id: "dizim", ad: "Taşlarla Dizim", sayfa: "/taslarla-dizim", api: "/api/dizim/", dizin: "dizim", sinir: 5 },
+  { id: "yuz-muzigi", ad: "Yüz Müziği", sayfa: "/yuz-muzigi", api: "/api/yuz-muzigi/", dizin: "yuz-muzigi", sinir: null },
 ];
 
 const listeOrtam = (ad) => String(process.env[ad] || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);

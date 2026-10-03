@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Yüz Müziği: yüzünün oranlarından sana özel üretilen, sonsuz bir rahatlama ve uyku müziği; ezoterik animasyon ve uyku zamanlayıcısıyla." />
+    <title>Yüz Müziği · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=11" />
+    <link rel="stylesheet" href="/fal.css?v=7" />
+    <link rel="stylesheet" href="/yuz-muzigi.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/" aria-label="Ana menü" title="Ana menü">←</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><picture><source media="(orientation: portrait) and (max-width: 600px)" srcset="/logo/ezo_E.png?v=1" width="1247" height="216" /><img src="/logo/ezo_D.png?v=1" alt="Ezoter.ist" width="1247" height="77" /></picture></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Yüz Müziği</p>
+          <h1>Yüzünün<br />müziği</h1>
+          <p class="lead">Yüzünün oranları — altın orana yakınlığı, şekli, alnının ve çenenin dengesi — sana özel bir ezgiye dönüşür. Aynı yüz hep aynı ana motifi çalar; müzik ise hiç bitmeden, yavaşça değişerek akar. Gözlerini kapat, nefesine eşlik eden ışığı izle, uykuya dal.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#yuz">Yüzümü seç</a>
+            <a class="btn btn-ghost" href="#calar">Dinlemeye geç</a>
+          </div>
+          <p class="disclaimer">Rahatlama ve uykuya hazırlık içindir; tıbbi bir uyku tedavisi değildir.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="hero-goz" src="/bekleme/goz-gezegenler.webp?v=1" alt="" width="340" height="370" />
+        </div>
+      </section>
+
+      <section id="yuz" aria-labelledby="faceTitle">
+        <div class="section-head">
+          <p class="step">1. adım</p>
+          <h2 id="faceTitle">Hangi yüzün müziği çalsın?</h2>
+          <p class="section-note">Yüz Okuma'da baktırdığın yüzlerden birini seç ya da burada yeni bir yüz tara. Fotoğrafın saklanmaz; yalnız oranların kaydedilir.</p>
+        </div>
+        <div class="card">
+          <ul class="face-list" id="faceList"></ul>
+          <div class="scan">
+            <div class="photo-slots" id="scanSlot"></div>
+            <div class="scan-side">
+              <p class="section-note" id="scanStatus">Yüzünü tam karşıdan, aydınlık bir yerde çek.</p>
+              <button type="button" class="btn btn-primary" id="scanButton" disabled>Yüzümü ölç</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="calar" aria-labelledby="playerTitle">
+        <div class="section-head">
+          <p class="step">2. adım</p>
+          <h2 id="playerTitle">Dinle</h2>
+          <p class="section-note" id="recipe">Önce yukarıdan bir yüz seç.</p>
+        </div>
+        <div class="player card" id="player">
+          <div class="stage" id="stage">
+            <canvas id="mandala" aria-hidden="true"></canvas>
+            <div class="stage-controls">
+              <button type="button" class="play-btn" id="playButton" disabled aria-label="Çal">▶</button>
+              <p class="stage-note" id="stageNote">Yüzünü seç, sonra çal.</p>
+              <button type="button" class="stage-btn" id="fullButton" title="Tam ekran">⛶ Tam ekran</button>
+            </div>
+          </div>
+          <div class="controls">
+            <label class="volume"><span>Ses</span><input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" /></label>
+            <div class="toggles">
+              <button type="button" class="chip" id="oceanToggle" aria-pressed="false">🌊 Okyanus</button>
+              <button type="button" class="chip" id="binauralToggle" aria-pressed="false" title="Kulaklıkla dinle">🎧 Binaural (delta)</button>
+            </div>
+            <div class="timer">
+              <span>Uyku zamanlayıcısı</span>
+              <div class="chips" id="timerChips">
+                <button type="button" class="chip" data-dk="0" aria-pressed="true">Kapalı</button>
+                <button type="button" class="chip" data-dk="15" aria-pressed="false">15 dk</button>
+                <button type="button" class="chip" data-dk="30" aria-pressed="false">30 dk</button>
+                <button type="button" class="chip" data-dk="60" aria-pressed="false">60 dk</button>
+              </div>
+            </div>
+            <p class="section-note small">Binaural vuruş yalnız kulaklıkla işe yarar. Ekran kilitlenince bazı telefonlar sesi durdurabilir; kesintisiz dinlemek için ekranı açık bırakıp "Tam ekran"da karartabilirsin.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="/foto-yuva.js?v=2"></script>
+    <script src="/yuz-harita.js?v=2"></script>
+    <script src="/yuz-muzigi-ses.js?v=1"></script>
+    <script src="/yuz-muzigi-sayfa.js?v=1"></script>
+    <script src="/ust-cubuk.js?v=4" defer></script>
+  </body>
+</html>

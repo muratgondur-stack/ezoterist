@@ -25,6 +25,7 @@ const { createHandler: createRuhsalHandler } = require("./ruhsal-gunluk-api");
 const { createHandler: createSembolHandler } = require("./sembol-api");
 const { createHandler: createAsistanHandler } = require("./asistan-api");
 const { createHandler: createDizimHandler } = require("./dizim-api");
+const { createHandler: createYuzMuzigiHandler } = require("./yuz-muzigi-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -161,6 +162,7 @@ const pageRoutes = {
   "/semboller": "semboller.html",
   "/asistan": "asistan.html",
   "/taslarla-dizim": "dizim.html",
+  "/yuz-muzigi": "yuz-muzigi.html",
   "/gizlilik": "gizlilik.html",
   "/kullanim-kosullari": "kullanim-kosullari.html",
 };
@@ -186,6 +188,7 @@ const handleRuhsalRequest = createRuhsalHandler({ dataDir, currentUser, sendFile
 const handleSembolRequest = createSembolHandler({ dataDir, currentUser, sendFile });
 const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser, sendFile });
 const handleDizimRequest = createDizimHandler({ dataDir, currentUser, sendFile });
+const handleYuzMuzigiRequest = createYuzMuzigiHandler({ dataDir, currentUser });
 const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi });
 
 const server = http.createServer((request, response) => {
@@ -248,6 +251,7 @@ const server = http.createServer((request, response) => {
   if (handleSembolRequest(request, response, url)) return;
   if (handleAsistanRequest(request, response, url)) return;
   if (handleDizimRequest(request, response, url)) return;
+  if (handleYuzMuzigiRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {

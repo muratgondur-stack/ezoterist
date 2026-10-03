@@ -59,7 +59,10 @@ const fitLayout = () => {
   const height = window.innerHeight - (grid.getBoundingClientRect().top + window.scrollY) - 16;
 
   let best = { cols: 5, size: 0 };
-  for (let cols = 2; cols <= 10; cols += 1) {
+  // Mobil dikey ekranda satırda hep 4 simge (Murat 2026-10-04); sığmayan satırlar aşağı kayar.
+  const mobilDikey = window.matchMedia("(orientation: portrait) and (max-width: 600px)").matches;
+  if (mobilDikey) best = { cols: 4, size: Math.min((width - 3 * colGap) / 4 - padX, 220) };
+  else for (let cols = 2; cols <= 10; cols += 1) {
     const rows = Math.ceil(count / cols);
     const byWidth = (width - (cols - 1) * colGap) / cols - padX;
     const byHeight = ((height - (rows - 1) * rowGap) / rows - extraY) / 0.9;
@@ -93,7 +96,7 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
   .catch(() => null);
 
 // Hazır olan bölümlerin kendi sayfaları var; diğerleri "çok yakında" der.
-const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji", "#ruya-yorumu": "/ruya", "#kahve-fali": "/kahve-fali", "#el-fali": "/el-fali", "#tarot": "/tarot", "#yuz-okuma": "/yuz-okuma", "#fotograf-analizi": "/fotograf-analizi", "#ask-uyumu": "/ask-uyumu", "#dogum-haritasi": "/dogum-haritasi", "#melek-sayilari": "/melek-sayilari", "#i-ching": "/iching", "#run-taslari": "/run-taslari", "#ay-takvimi": "/ay-takvimi", "#cakralar": "/cakralar", "#kristaller": "/kristaller", "#kisisel-arsiv": "/arsiv", "#ruhsal-gunluk": "/ruhsal-gunluk", "#semboller": "/semboller", "#ezoterik-asistan": "/asistan", "#taslarla-dizim": "/taslarla-dizim" };
+const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji", "#ruya-yorumu": "/ruya", "#kahve-fali": "/kahve-fali", "#el-fali": "/el-fali", "#tarot": "/tarot", "#yuz-okuma": "/yuz-okuma", "#fotograf-analizi": "/fotograf-analizi", "#ask-uyumu": "/ask-uyumu", "#dogum-haritasi": "/dogum-haritasi", "#melek-sayilari": "/melek-sayilari", "#i-ching": "/iching", "#run-taslari": "/run-taslari", "#ay-takvimi": "/ay-takvimi", "#cakralar": "/cakralar", "#kristaller": "/kristaller", "#kisisel-arsiv": "/arsiv", "#ruhsal-gunluk": "/ruhsal-gunluk", "#semboller": "/semboller", "#ezoterik-asistan": "/asistan", "#taslarla-dizim": "/taslarla-dizim", "#yuz-muzigi": "/yuz-muzigi" };
 
 // Yönetim panelinden gelen genel ayarlar: kapatılan bölümler ve müzik seviyesi.
 let genelAyarlar = { kapali: [], muzik: 0.1 };
