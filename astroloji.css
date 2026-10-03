@@ -737,3 +737,19 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
 .alt-iletisim-kapat { position: absolute; top: 10px; right: 12px; padding: 4px 8px; border: 0; color: #fff; background: none; font-size: 1rem; cursor: pointer; }
 .alt-iletisim-razece { display: block; margin-top: 14px; }
 .alt-iletisim-razece img { display: block; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
+
+/* Yapay zekâ bekleme animasyonu (ust-cubuk.js) */
+.ai-bekleme { position: fixed; inset: 0; z-index: 900; display: grid; place-content: center; justify-items: center; gap: 14px; background: radial-gradient(circle at 50% 45%, rgba(10, 8, 30, 0.55), rgba(5, 6, 18, 0.72)); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); pointer-events: none; animation: aiBelir 0.25s ease both; }
+.ai-bekleme[hidden] { display: none; }
+.ai-bekleme-kutu { position: relative; display: grid; place-items: center; width: min(62vw, 250px); aspect-ratio: 1; }
+.ai-bekleme-kutu img { position: relative; width: 66%; height: auto; filter: drop-shadow(0 0 22px rgba(255, 190, 90, 0.45)); animation: aiNabiz 2.4s ease-in-out infinite; }
+.ai-cark { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: rgba(243, 194, 107, 0.8); stroke-width: 1.4; }
+.ai-cark.dis { animation: aiDon 7s linear infinite; }
+.ai-cark.dis line { stroke-width: 1.6; }
+.ai-cark.ic { animation: aiDon 4.5s linear infinite reverse; stroke: rgba(255, 220, 160, 0.7); }
+.ai-cark.ic circle + circle, .ai-cark.ic circle ~ circle { fill: #f3c26b; stroke: none; }
+.ai-bekleme-yazi { margin: 0; padding: 6px 16px; border-radius: 999px; color: #fff6e0; background: rgba(0, 0, 0, 0.45); font-weight: 700; letter-spacing: 0.04em; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); }
+@keyframes aiDon { to { transform: rotate(360deg); } }
+@keyframes aiNabiz { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes aiBelir { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ai-cark, .ai-bekleme-kutu img { animation: none; } }

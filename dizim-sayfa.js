@@ -380,14 +380,14 @@ function tasSesi() {
   return {
     hiz(v) {
       // v: 0..1 göreli hız
-      ses.gain.setTargetAtTime(0.16 * v, ctx.currentTime, 0.05);
+      ses.gain.setTargetAtTime(0.34 * v, ctx.currentTime, 0.05);
       suzgec.frequency.setTargetAtTime(300 + 500 * v, ctx.currentTime, 0.05);
     },
-    tik(v) { vurus(0.05 + 0.1 * v, 1700); },
+    tik(v) { vurus(0.12 + 0.2 * v, 1700); },
     bitir() {
       ses.gain.setTargetAtTime(0, ctx.currentTime, 0.08);
-      vurus(0.22, 1100);
-      setTimeout(() => vurus(0.14, 1400), 70);
+      vurus(0.45, 1100);
+      setTimeout(() => vurus(0.3, 1400), 70);
       setTimeout(() => { try { kaynak.stop(); } catch { /* zaten durdu */ } }, 600);
     },
   };

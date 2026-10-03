@@ -100,4 +100,68 @@
   pencere.querySelector(".alt-iletisim-kapat").addEventListener("click", () => pencere.close());
   pencere.addEventListener("click", (e) => { if (e.target === pencere) pencere.close(); });
   document.body.append(alt, pencere);
+
+  // Yapay zekâ bekleme animasyonu (Murat 2026-10-03): /api/ isteği 0,7 sn'den uzun sürerse ortada göz-gezegenler
+  // görseli ve etrafında dönen çark gösterilir. Kısa işler (giriş, liste, silme, kayıt) hariç; sayfayı kilitlemez.
+  const HARIC = /^\/api\/(me|logout|login|profil|sifre|ayarlar|yonetim|arsiv|kontor)\b|\/(gunluk|durum|sil|liste|niyet-sil|niyet-durum|gorsel|panel|kayit)(\/|$)/;
+  const bekleme = document.createElement("div");
+  bekleme.className = "ai-bekleme";
+  bekleme.hidden = true;
+  bekleme.setAttribute("role", "status");
+  bekleme.setAttribute("aria-live", "polite");
+  const cizgiler = Array.from({ length: 24 }, (_, i) => {
+    const a = (i * 15 * Math.PI) / 180;
+    const ic = i % 2 ? 86 : 82;
+    return `<line x1="${(100 + ic * Math.cos(a)).toFixed(1)}" y1="${(100 + ic * Math.sin(a)).toFixed(1)}" x2="${(100 + 93 * Math.cos(a)).toFixed(1)}" y2="${(100 + 93 * Math.sin(a)).toFixed(1)}" />`;
+  }).join("");
+  const noktalar = Array.from({ length: 8 }, (_, i) => {
+    const a = (i * 45 * Math.PI) / 180;
+    return `<circle cx="${(100 + 74 * Math.cos(a)).toFixed(1)}" cy="${(100 + 74 * Math.sin(a)).toFixed(1)}" r="${i % 2 ? 2.2 : 3.4}" />`;
+  }).join("");
+  bekleme.innerHTML = `
+    <div class="ai-bekleme-kutu">
+      <svg class="ai-cark dis" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="95" /><circle cx="100" cy="100" r="80" />${cizgiler}</svg>
+      <svg class="ai-cark ic" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="74" stroke-dasharray="3 7" />${noktalar}</svg>
+      <img src="/bekleme/goz-gezegenler.webp?v=1" alt="" width="340" height="370" />
+    </div>
+    <p class="ai-bekleme-yazi">Yapay zekâ hazırlıyor<span class="ai-sure"></span></p>`;
+  document.body.append(bekleme);
+  let bekleyen = 0;
+  let gosterZamani = null;
+  let sayac = null;
+  const sure = bekleme.querySelector(".ai-sure");
+  const guncelle = () => {
+    if (bekleyen > 0) {
+      if (bekleme.hidden) {
+        bekleme.hidden = false;
+        const bas = Date.now();
+        sure.textContent = "…";
+        clearInterval(sayac);
+        sayac = setInterval(() => {
+          const sn = Math.round((Date.now() - bas) / 1000) + 1;
+          sure.textContent = sn >= 3 ? `… ${sn} sn` : "…";
+        }, 1000);
+      }
+    } else {
+      bekleme.hidden = true;
+      clearInterval(sayac);
+    }
+  };
+  const asilFetch = window.fetch.bind(window);
+  window.fetch = (girdi, ayar) => {
+    let yol = "";
+    try { yol = new URL(typeof girdi === "string" ? girdi : girdi.url, location.href).pathname; } catch { yol = ""; }
+    const izle = yol.startsWith("/api/") && !HARIC.test(yol);
+    const istek = asilFetch(girdi, ayar);
+    if (!izle) return istek;
+    let sayildi = false;
+    const zamanlayici = setTimeout(() => { sayildi = true; bekleyen += 1; guncelle(); }, 700);
+    const bitti = () => {
+      clearTimeout(zamanlayici);
+      if (sayildi) { bekleyen = Math.max(0, bekleyen - 1); guncelle(); }
+    };
+    // Gövde okunana kadar değil, cevap başlıkları gelene kadar beklenir (ses/fotoğraf akışlarında yeterli).
+    istek.then(bitti, bitti);
+    return istek;
+  };
 })();

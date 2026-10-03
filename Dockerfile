@@ -37,6 +37,7 @@ COPY asistan-api.js asistan.html asistan.css asistan-sayfa.js ./
 COPY ayarlar.js yonetim-api.js yonetim.html yonetim.css yonetim-sayfa.js ./
 COPY dizim-hesap.js dizim-api.js dizim.html dizim.css dizim-sayfa.js ./
 COPY dizim ./dizim
+COPY bekleme ./bekleme
 COPY sembol ./sembol
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi
