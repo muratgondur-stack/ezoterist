@@ -160,8 +160,7 @@ const pageRoutes = {
   "/ruhsal-gunluk": "ruhsal-gunluk.html",
   "/semboller": "semboller.html",
   "/asistan": "asistan.html",
-  // Menüde yok; yalnız doğrudan adresle (Murat 2026-10-03).
-  "/tas": "dizim.html",
+  "/taslarla-dizim": "dizim.html",
   "/gizlilik": "gizlilik.html",
   "/kullanim-kosullari": "kullanim-kosullari.html",
 };

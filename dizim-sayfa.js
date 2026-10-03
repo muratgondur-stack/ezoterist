@@ -860,7 +860,7 @@ function karsilastirmaGoster({ fark, yorum }) {
 async function init() {
   const me = await fetch("/api/me", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (!me?.user) {
-    window.location.replace(`/login?next=${encodeURIComponent("/tas")}`);
+    window.location.replace(`/login?next=${encodeURIComponent("/taslarla-dizim")}`);
     return;
   }
   $("topbarUser").textContent = me.user.name || me.user.email;

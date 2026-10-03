@@ -151,7 +151,8 @@
   window.fetch = (girdi, ayar) => {
     let yol = "";
     try { yol = new URL(typeof girdi === "string" ? girdi : girdi.url, location.href).pathname; } catch { yol = ""; }
-    const izle = yol.startsWith("/api/") && !HARIC.test(yol);
+    // Ezo asistan sohbetinin kendi "yazıyor" balonu var; orada büyük animasyon gösterilmez.
+    const izle = yol.startsWith("/api/") && !HARIC.test(yol) && location.pathname !== "/asistan";
     const istek = asilFetch(girdi, ayar);
     if (!izle) return istek;
     let sayildi = false;

@@ -230,7 +230,7 @@ async function gonder(metin) {
   kutu.append(mesajEl(gecici));
   const yaziyor = document.createElement("div");
   yaziyor.className = "msg ezo";
-  yaziyor.innerHTML = `<img class="avatar" src="${AVATAR}" alt="" width="34" height="34" /><div class="bubble typing"><span></span><span></span><span></span></div>`;
+  yaziyor.innerHTML = `<img class="avatar" src="${AVATAR}" alt="" width="34" height="34" /><div class="bubble typing"><img class="typing-goz" src="/bekleme/goz-gezegenler.webp?v=1" alt="" width="24" height="26" /><span></span><span></span><span></span></div>`;
   kutu.append(yaziyor);
   asagi();
   alan.value = "";
