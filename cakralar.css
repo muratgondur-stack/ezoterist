@@ -1,0 +1,128 @@
+/* Çakralar sayfası: astroloji.css'in üzerine. */
+
+/* --- Beden figürü --- */
+.body-wrap { display: grid; place-items: center; }
+.body-figure { position: relative; width: min(100%, 460px); aspect-ratio: 1; border-radius: 50%; overflow: hidden; box-shadow: 0 0 80px rgba(150, 120, 255, 0.25); }
+.body-figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.body-figure .nokta {
+  position: absolute;
+  width: 11%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--c) 0%, color-mix(in srgb, var(--c) 40%, transparent) 45%, transparent 70%);
+  cursor: pointer;
+  animation: nabiz 2.6s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+.body-figure .nokta:hover, .body-figure .nokta.aktif { animation: none; transform: translate(-50%, -50%) scale(1.35); box-shadow: 0 0 26px 6px var(--c); }
+@keyframes nabiz { 50% { transform: translate(-50%, -50%) scale(1.25); opacity: 0.85; } }
+
+/* --- Çakra ayrıntısı ve şerit --- */
+.chakra-detail { display: grid; grid-template-columns: 120px 1fr; gap: 22px; align-items: start; border-color: color-mix(in srgb, var(--c, #f3c26b) 55%, transparent); transition: border-color 0.4s; }
+.chakra-detail .disk { width: 120px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff 0%, var(--c) 30%, color-mix(in srgb, var(--c) 30%, #070914) 75%); box-shadow: 0 0 40px var(--c); display: grid; place-items: center; color: #fff; font-family: var(--serif); font-size: 1.6rem; font-weight: 700; text-shadow: 0 0 10px rgba(0, 0, 0, 0.6); animation: isil 3.2s ease-in-out infinite; }
+@keyframes isil { 50% { box-shadow: 0 0 60px 6px var(--c); } }
+.chakra-detail h2 { font-size: 2rem; }
+.chakra-detail .alt { color: var(--muted); }
+.chakra-detail p { color: #e3dff0; margin: 6px 0; }
+.chakra-detail dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin: 12px 0 0; }
+.chakra-detail dt { color: var(--c, var(--gold)); font-size: 0.76rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.chakra-detail dd { margin: 2px 0 0; color: #e3dff0; font-size: 0.92rem; }
+.chakra-detail .stones { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chakra-detail .stones a { padding: 4px 10px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 999px; color: var(--foreground); font-size: 0.82rem; text-decoration: none; }
+.chakra-detail .stones a:hover { border-color: var(--c); }
+.chakra-detail .olumlama { margin-top: 12px; font-family: var(--serif); font-size: 1.2rem; font-style: italic; color: #fff3d6; }
+.chakra-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.chakra-strip button { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; padding: 12px 4px; border: 1px solid var(--card-border); border-radius: 14px; color: var(--foreground); background: var(--card); font: inherit; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+.chakra-strip button:hover, .chakra-strip button.aktif { transform: translateY(-3px); border-color: var(--c); }
+.chakra-strip i { width: 28px; height: 28px; border-radius: 50%; background: var(--c); box-shadow: 0 0 14px var(--c); }
+.chakra-strip b { font-size: 0.8rem; text-align: center; }
+.chakra-strip small { color: var(--muted); font-size: 0.7rem; }
+
+/* --- Test --- */
+.quiz { text-align: center; }
+.quiz-progress { height: 6px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.08); }
+.quiz-progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #e5383b, #f77f00, #fcbf49, #52b788, #4cc9f0, #5a4fcf, #b388eb); transition: width 0.4s ease; }
+.quiz-count { margin-top: 14px; color: var(--muted); font-size: 0.86rem; }
+.quiz-question { min-height: 3.2em; margin: 10px auto 18px; max-width: 620px; font-family: var(--serif); font-size: 1.7rem; line-height: 1.3; animation: rise 0.35s ease both; }
+.quiz-scale { display: flex; justify-content: center; gap: 10px; }
+.quiz-scale button { width: 56px; height: 56px; border: 1.5px solid rgba(255, 255, 255, 0.2); border-radius: 50%; color: var(--foreground); background: rgba(255, 255, 255, 0.04); font: inherit; font-size: 1.2rem; font-weight: 800; cursor: pointer; transition: transform 0.15s, background 0.2s, border-color 0.2s; }
+.quiz-scale button:hover { transform: scale(1.08); border-color: var(--c, var(--gold)); }
+.quiz-scale button.secili { color: #070914; background: var(--c, var(--gold)); border-color: var(--c, var(--gold)); }
+.quiz-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; }
+.quiz-legend { color: var(--muted); font-size: 0.8rem; }
+.quiz-end { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; text-align: left; }
+.quiz-end .field { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; }
+.quiz-end textarea { box-sizing: border-box; width: 100%; padding: 11px 12px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 12px; color: var(--foreground); background: rgba(255, 255, 255, 0.06); font: inherit; font-weight: 500; }
+.quiz-end .btn { align-self: center; }
+
+/* --- Sonuç --- */
+.result { animation: rise 0.6s ease both; }
+.result-summary { margin: 10px 0 16px; color: #efeaf9; font-size: 1.04rem; }
+.result-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.chakra-bars { display: flex; flex-direction: column-reverse; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.chakra-bars li { display: grid; grid-template-columns: 26px 1fr 44px; gap: 10px; align-items: center; }
+.chakra-bars i { width: 22px; height: 22px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
+.chakra-bars .ad { display: block; margin-bottom: 4px; font-size: 0.86rem; font-weight: 700; }
+.chakra-bars .ad small { color: var(--muted); font-weight: 600; }
+.chakra-bars .bar { height: 10px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.08); }
+.chakra-bars .bar span { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--c); box-shadow: 0 0 10px var(--c); transition: width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.chakra-bars .val { font-family: var(--serif); font-size: 1.3rem; font-weight: 700; text-align: right; }
+.chakra-bars p { grid-column: 2 / -1; margin-top: -4px; color: #d8d3e8; font-size: 0.84rem; }
+.focus-chakra { padding: 16px; border: 1px solid var(--c); border-radius: 18px; background: color-mix(in srgb, var(--c) 10%, transparent); text-align: center; }
+.focus-chakra .disk { width: 90px; aspect-ratio: 1; margin: 0 auto 10px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff 0%, var(--c) 30%, color-mix(in srgb, var(--c) 30%, #070914) 75%); box-shadow: 0 0 30px var(--c); }
+.focus-chakra b { display: block; font-family: var(--serif); font-size: 1.4rem; }
+.focus-chakra p { color: #e3dff0; font-size: 0.9rem; margin-top: 6px; }
+.week { margin-top: 18px; }
+.week h3 { margin-bottom: 8px; }
+.week-plan { margin: 0; padding-left: 22px; color: #e3dff0; }
+.week-plan li { margin: 6px 0; }
+.week-plan li::marker { color: var(--gold); font-weight: 800; }
+.affirmation { margin-top: 14px; padding: 14px 16px; border: 1px solid rgba(179, 136, 235, 0.35); border-radius: 16px; color: #fff3d6; background: rgba(179, 136, 235, 0.08); font-family: var(--serif); font-size: 1.3rem; font-style: italic; text-align: center; }
+.affirmation:empty { display: none; }
+#sonuc .expert { margin-top: 16px; }
+
+/* --- Meditasyon --- */
+.meditation { display: grid; grid-template-columns: 90px 1fr; gap: 26px; align-items: center; }
+.med-column { display: flex; flex-direction: column-reverse; align-items: center; gap: 14px; padding: 14px 0; }
+.med-column span { width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--c) 25%, #0b0d22); border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); transition: background 0.8s, box-shadow 0.8s, transform 0.8s; }
+.med-column span.yandi { background: var(--c); box-shadow: 0 0 22px 4px var(--c); }
+.med-column span.simdi { transform: scale(1.35); box-shadow: 0 0 36px 10px var(--c); }
+.med-text h3 { font-size: 1.8rem; }
+.med-text p { color: #e3dff0; margin: 8px 0; }
+.mantra { font-family: var(--serif); font-size: 2rem; letter-spacing: 0.3em; color: #fff3d6; text-shadow: 0 0 18px rgba(255, 220, 160, 0.6); }
+.mantra:empty { display: none; }
+.med-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+
+/* --- Günlük --- */
+.chakra-journal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.chakra-journal li { position: relative; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); }
+.chakra-journal li.is-current { border-color: var(--gold); }
+.chakra-journal .open { display: block; width: 100%; padding: 14px 40px 14px 16px; border: 0; color: inherit; background: none; font: inherit; text-align: left; cursor: pointer; }
+.chakra-journal .mini { display: flex; align-items: flex-end; gap: 4px; height: 48px; margin-bottom: 8px; }
+.chakra-journal .mini span { flex: 1; border-radius: 4px 4px 0 0; background: var(--c); min-height: 4px; }
+.chakra-journal b { display: block; font-family: var(--serif); font-size: 1.1rem; }
+.chakra-journal small { color: var(--muted); font-size: 0.78rem; }
+.chakra-journal .del { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border: 0; border-radius: 50%; color: var(--muted); background: rgba(255, 255, 255, 0.06); cursor: pointer; }
+.chakra-journal .del:hover { color: #fff; background: rgba(255, 90, 90, 0.4); }
+.journal-empty { color: var(--muted); }
+
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 860px) {
+  .chakra-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .result-layout { grid-template-columns: 1fr; }
+  .chakra-journal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .chakra-detail { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .chakra-detail dl { grid-template-columns: 1fr; text-align: left; }
+  .quiz-question { font-size: 1.4rem; }
+  .quiz-scale { gap: 6px; }
+  .quiz-scale button { width: 50px; height: 50px; }
+  .meditation { grid-template-columns: 60px 1fr; gap: 16px; }
+  .med-column span { width: 26px; height: 26px; }
+  .chakra-journal { grid-template-columns: 1fr; }
+}

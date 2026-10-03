@@ -21,6 +21,9 @@ const { ichingKaydiOku, ALANLAR: ICHING_ALANLARI } = require("./iching-api");
 const { runKaydiOku } = require("./run-api");
 const RunVeri = require("./run-veri");
 const { ayKaydiOku } = require("./ay-takvimi-api");
+const { cakraKaydiOku, kristalKaydiOku } = require("./cakra-kristal-api");
+const CakraVeri = require("./cakra-veri");
+const KristalVeri = require("./kristal-veri");
 const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
@@ -223,6 +226,28 @@ const BOLUMLER = {
       baslik: `${k.rehber.baslik} · ${Veri.burclar[k.yeniAyBurcu].ad} Yeni Ayı`,
       girdiMetni: `Döngü: ${k.kod} Yeni Ayı (${Veri.burclar[k.yeniAyBurcu].ad}), Dolunay ${Veri.burclar[k.dolunayBurcu].ad}`,
       ozet: k.niyetler.length ? `Bu döngüdeki niyetleri: ${k.niyetler.map((n) => n.metin).join(" · ")}` : "Bu döngüde henüz niyet yazmamış.",
+    }),
+  },
+  cakralar: {
+    ad: "çakra testi",
+    link: "/cakralar#gunluk",
+    yukle: (dataDir, userId, body) => cakraKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: `Çakra testi · ${k.yorum.baslik}`,
+      girdiMetni: k.not ? `Notu: ${k.not}` : "Not eklememiş",
+      ozet: CakraVeri.cakralar.map((c) => `${c.ad} %${k.puanlar[c.id]}`).join(" — "),
+      kayitId: k.id,
+    }),
+  },
+  kristaller: {
+    ad: "kristal önerisi",
+    link: "/kristaller#gunluk",
+    yukle: (dataDir, userId, body) => kristalKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: `Kristaller · ${k.yorum.secimler.map((s) => KristalVeri.kristalBul(s.id).ad).join(", ")}`,
+      girdiMetni: [k.niyet ? `Niyeti: ${KristalVeri.niyetler[k.niyet]}` : "", k.ihtiyac ? `İhtiyacı: ${k.ihtiyac}` : ""].filter(Boolean).join(" — "),
+      ozet: k.yorum.ozet,
+      kayitId: k.id,
     }),
   },
 };

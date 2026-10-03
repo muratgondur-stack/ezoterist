@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Kristaller: 24 kristalin anlamı ve kullanımı, çakraya, burca ve niyete göre kristaller, günün kristali ve sana özel kristal önerisi." />
+    <title>Kristaller · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/kristaller.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Kristaller</p>
+          <h1>Toprağın<br />ışıltılı hazineleri</h1>
+          <p class="lead">Ametistten gül kuvarsa, 24 kristalin anlamı ve nasıl kullanıldığı. Çakrana, burcuna ya da niyetine göre süz; ihtiyacını yaz, sana en uygun üç kristali ve küçük ritüelini önerelim.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#oneri">Bana kristal öner</a>
+            <a class="btn btn-ghost" href="#rehber">Kristal rehberi</a>
+            <a class="btn btn-ghost" href="/cakralar">Çakralar →</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="crystal-cover" src="/kristal/kristal-kapak.webp?v=1" alt="" width="720" height="720" />
+        </div>
+      </section>
+
+      <section id="gunun" aria-labelledby="dailyTitle">
+        <div class="section-head">
+          <h2 id="dailyTitle">Günün kristali</h2>
+          <p class="section-note" id="dailyDate"></p>
+        </div>
+        <div class="card daily-crystal" id="dailyCrystal"></div>
+      </section>
+
+      <section id="burcum" aria-labelledby="signTitle" hidden>
+        <div class="section-head">
+          <h2 id="signTitle">Burçlarının kristalleri</h2>
+          <p class="section-note">Doğum haritandaki Güneş, Ay ve yükselen burçlarına geleneksel olarak eşlik eden taşlar.</p>
+        </div>
+        <div class="sign-crystals" id="signCrystals"></div>
+      </section>
+
+      <section id="oneri" aria-labelledby="suggestTitle">
+        <div class="section-head">
+          <h2 id="suggestTitle">Sana özel kristal önerisi</h2>
+          <p class="section-note" id="quota">Bir niyet seç ve/veya ihtiyacını yaz; listemizden sana en uygun üç kristali seçelim.</p>
+        </div>
+        <form class="card suggest-form" id="suggestForm">
+          <div class="field">
+            <span>Niyetin</span>
+            <div class="chips" id="intentChips"></div>
+          </div>
+          <label class="field">
+            <span>İhtiyacını anlat (isteğe bağlı)</span>
+            <textarea name="ihtiyac" rows="3" maxlength="400" placeholder="Örneğin: Yeni işimde özgüvenim düşük, toplantılarda kendimi ifade edemiyorum."></textarea>
+          </label>
+          <button type="submit" class="btn btn-primary" id="suggestSubmit">Kristallerimi öner</button>
+        </form>
+      </section>
+
+      <section id="sonuc" hidden aria-labelledby="resultTitle">
+        <div class="card result">
+          <div class="reading-head">
+            <div><p class="sky-label" id="resultMeta"></p><h2 id="resultTitle"></h2></div>
+            <span class="badge" id="resultBadge"></span>
+          </div>
+          <p class="result-summary" id="resultSummary"></p>
+          <div class="picks" id="picks"></div>
+          <div id="ritualBox"><h3>🕯️ Küçük ritüelin</h3><ol class="ritual" id="ritual"></ol></div>
+          <p class="affirmation" id="resultAffirmation"></p>
+          <button type="button" class="listen" id="resultListen" hidden>🔊 Önerimi sesli dinle</button>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Kristal önerin hazır. Dilersen uzmanlarımızdan birini seç; ihtiyacını kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="rehber" aria-labelledby="guideTitle">
+        <div class="section-head">
+          <h2 id="guideTitle">Kristal rehberi</h2>
+          <p class="section-note" id="filterNote">24 kristal. Çakraya, burca ya da niyete göre süz; bir kristale dokun.</p>
+        </div>
+        <div class="filters">
+          <label><span>Çakra</span><select id="filterChakra"></select></label>
+          <label><span>Burç</span><select id="filterSign"></select></label>
+          <label><span>Niyet</span><select id="filterIntent"></select></label>
+        </div>
+        <ul class="crystal-grid" id="crystalGrid"></ul>
+        <div class="card cleansing">
+          <h3>Kristalini nasıl temizlersin?</h3>
+          <ul class="ticks" id="cleansing"></ul>
+        </div>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">Kristal günlüğüm</h2>
+          <p class="section-note" id="journalNote">Aldığın öneriler burada saklanır.</p>
+        </div>
+        <ul class="crystal-journal" id="journal"></ul>
+      </section>
+
+      <p class="disclaimer">Kristaller ruhsal ve duygusal bir destek, niyetini hatırlatan güzel bir araçtır; tıbbi tedavinin yerini tutmaz.</p>
+    </main>
+
+    <dialog class="sign-dialog crystal-dialog" id="crystalDialog">
+      <form method="dialog" class="dlg-close-form"><button class="dlg-close" aria-label="Kapat">✕</button></form>
+      <div id="crystalDialogBody"></div>
+    </dialog>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/cakra-veri.js?v=1"></script>
+    <script src="/kristal-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/kristaller-sayfa.js?v=1"></script>
+  </body>
+</html>

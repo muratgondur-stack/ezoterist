@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Çakralar: yedi çakranın anlamı, çakra denge testi, sana özel haftalık denge planı ve sesli rehberli çakra meditasyonu." />
+    <title>Çakralar · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/cakralar.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero chakra-hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Çakralar</p>
+          <h1>Yedi enerji<br />merkezin</h1>
+          <p class="lead">Omurganın tabanından başının tepesine yedi çakra: güvenden sevgiye, sesten sezgiye. Bir çakraya dokun ve tanı; testle dengeni ölç, sana özel planını al, sesli meditasyonla çakralarını tek tek aç.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#test">Çakra testimi yap</a>
+            <a class="btn btn-ghost" href="#meditasyon">Rehberli meditasyon</a>
+            <a class="btn btn-ghost" href="/kristaller">Kristaller →</a>
+          </div>
+        </div>
+        <div class="body-wrap">
+          <div class="body-figure" id="bodyFigure">
+            <img src="/kristal/cakra-beden.webp?v=1" alt="Meditasyon yapan bir beden ve yedi çakra" width="720" height="720" />
+          </div>
+        </div>
+      </section>
+
+      <section id="cakra" aria-labelledby="chakraTitle">
+        <div class="card chakra-detail" id="chakraDetail" aria-live="polite"></div>
+        <ul class="chakra-strip" id="chakraStrip"></ul>
+      </section>
+
+      <section id="test" aria-labelledby="testTitle">
+        <div class="section-head">
+          <h2 id="testTitle">Çakra denge testi</h2>
+          <p class="section-note" id="quota">21 kısa ifade. İçinden geleni işaretle; doğru ya da yanlış cevap yok.</p>
+        </div>
+        <div class="card quiz" id="quiz">
+          <div class="quiz-progress"><span id="quizBar"></span></div>
+          <p class="quiz-count" id="quizCount"></p>
+          <p class="quiz-question" id="quizQuestion"></p>
+          <div class="quiz-scale" id="quizScale"></div>
+          <div class="quiz-nav">
+            <button type="button" class="btn btn-ghost" id="quizBack">← Geri</button>
+            <span class="quiz-legend">1 = hiç katılmıyorum · 5 = tamamen katılıyorum</span>
+          </div>
+          <div class="quiz-end" id="quizEnd" hidden>
+            <label class="field">
+              <span>Eklemek istediğin bir şey var mı? (isteğe bağlı)</span>
+              <textarea id="quizNote" rows="2" maxlength="300" placeholder="Örneğin: Son zamanlarda çok yorgun ve kararsızım."></textarea>
+            </label>
+            <button type="button" class="btn btn-primary" id="quizSubmit">Sonucumu göster</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="sonuc" hidden aria-labelledby="resultTitle">
+        <div class="card result">
+          <div class="reading-head">
+            <div>
+              <p class="sky-label" id="resultDate"></p>
+              <h2 id="resultTitle"></h2>
+            </div>
+            <span class="badge" id="resultBadge"></span>
+          </div>
+          <p class="result-summary" id="resultSummary"></p>
+          <div class="result-layout">
+            <ul class="chakra-bars" id="chakraBars"></ul>
+            <div class="focus-chakra" id="focusChakra"></div>
+          </div>
+          <div class="week" id="weekBox"><h3>Bir haftalık denge planın</h3><ol class="week-plan" id="weekPlan"></ol></div>
+          <p class="affirmation" id="resultAffirmation"></p>
+          <button type="button" class="listen" id="resultListen" hidden>🔊 Sonucumu sesli dinle</button>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Çakra sonucun hazır. Dilersen uzmanlarımızdan birini seç; enerji tablonu kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="meditasyon" aria-labelledby="medTitle">
+        <div class="section-head">
+          <h2 id="medTitle">Rehberli çakra meditasyonu</h2>
+          <p class="section-note">Yaklaşık 4 dakika. Kulaklıkla, sessiz bir yerde dinle; her çakra sırayla parlayacak.</p>
+        </div>
+        <div class="card meditation">
+          <div class="med-column" id="medColumn"></div>
+          <div class="med-text">
+            <p class="sky-label" id="medStep">Hazır olduğunda başla</p>
+            <h3 id="medTitleText">Kökten taca bir yolculuk</h3>
+            <p id="medBody">Rahat bir yerde otur, omurganı dik tut. Başlat'a bastığında seni yedi çakranın içinden, aşağıdan yukarıya doğru geçireceğim.</p>
+            <p class="mantra" id="medMantra"></p>
+            <div class="med-actions">
+              <button type="button" class="btn btn-primary" id="medStart">▶ Meditasyonu başlat</button>
+              <button type="button" class="btn btn-ghost" id="medStop" hidden>■ Bitir</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">Çakra günlüğüm</h2>
+          <p class="section-note" id="journalNote">Testlerin burada saklanır; zaman içindeki değişimini izleyebilirsin.</p>
+        </div>
+        <ul class="chakra-journal" id="journal"></ul>
+      </section>
+
+      <p class="disclaimer">Çakra çalışmaları ruhsal ve duygusal farkındalık için ilham veren bir rehberdir; sağlıkla ilgili konularda mutlaka bir uzmana başvur.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <audio id="medVoice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/cakra-veri.js?v=1"></script>
+    <script src="/kristal-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/cakralar-sayfa.js?v=1"></script>
+  </body>
+</html>

@@ -1,0 +1,103 @@
+/* Kristaller sayfası: astroloji.css'in üzerine. */
+
+.crystal-cover { position: relative; width: min(100%, 440px); height: auto; border-radius: 28px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba(179, 136, 235, 0.25); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { padding: 6px 12px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 999px; color: var(--foreground); background: rgba(255, 255, 255, 0.04); font: inherit; font-size: 0.84rem; cursor: pointer; }
+.chips button[aria-pressed="true"] { border-color: var(--gold); background: rgba(243, 194, 107, 0.2); }
+
+.crystal-img { width: 100%; aspect-ratio: 1; border-radius: 16px; object-fit: cover; display: block; }
+.dot { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px var(--c); vertical-align: middle; }
+
+/* --- Günün kristali --- */
+.daily-crystal { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: center; }
+.daily-crystal img { animation: shimmer 6s ease-in-out infinite; }
+@keyframes shimmer { 50% { filter: brightness(1.15) saturate(1.15); transform: scale(1.02); } }
+.daily-crystal h3 { font-size: 2rem; }
+.daily-crystal p { color: #e3dff0; margin: 6px 0; }
+.daily-crystal .kw { color: var(--muted); font-size: 0.86rem; }
+
+/* --- Burç kristalleri --- */
+.sign-crystals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.sign-crystals .card { padding: 14px; }
+.sign-crystals h3 { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; }
+.sign-crystals h3 img { width: 44px; height: 44px; }
+.sign-crystals .row { display: flex; gap: 8px; margin-top: 10px; }
+.sign-crystals .row button { flex: 1; padding: 0; border: 0; background: none; color: var(--foreground); font: inherit; font-size: 0.74rem; cursor: pointer; text-align: center; }
+.sign-crystals .row img { margin-bottom: 4px; border-radius: 12px; }
+
+/* --- Öneri formu ve sonuç --- */
+.suggest-form { display: flex; flex-direction: column; gap: 14px; }
+.suggest-form .field { display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; font-weight: 700; }
+.suggest-form textarea { box-sizing: border-box; width: 100%; padding: 11px 12px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 12px; color: var(--foreground); background: rgba(255, 255, 255, 0.06); font: inherit; font-weight: 500; }
+.suggest-form textarea:focus { outline: none; border-color: var(--gold); }
+.suggest-form .btn { align-self: flex-start; }
+.result { animation: rise 0.6s ease both; }
+.result-summary { margin: 10px 0 16px; color: #efeaf9; font-size: 1.04rem; }
+.picks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.pick { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--card-border); border-radius: 18px; background: rgba(255, 255, 255, 0.03); animation: rise 0.6s ease both; }
+.pick img { animation: shimmer 7s ease-in-out infinite; }
+.pick b { font-family: var(--serif); font-size: 1.35rem; }
+.pick p { color: #e3dff0; font-size: 0.9rem; }
+.pick .use { padding-top: 8px; border-top: 1px dashed rgba(255, 255, 255, 0.1); color: var(--gold); font-size: 0.86rem; }
+#ritualBox { margin-top: 16px; }
+.ritual { margin: 6px 0 0; padding-left: 22px; color: #e3dff0; }
+.ritual li { margin: 4px 0; }
+.ritual li::marker { color: var(--gold); font-weight: 800; }
+.affirmation { margin-top: 14px; padding: 14px 16px; border: 1px solid rgba(179, 136, 235, 0.35); border-radius: 16px; color: #fff3d6; background: rgba(179, 136, 235, 0.08); font-family: var(--serif); font-size: 1.3rem; font-style: italic; text-align: center; }
+.affirmation:empty { display: none; }
+#sonuc .expert { margin-top: 16px; }
+
+/* --- Rehber --- */
+.filters { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.filters label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; font-weight: 800; color: var(--muted); }
+.filters select { min-width: 160px; min-height: 42px; padding: 8px 12px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 12px; color: var(--foreground); background: rgba(255, 255, 255, 0.06); font: inherit; }
+.filters select option { color: #111; }
+.crystal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.crystal-grid button { display: flex; flex-direction: column; gap: 6px; width: 100%; height: 100%; padding: 8px 8px 12px; border: 1px solid var(--card-border); border-radius: 18px; color: var(--foreground); background: var(--card); font: inherit; text-align: left; cursor: pointer; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+.crystal-grid button:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 12px 30px rgba(179, 136, 235, 0.2); }
+.crystal-grid b { padding: 0 4px; font-family: var(--serif); font-size: 1.15rem; }
+.crystal-grid small { padding: 0 4px; color: var(--muted); font-size: 0.76rem; }
+.crystal-grid li { animation: rise 0.4s ease both; }
+.cleansing { margin-top: 16px; }
+
+.crystal-dialog { width: min(680px, calc(100vw - 24px)); }
+.crystal-detail { display: grid; grid-template-columns: 220px 1fr; gap: 22px; align-items: start; }
+.crystal-detail h2 { font-size: 2rem; }
+.crystal-detail p { margin: 8px 0; color: #e3dff0; }
+.crystal-detail .kw { color: var(--muted); font-size: 0.86rem; }
+.crystal-detail dl { display: grid; gap: 8px; margin: 10px 0 0; }
+.crystal-detail dt { color: var(--gold); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.crystal-detail dd { margin: 2px 0 0; color: #e3dff0; font-size: 0.92rem; }
+.crystal-detail dd a { color: var(--foreground); }
+
+/* --- Günlük --- */
+.crystal-journal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.crystal-journal li { position: relative; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); }
+.crystal-journal li.is-current { border-color: var(--gold); }
+.crystal-journal .open { display: block; width: 100%; padding: 14px 40px 14px 16px; border: 0; color: inherit; background: none; font: inherit; text-align: left; cursor: pointer; }
+.crystal-journal .mini { display: flex; gap: 6px; margin-bottom: 8px; }
+.crystal-journal .mini img { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; }
+.crystal-journal b { display: block; font-family: var(--serif); font-size: 1.1rem; }
+.crystal-journal small { color: var(--muted); font-size: 0.78rem; }
+.crystal-journal p { margin-top: 4px; color: #d8d3e8; font-size: 0.84rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.crystal-journal .del { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border: 0; border-radius: 50%; color: var(--muted); background: rgba(255, 255, 255, 0.06); cursor: pointer; }
+.crystal-journal .del:hover { color: #fff; background: rgba(255, 90, 90, 0.4); }
+.journal-empty { color: var(--muted); }
+
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 860px) {
+  .sign-crystals, .picks { grid-template-columns: 1fr; }
+  .crystal-journal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .daily-crystal, .crystal-detail { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .daily-crystal img, .crystal-detail img { max-width: 240px; }
+  .crystal-detail dl { text-align: left; }
+  .crystal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filters label { flex: 1 1 140px; }
+  .filters select { min-width: 0; width: 100%; }
+  .crystal-journal { grid-template-columns: 1fr; }
+}

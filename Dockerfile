@@ -28,6 +28,8 @@ COPY run-veri.js run-api.js run-taslari.html run-taslari.css run-sayfa.js ./
 COPY run ./run
 COPY ay-takvimi-veri.js ay-takvimi-api.js ay-takvimi.html ay-takvimi.css ay-takvimi-sayfa.js ./
 COPY ay ./ay
+COPY cakra-veri.js kristal-veri.js cakra-kristal-api.js cakralar.html cakralar.css cakralar-sayfa.js kristaller.html kristaller.css kristaller-sayfa.js ./
+COPY kristal ./kristal
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi
 COPY fal ./fal
