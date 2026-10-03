@@ -334,6 +334,65 @@ function koseDugmeleri() {
   });
 }
 
+// Dönme sesi (Web Audio, dosyasız): hıza göre kısılan taş hışırtısı, gedik geçişlerinde tıkırtı, sonda yumuşak "tak".
+let sesBaglami = null;
+function tasSesi() {
+  try {
+    sesBaglami = sesBaglami || new (window.AudioContext || window.webkitAudioContext)();
+  } catch {
+    return null;
+  }
+  const ctx = sesBaglami;
+  ctx.resume?.();
+  const gurultu = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+  const veri = gurultu.getChannelData(0);
+  let son = 0;
+  for (let i = 0; i < veri.length; i += 1) {
+    son = son * 0.86 + (Math.random() * 2 - 1) * 0.14; // kahverengi gürültü: kaba, taşa benzer
+    veri[i] = son * 3;
+  }
+  const kaynak = ctx.createBufferSource();
+  kaynak.buffer = gurultu;
+  kaynak.loop = true;
+  const suzgec = ctx.createBiquadFilter();
+  suzgec.type = "bandpass";
+  suzgec.frequency.value = 520;
+  suzgec.Q.value = 0.9;
+  const ses = ctx.createGain();
+  ses.gain.value = 0;
+  kaynak.connect(suzgec).connect(ses).connect(ctx.destination);
+  kaynak.start();
+  const vurus = (guc, frekans) => {
+    const t0 = ctx.currentTime;
+    const b = ctx.createBufferSource();
+    b.buffer = gurultu;
+    const f = ctx.createBiquadFilter();
+    f.type = "bandpass";
+    f.frequency.value = frekans * (0.85 + Math.random() * 0.3);
+    f.Q.value = 6;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(guc, t0 + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.07);
+    b.connect(f).connect(g).connect(ctx.destination);
+    b.start(t0, Math.random() * 1.5, 0.08);
+  };
+  return {
+    hiz(v) {
+      // v: 0..1 göreli hız
+      ses.gain.setTargetAtTime(0.16 * v, ctx.currentTime, 0.05);
+      suzgec.frequency.setTargetAtTime(300 + 500 * v, ctx.currentTime, 0.05);
+    },
+    tik(v) { vurus(0.05 + 0.1 * v, 1700); },
+    bitir() {
+      ses.gain.setTargetAtTime(0, ctx.currentTime, 0.08);
+      vurus(0.22, 1100);
+      setTimeout(() => vurus(0.14, 1400), 70);
+      setTimeout(() => { try { kaynak.stop(); } catch { /* zaten durdu */ } }, 600);
+    },
+  };
+}
+
 function cemberleriDondur(kose) {
   if (doniyor) return;
   const masadakiler = taslar.filter((t) => t.x != null && t.gedik != null);
@@ -347,10 +406,21 @@ function cemberleriDondur(kose) {
     return { t, g, h: HALKALAR[g.hi], el: $("table").querySelector(`.stone[data-id="${t.id}"]`) };
   });
   const yavasla = (u) => 1 - (1 - u) ** 3;
+  // Ses yalnız süs: bir hata dönmeyi asla durdurmasın.
+  let sesler = null;
+  try { sesler = tasSesi(); } catch { sesler = null; }
+  const sesle = (fn) => { try { fn(); } catch { /* ses olmadan devam */ } };
+  let gecilen = 0; // dış çemberde geçilen gedik sayısı (tıkırtı için)
   const bas = performance.now();
   const kare = (simdi) => {
     const u = Math.min(1, (simdi - bas) / DONME_SURESI);
     const k = yavasla(u);
+    const hiz = (1 - u) ** 2; // türev (3(1-u)²) / 3
+    if (sesler) {
+      sesle(() => sesler.hiz(hiz));
+      const adimSayisi = Math.floor(Math.abs(adim[0]) * k);
+      if (adimSayisi > gecilen) { gecilen = adimSayisi; sesle(() => sesler.tik(hiz)); }
+    }
     parcalar.forEach(({ g, h, el }) => {
       if (!el) return;
       const aci = halkaAcisi(h, g.sira + adim[g.hi] * k);
@@ -362,6 +432,7 @@ function cemberleriDondur(kose) {
       const yeniSira = (((g.sira + adim[g.hi]) % h.adet) + h.adet) % h.adet;
       gedigeKoy(t, gedikNo(g.hi, yeniSira));
     });
+    if (sesler) sesle(() => sesler.bitir());
     doniyor = false;
     $("table").classList.remove("doniyor");
     renderBench();
