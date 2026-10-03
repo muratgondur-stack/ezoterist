@@ -18,12 +18,14 @@ const fitLayout = () => {
     root.style.setProperty("--banner-w", `${Math.max(0, barLeft - leftEdge - 2 * gap)}px`);
     root.style.setProperty("--banner-shift", `${(leftEdge + barLeft) / 2 - window.innerWidth / 2}px`);
   } else {
-    const side = Math.max(leftEdge, window.innerWidth - barLeft) + 12;
-    const between = window.innerWidth - 2 * side;
+    // Yatayda banner müzik butonu ile hesap butonları arasındaki boşluğun tamamını doldurur (Murat 2026-10-03);
+    // boşluk çok darsa butonların altına iner.
+    const gap = 12;
+    const between = barLeft - leftEdge - 2 * gap;
     const below = between < 280;
     document.body.classList.toggle("banner-below", below);
-    root.style.setProperty("--banner-w", `${Math.min(680, below ? window.innerWidth - 32 : between)}px`);
-    root.style.setProperty("--banner-shift", "0px");
+    root.style.setProperty("--banner-w", `${below ? window.innerWidth - 32 : between}px`);
+    root.style.setProperty("--banner-shift", below ? "0px" : `${(leftEdge + barLeft) / 2 - window.innerWidth / 2}px`);
   }
 
   if (!grid || !firstButton) return;
