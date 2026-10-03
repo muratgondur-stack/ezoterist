@@ -1,7 +1,7 @@
 /* Ezoterik asistan sohbet sayfası: astroloji.css'in üzerine. */
 
 body { overflow: hidden; }
-.chat-page { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; width: 100%; max-width: 1180px; height: calc(100dvh - 64px); margin: 0 auto; padding: 12px 16px; box-sizing: border-box; }
+.chat-page { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; width: 100%; max-width: 1180px; height: calc(100dvh - var(--ust, 64px)); margin: 0 auto; padding: 12px 16px; box-sizing: border-box; }
 
 /* --- Sohbet listesi --- */
 .threads { display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 14px; border: 1px solid var(--card-border); border-radius: var(--radius); background: var(--card); backdrop-filter: blur(10px); }
@@ -71,7 +71,7 @@ body { overflow: hidden; }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 820px) {
-  .chat-page { grid-template-columns: 1fr; padding: 8px; height: calc(100dvh - 60px); }
+  .chat-page { grid-template-columns: 1fr; padding: 8px; height: calc(100dvh - var(--ust, 60px)); }
   .threads { position: fixed; z-index: 30; top: 60px; bottom: 0; left: 0; width: min(82vw, 300px); border-radius: 0 20px 20px 0; transform: translateX(-105%); transition: transform 0.3s ease; background: rgba(11, 13, 34, 0.97); }
   .threads.acik { transform: none; box-shadow: 20px 0 60px rgba(0, 0, 0, 0.6); }
   .threads-toggle { display: grid; place-items: center; }
