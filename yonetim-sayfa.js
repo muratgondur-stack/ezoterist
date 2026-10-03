@@ -32,6 +32,7 @@ function sekme(ad) {
   document.querySelectorAll(".panel").forEach((p) => { p.hidden = p.id !== `tab-${ad}`; });
   history.replaceState(null, "", `#${ad}`);
   if (ad === "kullanicilar" && !kullanicilar.length) kullanicilariYukle();
+  if (ad === "anahtarlar") anahtarlariYukle();
 }
 document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => sekme(b.dataset.tab)));
 
@@ -265,6 +266,65 @@ function renderGecmis() {
   }));
 }
 
+// --- API anahtarları ---
+
+async function anahtarlariYukle() {
+  try {
+    renderAnahtarlar((await api("/api/yonetim/anahtarlar")).anahtarlar);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+function renderAnahtarlar(liste) {
+  $("keys").replaceChildren(...liste.map((a) => {
+    const durum = el("p", { className: "key-state", textContent: a.var ? `Kayıtlı · …${a.son4} · ${tarih(a.tarih)}` : "Girilmemiş" });
+    const sonuc = el("p", { className: "key-result" });
+    const girdi = el("input", { type: "password", placeholder: a.var ? "Yeni anahtarla değiştir" : a.ipucu, autocomplete: "off", spellcheck: false });
+    girdi.setAttribute("aria-label", `${a.ad} anahtarı`);
+    const kaydet = el("button", { type: "button", className: "btn btn-primary", textContent: "Kaydet" });
+    const testEt = el("button", { type: "button", className: "btn btn-ghost", textContent: "Test et", disabled: !a.var });
+    const sil = el("button", { type: "button", className: "btn btn-ghost", textContent: "Sil", hidden: !a.var });
+    kaydet.addEventListener("click", async () => {
+      if (!girdi.value.trim()) { toast("Önce anahtarı yapıştır."); return; }
+      kaydet.disabled = true;
+      try {
+        const yeni = (await api("/api/yonetim/anahtar", { saglayici: a.id, deger: girdi.value })).anahtarlar;
+        renderAnahtarlar(yeni);
+        toast(`${a.ad} anahtarı kaydedildi. Şimdi test edebilirsin.`);
+      } catch (error) {
+        toast(error.message);
+        kaydet.disabled = false;
+      }
+    });
+    testEt.addEventListener("click", async () => {
+      testEt.disabled = true;
+      sonuc.className = "key-result";
+      sonuc.textContent = "Test ediliyor…";
+      try {
+        const r = await api("/api/yonetim/anahtar-test", { saglayici: a.id });
+        sonuc.className = `key-result ${r.ok ? "ok" : "bad"}`;
+        sonuc.textContent = `${r.ok ? "✓" : "✗"} ${r.mesaj}`;
+      } catch (error) {
+        sonuc.className = "key-result bad";
+        sonuc.textContent = error.message;
+      } finally {
+        testEt.disabled = false;
+      }
+    });
+    sil.addEventListener("click", async () => {
+      if (!confirm(`${a.ad} anahtarı silinsin mi?`)) return;
+      try {
+        renderAnahtarlar((await api("/api/yonetim/anahtar", { saglayici: a.id, deger: "" })).anahtarlar);
+        toast("Anahtar silindi.");
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+    return el("div", { className: "key-row" }, el("h3", { textContent: a.ad }), durum, el("div", { className: "key-actions" }, girdi, kaydet, testEt, sil), sonuc);
+  }));
+}
+
 // --- Başlangıç ---
 
 async function yukle() {
@@ -294,5 +354,5 @@ window.addEventListener("beforeunload", (e) => { if (Object.keys(taslak).length)
     return;
   }
   const hedef = location.hash.slice(1);
-  if (["ozet", "ayarlar", "kullanicilar", "gecmis"].includes(hedef)) sekme(hedef);
+  if (["ozet", "ayarlar", "kullanicilar", "anahtarlar", "gecmis"].includes(hedef)) sekme(hedef);
 })();

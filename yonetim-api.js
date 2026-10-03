@@ -6,6 +6,7 @@ const path = require("node:path");
 const Ayarlar = require("./ayarlar");
 const { yardimci } = require("./astroloji-api");
 const { kontorDefteri } = require("./kontor");
+const Anahtarlar = require("./anahtarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesOrnek, sesSaglik, bugun, llmEnabled } = yardimci;
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
@@ -135,6 +136,21 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
         const aciklama = String(body?.aciklama || "").trim().slice(0, 120) || (miktar > 0 ? "Hediye kontör" : "Düzeltme");
         const hareket = await kontor.hareketEkle(hedef.id, { miktar, tur: miktar > 0 ? "hediye" : "harcama", aciklama, ref: `yonetim:${user.email}` });
         sendJson(response, 200, { hareket });
+      },
+      // Dış servis API anahtarları: panele yalnız özet (son 4 karakter) gider; geçmişe değer yazılmaz.
+      "GET /api/yonetim/anahtarlar": async () => sendJson(response, 200, { anahtarlar: Anahtarlar.ozet() }),
+      "POST /api/yonetim/anahtar": async () => {
+        const body = await readJson(request);
+        const saglayici = String(body?.saglayici || "");
+        const onceki = Anahtarlar.ozet().find((a) => a.id === saglayici);
+        await Anahtarlar.kaydet(saglayici, body?.deger);
+        const simdi = Anahtarlar.ozet().find((a) => a.id === saglayici);
+        await gecmiseYaz(user, { [`anahtar.${saglayici}`]: simdi.var ? `…${simdi.son4}` : "(silindi)" }, { [`anahtar.${saglayici}`]: onceki?.var ? `…${onceki.son4}` : "(yok)" });
+        sendJson(response, 200, { anahtarlar: Anahtarlar.ozet() });
+      },
+      "POST /api/yonetim/anahtar-test": async () => {
+        const body = await readJson(request);
+        sendJson(response, 200, await Anahtarlar.test(String(body?.saglayici || "")));
       },
     };
     const handler = routes[`${request.method} ${url.pathname}`];

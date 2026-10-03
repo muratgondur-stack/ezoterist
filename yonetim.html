@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=10" />
-    <link rel="stylesheet" href="/yonetim.css?v=2" />
+    <link rel="stylesheet" href="/yonetim.css?v=3" />
   </head>
   <body>
     <header class="topbar">
@@ -33,6 +33,7 @@
         <button type="button" data-tab="ozet" aria-selected="true">📊 Özet</button>
         <button type="button" data-tab="ayarlar" aria-selected="false">⚙️ Ayarlar</button>
         <button type="button" data-tab="kullanicilar" aria-selected="false">👥 Kullanıcılar</button>
+        <button type="button" data-tab="anahtarlar" aria-selected="false">🔑 API anahtarları</button>
         <button type="button" data-tab="gecmis" aria-selected="false">🕓 Değişiklik geçmişi</button>
       </nav>
 
@@ -73,6 +74,14 @@
         </div>
       </section>
 
+      <section class="panel" id="tab-anahtarlar" hidden>
+        <div class="card">
+          <h2>API anahtarları</h2>
+          <p class="section-note">Dış servislerin anahtarları. Sunucuda saklanır; burada yalnız son 4 karakteri görünür. "Test et" ücretsiz bir listeleme çağrısıyla anahtarın çalıştığını doğrular, para harcamaz.</p>
+          <div class="keys" id="keys"></div>
+        </div>
+      </section>
+
       <section class="panel" id="tab-gecmis" hidden>
         <div class="card">
           <h2>Değişiklik geçmişi</h2>
@@ -94,7 +103,7 @@
 
     <audio id="sample" preload="none"></audio>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="/yonetim-sayfa.js?v=1"></script>
+    <script src="/yonetim-sayfa.js?v=2"></script>
     <script src="/ust-cubuk.js?v=2" defer></script>
 </body>
 </html>
