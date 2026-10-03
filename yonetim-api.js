@@ -73,7 +73,8 @@ async function maliyetTablosu() {
   return {
     kur, kurKaynagi: elle > 0 ? "elle" : otomatik ? `TCMB ${otomatik.tarih}` : "alınamadı",
     tcmb: otomatik?.deger || null, birim, kontorTL, olcumBaslangic: olcum.baslangic,
-    bolumler: [...Ayarlar.BOLUMLER.map((b) => satir(b.id, b.ad, true)), satir("uzman", "Uzman yorumu taslağı", false)],
+    // Asistanda fiyat ve maliyet her soru + cevap içindir (Murat 2026-10-04); sesle sorma (Whisper) hesaba katılmaz.
+    bolumler: [...Ayarlar.BOLUMLER.map((b) => satir(b.id, b.id === "asistan" ? `${b.ad} (her soru + cevap)` : b.ad, true)), satir("uzman", "Uzman yorumu taslağı", false)],
   };
 }
 
