@@ -24,6 +24,8 @@ COPY melek-sayilari-veri.js melek-sayilari-api.js melek-sayilari.html melek-sayi
 COPY melek ./melek
 COPY iching-veri.js iching-api.js iching.html iching.css iching-sayfa.js ./
 COPY iching ./iching
+COPY run-veri.js run-api.js run-taslari.html run-taslari.css run-sayfa.js ./
+COPY run ./run
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi
 COPY fal ./fal

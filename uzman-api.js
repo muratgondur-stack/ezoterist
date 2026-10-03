@@ -18,6 +18,8 @@ const { analizKaydiOku, fotoYolu: analizFotoYolu } = require("./fotograf-analiz-
 const { askKaydiOku } = require("./ask-uyumu-api");
 const { melekKaydiOku, ALANLAR: MELEK_ALANLARI } = require("./melek-sayilari-api");
 const { ichingKaydiOku, ALANLAR: ICHING_ALANLARI } = require("./iching-api");
+const { runKaydiOku } = require("./run-api");
+const RunVeri = require("./run-veri");
 const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
@@ -197,6 +199,20 @@ const BOLUMLER = {
         k.degisen.length ? `Değişen çizgiler: ${k.degisen.join(", ")}` : "Değişen çizgi yok"].join(" — "),
       kayitId: k.id,
     }),
+  },
+  "run-taslari": {
+    ad: "rün açılımı",
+    link: "/run-taslari#gunluk",
+    yukle: (dataDir, userId, body) => runKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => {
+      const acilim = RunVeri.acilimlar[k.acilim];
+      return {
+        baslik: `${acilim.ad} · ${k.yorum.baslik}`,
+        girdiMetni: k.soru ? `Sorusu: ${k.soru}` : "Soru belirtilmedi",
+        ozet: k.taslar.map((c, i) => `${acilim.pozisyonlar[i]}: ${RunVeri.runBul(c.id).ad}${c.ters ? " (ters)" : ""}`).join(" — "),
+        kayitId: k.id,
+      };
+    },
   },
 };
 
