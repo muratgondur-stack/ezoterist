@@ -12,7 +12,7 @@ const Ayarlar = require("./ayarlar");
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
 const GUNLUK_SINIR = () => Ayarlar.sinir("dizim"); // yönetim panelinden (0 = sınırsız)
-const MAX_TAS = 24;
+const MAX_TAS = 32;
 const MAX_GORSEL = 1.5 * 1024 * 1024;
 const GORUNUMLER = Array.from({ length: 12 }, (_, i) => `tas-${String(i + 1).padStart(2, "0")}`);
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
@@ -39,7 +39,7 @@ function jsonAyikla(metin) {
 // Masada iç ve dış çemberde gedikler var (dizim-sayfa.js GEDIKLER ile aynı ölçüler). Bütün taşlar gediklerdeyse
 // kimin iç çemberde (merkeze yakın), kimin dış çemberde olduğu yapay zekâya ayrıca söylenir.
 function halkaSatiri(kayit) {
-  // Kare masa (oran 1): dıştan içe 12-7-5 gedikli üç tam çember. Yarıçaplar masa kenarı cinsinden (dizim-sayfa.js HALKALAR).
+  // Kare masa (oran 1): dıştan içe 16-10-6 gedikli üç tam çember. Yarıçaplar masa kenarı cinsinden (dizim-sayfa.js HALKALAR).
   const oran = Number(kayit.oran) || 2 / 3;
   if (Math.abs(oran - 1) > 0.01) return "";
   const HALKALAR = [["dis", 0.39], ["orta", 0.277], ["ic", 0.168]];
@@ -51,7 +51,7 @@ function halkaSatiri(kayit) {
   const h = kayit.taslar.map((t) => [t.ad, halka(t)]);
   if (h.some(([, x]) => !x)) return "";
   const liste = (ad) => h.filter(([, x]) => x === ad).map(([a]) => a).join(", ") || "boş";
-  return `Masada üç çember gedik var (dıştan içe 12, 7, 5). Dış çember (çevrede): ${liste("dis")}. Orta çember: ${liste("orta")}. İç çember (merkeze en yakın): ${liste("ic")}.`;
+  return `Masada üç çember gedik var (dıştan içe 16, 10, 6). Dış çember (çevrede): ${liste("dis")}. Orta çember: ${liste("orta")}. İç çember (merkeze en yakın): ${liste("ic")}.`;
 }
 
 // Yapay zekâya giden özet: ham koordinat yerine yorumlanmış ölçümler (0-100 ölçeği).

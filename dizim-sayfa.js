@@ -3,16 +3,16 @@ const $ = (id) => document.getElementById(id);
 const ORAN = 1; // masa yüksekliği / genişliği: kare masa (Murat 2026-10-03; eski kayıtlar 2/3, kendi oranlarıyla gösterilir)
 const GORUNUMLER = Array.from({ length: 12 }, (_, i) => `tas-${String(i + 1).padStart(2, "0")}`);
 const tasResmi = (g) => `/dizim/${g}.webp?v=1`;
-const MAX_TAS = 24;
+const MAX_TAS = 32; // gedik sayısı kadar
 
 // Masadaki gedikler (Murat 2026-10-03): taşlar serbest durmaz, iç ve dış iki çemberdeki gediklere oturur.
-// Kare masada üç tam çember, dıştan içe 12-7-5 gedik (Murat 2026-10-03); yarıçaplar masa kenarı cinsinden.
+// Kare masada üç tam çember, dıştan içe 16-10-6 gedik (Murat 2026-10-03, 32 taş); yarıçaplar masa kenarı cinsinden.
 // Merkezdeki sedef rozet iç çemberin içinde, köşelerdeki sedef işaretler dış çemberin dışında kalır (dizim/masa-kare.webp).
 // Rastgele dizimde kişiler dışta, kavramlar ortada, mekânlar içte durur.
 const HALKALAR = [
-  { ad: "dis", adet: 12, rx: 0.39, ry: 0.39, kayma: 0 },
-  { ad: "orta", adet: 7, rx: 0.277, ry: 0.277, kayma: 0.5 },
-  { ad: "ic", adet: 5, rx: 0.168, ry: 0.168, kayma: 0 },
+  { ad: "dis", adet: 16, rx: 0.39, ry: 0.39, kayma: 0 },
+  { ad: "orta", adet: 10, rx: 0.277, ry: 0.277, kayma: 0.5 },
+  { ad: "ic", adet: 6, rx: 0.168, ry: 0.168, kayma: 0 },
 ];
 const HALKA_TURU = { kisi: "dis", ben: "dis", kavram: "orta", mekan: "ic" };
 const GEDIKLER = HALKALAR.flatMap((h) => Array.from({ length: h.adet }, (_, i) => {
@@ -21,9 +21,9 @@ const GEDIKLER = HALKALAR.flatMap((h) => Array.from({ length: h.adet }, (_, i) =
 }));
 
 const HAZIR = {
-  "Kişiler": [["Ben", "ben"], ["Anne", "kisi"], ["Baba", "kisi"], ["Eş", "kisi"], ["Sevgili", "kisi"], ["Çocuk", "kisi"], ["Kardeş", "kisi"], ["Anneanne", "kisi"], ["Babaanne", "kisi"], ["Dede", "kisi"], ["Arkadaş", "kisi"], ["Patron", "kisi"]],
-  "Mekânlar": [["Ev", "mekan"], ["İş", "mekan"], ["Okul", "mekan"], ["İstanbul", "mekan"], ["Memleket", "mekan"]],
-  "Kavramlar": [["Geçmiş", "kavram"], ["Gelecek", "kavram"], ["Para", "kavram"], ["Sağlık", "kavram"], ["Sevgi", "kavram"], ["Korku", "kavram"], ["Hedefim", "kavram"]],
+  "Kişiler": [["Ben", "ben"], ["Anne", "kisi"], ["Baba", "kisi"], ["Eş", "kisi"], ["Sevgili", "kisi"], ["Çocuk", "kisi"], ["Kardeş", "kisi"], ["Anneanne", "kisi"], ["Babaanne", "kisi"], ["Dede", "kisi"], ["Arkadaş", "kisi"], ["Patron", "kisi"], ["Amca", "kisi"], ["Dayı", "kisi"], ["Teyze", "kisi"], ["Hala", "kisi"]],
+  "Mekânlar": [["Ev", "mekan"], ["İş", "mekan"], ["Okul", "mekan"], ["İstanbul", "mekan"], ["Memleket", "mekan"], ["Doğa", "mekan"]],
+  "Kavramlar": [["Geçmiş", "kavram"], ["Gelecek", "kavram"], ["Para", "kavram"], ["Sağlık", "kavram"], ["Sevgi", "kavram"], ["Korku", "kavram"], ["Hedefim", "kavram"], ["Özgürlük", "kavram"], ["Ruhsallık", "kavram"], ["Kariyer", "kavram"]],
 };
 
 let durum = { ses: false, ai: false, kalan: 5, sinir: 5 };
@@ -314,7 +314,7 @@ function rastgeleDiz() {
     t.yeni = true;
   });
   renderBench();
-  toast("Taşlar dizildi: kişiler dışta, kavramlar ortada, mekânlar içte. İstediğin taşı sürükleyip yerini değiştirebilirsin.");
+  toast("Taşlar dizildi: kişiler dışta, kavramlar ortada, mekânlar içte.");
 }
 
 // Hazır listedeki bütün taşlar tek tuşla masa yanındaki tablaya gelir; hepsi zaten varsa masadakiler tablaya döner.
@@ -410,7 +410,7 @@ async function goruntuCiz(liste) {
     ctx.ellipse(gx, gy, W * 0.036, W * 0.025, 0, 0, Math.PI * 2);
     ctx.fill();
   }
-  const TAS = W * 0.075;
+  const TAS = W * 0.068;
   for (const t of liste) {
     const img = await resimYukle(tasResmi(t.gorunum));
     const s = Math.min(TAS / img.width, (TAS * 0.82) / img.height);
