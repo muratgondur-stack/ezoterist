@@ -39,13 +39,14 @@ function jsonAyikla(metin) {
 // Masada iç ve dış çemberde gedikler var (dizim-sayfa.js GEDIKLER ile aynı ölçüler). Bütün taşlar gediklerdeyse
 // kimin iç çemberde (merkeze yakın), kimin dış çemberde olduğu yapay zekâya ayrıca söylenir.
 function halkaSatiri(kayit) {
+  // Kare masa (oran 1): tam çemberler; ilk sürüm 3:2 masa: yatık elipsler. Yarıçaplar masa yüksekliği cinsinden.
+  const oran = Number(kayit.oran) || 2 / 3;
+  const [icR, disR] = Math.abs(oran - 1) < 0.01 ? [[0.2, 0.2], [0.385, 0.385]] : [[0.3, 0.21], [0.56, 0.4]];
   const halka = (t) => {
-    const dx = (t.x - 0.5) * 1.5;
+    const dx = (t.x - 0.5) / oran;
     const dy = t.y - 0.5;
-    const ic = Math.hypot(dx / 0.3, dy / 0.21);
-    const dis = Math.hypot(dx / 0.56, dy / 0.4);
-    if (Math.abs(ic - 1) < 0.12) return "ic";
-    if (Math.abs(dis - 1) < 0.12) return "dis";
+    if (Math.abs(Math.hypot(dx / icR[0], dy / icR[1]) - 1) < 0.12) return "ic";
+    if (Math.abs(Math.hypot(dx / disR[0], dy / disR[1]) - 1) < 0.12) return "dis";
     return null;
   };
   const h = kayit.taslar.map((t) => [t.ad, halka(t)]);

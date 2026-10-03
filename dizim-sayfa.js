@@ -1,15 +1,16 @@
 const { TURLER, benMi } = DizimHesap;
 const $ = (id) => document.getElementById(id);
-const ORAN = 2 / 3; // masa yüksekliği / genişliği (CSS aspect-ratio 3/2 ile aynı)
+const ORAN = 1; // masa yüksekliği / genişliği: kare masa (Murat 2026-10-03; eski kayıtlar 2/3, kendi oranlarıyla gösterilir)
 const GORUNUMLER = Array.from({ length: 12 }, (_, i) => `tas-${String(i + 1).padStart(2, "0")}`);
 const tasResmi = (g) => `/dizim/${g}.webp?v=1`;
 const MAX_TAS = 24;
 
 // Masadaki gedikler (Murat 2026-10-03): taşlar serbest durmaz, iç ve dış iki çemberdeki gediklere oturur.
-// Masa 3:2 olduğu için çemberler hafif yatık elips; yarıçaplar masa yüksekliği cinsinden.
+// Kare masada iki tam çember; yarıçaplar masa kenarı cinsinden. Merkezdeki sedef mandala iç çemberin içinde,
+// köşelerdeki sedef işaretler dış çemberin dışında kalır (dizim/masa-kare.webp).
 const HALKALAR = [
-  { ad: "ic", adet: 8, rx: 0.3, ry: 0.21, kayma: 0 },
-  { ad: "dis", adet: 16, rx: 0.56, ry: 0.4, kayma: 0.5 },
+  { ad: "ic", adet: 8, rx: 0.2, ry: 0.2, kayma: 0 },
+  { ad: "dis", adet: 16, rx: 0.385, ry: 0.385, kayma: 0.5 },
 ];
 const GEDIKLER = HALKALAR.flatMap((h) => Array.from({ length: h.adet }, (_, i) => {
   const aci = -Math.PI / 2 + ((i + h.kayma) * 2 * Math.PI) / h.adet;
@@ -338,10 +339,10 @@ async function goruntuCiz(liste) {
   c.width = W;
   c.height = H;
   const ctx = c.getContext("2d");
-  const masa = await resimYukle("/dizim/masa.webp?v=1");
+  const masa = await resimYukle("/dizim/masa-kare.webp?v=1");
   const olcek = Math.max(W / masa.width, H / masa.height);
   ctx.drawImage(masa, (W - masa.width * olcek) / 2, (H - masa.height * olcek) / 2, masa.width * olcek, masa.height * olcek);
-  const kenar = ctx.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, W * 0.75);
+  const kenar = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.78);
   kenar.addColorStop(0, "rgba(0,0,0,0)");
   kenar.addColorStop(1, "rgba(0,0,0,0.45)");
   ctx.fillStyle = kenar;
@@ -350,16 +351,16 @@ async function goruntuCiz(liste) {
   for (const g of GEDIKLER) {
     const gx = g.x * W;
     const gy = g.y * H;
-    const oyuk = ctx.createRadialGradient(gx, gy - 4, 4, gx, gy, W * 0.034);
+    const oyuk = ctx.createRadialGradient(gx, gy - 4, 4, gx, gy, W * 0.036);
     oyuk.addColorStop(0, "rgba(0,0,0,0.55)");
     oyuk.addColorStop(0.8, "rgba(0,0,0,0.35)");
     oyuk.addColorStop(1, "rgba(255,220,170,0.12)");
     ctx.fillStyle = oyuk;
     ctx.beginPath();
-    ctx.ellipse(gx, gy, W * 0.034, W * 0.024, 0, 0, Math.PI * 2);
+    ctx.ellipse(gx, gy, W * 0.036, W * 0.025, 0, 0, Math.PI * 2);
     ctx.fill();
   }
-  const TAS = W * 0.085;
+  const TAS = W * 0.08;
   for (const t of liste) {
     const img = await resimYukle(tasResmi(t.gorunum));
     const s = Math.min(TAS / img.width, (TAS * 0.82) / img.height);
@@ -432,15 +433,20 @@ $("analyzeButton").addEventListener("click", async () => {
 // Kayıttaki koordinatlardan masanın donmuş hâli + ölçüm katmanı (gruplar ve Ben'den çizgiler).
 function donmusMasa(kayit, hedef, { olcum = true } = {}) {
   // Gedikli yerleşimse (bütün taşlar gediklerde) gedikler de çizilir.
-  const gedikli = kayit.taslar.every((t) => GEDIKLER.some((g) => Math.abs(g.x - t.x) < 0.003 && Math.abs(g.y - t.y) < 0.003));
+  const oran = Number(kayit.oran) || 2 / 3;
+  const kare = Math.abs(oran - 1) < 0.01;
+  hedef.style.aspectRatio = String(1 / oran);
+  hedef.classList.toggle("kare", kare);
+  const gedikli = kare && kayit.taslar.every((t) => GEDIKLER.some((g) => Math.abs(g.x - t.x) < 0.003 && Math.abs(g.y - t.y) < 0.003));
   hedef.replaceChildren(...(gedikli ? gedikElleri() : []), ...kayit.taslar.map((t) => tasEl(t, { sabit: true })));
   if (!olcum) return;
   const SVGNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(SVGNS, "svg");
-  svg.setAttribute("viewBox", "0 0 150 100");
+  const VG = 100 / oran; // görünüm genişliği (yükseklik 100); daireler daire kalsın
+  svg.setAttribute("viewBox", `0 0 ${VG} 100`);
   svg.setAttribute("preserveAspectRatio", "none");
   const a = kayit.analiz;
-  const konum = Object.fromEntries(kayit.taslar.map((t) => [t.id, [t.x * 150, t.y * 100]]));
+  const konum = Object.fromEntries(kayit.taslar.map((t) => [t.id, [t.x * VG, t.y * 100]]));
   const renkler = ["#f3c26b", "#7fd1b9", "#b388eb", "#ff9f7f", "#7fb8ff", "#e0e070"];
   a.kumeler.filter((k) => k.uyeler.length > 1).forEach((k, i) => {
     const noktalar = k.uyeler.map((id) => konum[id]);
@@ -558,7 +564,7 @@ function renderJournal() {
     open.type = "button";
     open.className = "open";
     open.innerHTML = "<div class=\"thumb\"></div><div class=\"meta\"><b></b><small></small><p></p></div>";
-    open.querySelector(".thumb").style.backgroundImage = k.gorsel ? `url(/api/dizim/gorsel?id=${k.id})` : "url(/dizim/masa.webp?v=1)";
+    open.querySelector(".thumb").style.backgroundImage = k.gorsel ? `url(/api/dizim/gorsel?id=${k.id})` : "url(/dizim/masa-kare.webp?v=1)";
     open.querySelector("b").textContent = k.yorum.baslik;
     open.querySelector("small").textContent = tarih(k.tarih);
     open.querySelector("p").textContent = k.taslar.map((t) => t.ad).join(", ");
