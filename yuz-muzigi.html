@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=11" />
     <link rel="stylesheet" href="/fal.css?v=7" />
-    <link rel="stylesheet" href="/yuz-muzigi.css?v=2" />
+    <link rel="stylesheet" href="/yuz-muzigi.css?v=3" />
   </head>
   <body>
     <header class="topbar">
@@ -75,9 +75,12 @@
           </div>
           <div class="controls">
             <div class="modes" id="modeChips" role="group" aria-label="Müzik türü">
-              <button type="button" class="chip mode" data-mod="melodi" aria-pressed="true">🎹 Melodi <small>piyano ninnisi</small></button>
-              <button type="button" class="chip mode" data-mod="meditasyon" aria-pressed="false">🕉 Meditasyon <small>kâse ve çan ambiyansı</small></button>
+              <button type="button" class="chip mode" data-mod="melodi" aria-pressed="true">🎹 Melodi <small>ezgili müzik</small></button>
+              <button type="button" class="chip mode" data-mod="meditasyon" aria-pressed="false">🕉 Meditasyon <small>kâse, çan ve gong ambiyansı</small></button>
             </div>
+            <div class="pick-row" id="styleRow"><span>Melodi stili</span><div class="chips pick" id="styleChips"></div></div>
+            <div class="pick-row" id="medRow" hidden><span>Meditasyon tipi</span><div class="chips pick" id="medChips"></div></div>
+            <div class="pick-row"><span>Animasyon</span><div class="chips" id="animChips"></div></div>
             <label class="volume"><span>Ses</span><input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" /></label>
             <div class="toggles">
               <button type="button" class="chip" id="oceanToggle" aria-pressed="false">🌊 Okyanus</button>
@@ -101,8 +104,8 @@
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script src="/foto-yuva.js?v=2"></script>
     <script src="/yuz-harita.js?v=2"></script>
-    <script src="/yuz-muzigi-ses.js?v=2"></script>
-    <script src="/yuz-muzigi-sayfa.js?v=2"></script>
+    <script src="/yuz-muzigi-ses.js?v=3"></script>
+    <script src="/yuz-muzigi-sayfa.js?v=3"></script>
     <script src="/ust-cubuk.js?v=4" defer></script>
   </body>
 </html>
