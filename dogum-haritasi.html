@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Doğum Haritası: gerçek gök hesabıyla harita çarkın, 12 ev, gezegen açıları, element dengesi ve derin yorum." />
+    <title>Doğum Haritası · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/dogum-haritasi.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Doğum Haritası</p>
+          <h1>Doğduğun anın<br />gökyüzü</h1>
+          <p class="lead">Doğduğun dakikada gezegenler nerede duruyordu? Harita çarkın gerçek gök hesabıyla çiziliyor: 12 ev, gezegenlerin açıları, element dengen ve astroloğumuzun bölüm bölüm derin yorumu.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#bilgiler" id="heroStart">Haritamı çiz</a>
+            <a class="btn btn-ghost" href="/astroloji">Burçlar ve günün gökyüzü</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="hero-wheel" src="/astroloji/cark.webp" alt="" width="520" height="520" />
+        </div>
+      </section>
+
+      <section id="bilgiler" aria-labelledby="formTitle">
+        <div class="section-head">
+          <h2 id="formTitle">Doğum bilgilerin</h2>
+          <p class="section-note" id="formNote">Evler ve yükselen için doğum saatin ve yerin gerekli.</p>
+        </div>
+        <form class="card birth-form" id="birthForm">
+          <label><span>Doğum tarihi</span><input type="date" name="tarih" min="1900-01-01" max="2049-12-31" required /></label>
+          <label><span>Doğum saati</span><input type="time" name="saat" /></label>
+          <label><span>Doğum yeri</span><select name="sehir" required></select></label>
+          <label class="check"><input type="checkbox" name="saatYok" /><span>Doğum saatimi bilmiyorum</span></label>
+          <button type="submit" class="btn btn-primary" id="birthSubmit">Haritamı çiz</button>
+          <p class="form-hint">Bilgilerin astroloji bölümündeki haritanla ortaktır; farklı bilgilerle yeni harita 3 günde bir çıkarılabilir.</p>
+        </form>
+        <div class="birth-summary card" id="birthSummary" hidden>
+          <p id="birthText"></p>
+          <button type="button" class="btn btn-ghost" id="birthEdit">Bilgileri değiştir</button>
+        </div>
+      </section>
+
+      <section id="harita" hidden aria-labelledby="wheelTitle">
+        <div class="section-head">
+          <h2 id="wheelTitle">Harita çarkın</h2>
+          <p class="section-note" id="wheelNote"></p>
+        </div>
+        <div class="wheel-layout">
+          <div class="wheel-wrap card">
+            <svg class="wheel" id="wheel" viewBox="-300 -300 600 600" role="img" aria-label="Doğum haritası çarkı"></svg>
+            <ul class="wheel-legend" id="wheelLegend"></ul>
+          </div>
+          <aside class="card focus" id="focus" aria-live="polite">
+            <p class="sky-label">Gezegenine dokun</p>
+            <p class="focus-empty">Çarktaki bir gezegene ya da aşağıdaki listeye dokun; burcunu, evini ve açılarını burada anlatayım.</p>
+          </aside>
+        </div>
+
+        <div class="big-three" id="bigThree"></div>
+
+        <div class="dlg-grid two">
+          <div class="card">
+            <h3>Gezegen yerleşimlerin</h3>
+            <table class="planet-table" id="planetTable"></table>
+          </div>
+          <div class="card">
+            <h3>Element ve nitelik dengen</h3>
+            <ul class="balance" id="elementBalance"></ul>
+            <ul class="balance" id="qualityBalance"></ul>
+            <p class="balance-note" id="balanceNote"></p>
+          </div>
+        </div>
+
+        <div class="section-head sub" id="housesHead">
+          <h2>12 ev</h2>
+          <p class="section-note">Placidus ev sistemi. Her ev hayatının bir alanıdır; içindeki gezegenler o alana enerji katar.</p>
+        </div>
+        <ul class="houses" id="houses"></ul>
+
+        <div class="section-head sub">
+          <h2>Gezegen açıların</h2>
+          <p class="section-note">Gezegenler arasındaki açılar, enerjilerinin birbiriyle nasıl konuştuğunu gösterir.</p>
+        </div>
+        <ul class="aspects" id="aspects"></ul>
+        <button type="button" class="btn btn-ghost aspects-more" id="aspectsMore" hidden>Tüm açıları göster</button>
+      </section>
+
+      <section id="yorum" hidden aria-labelledby="readingTitle">
+        <div class="section-head">
+          <h2 id="readingTitle">Derin yorumun</h2>
+          <p class="section-note" id="readingNote">Astroloğumuz haritanı evleri ve açılarıyla bölüm bölüm yorumlar.</p>
+        </div>
+        <div class="card reading-start" id="readingStart">
+          <img src="/astroloji/profil.webp" alt="" width="120" height="120" loading="lazy" />
+          <div>
+            <p>Haritanın derin yorumu hazır değil. Hazırlamak bir dakika kadar sürebilir.</p>
+            <button type="button" class="btn btn-primary" id="readingButton">Derin yorumumu hazırla</button>
+          </div>
+        </div>
+        <div class="reading-wait card" id="readingWait" hidden>
+          <div class="orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+          <p id="waitText">Gezegenlerin okunuyor…</p>
+        </div>
+        <div id="readingBody" hidden>
+          <div class="card reading-hero">
+            <div class="reading-head">
+              <h3 id="readingHeadline"></h3>
+              <span class="badge" id="readingBadge"></span>
+            </div>
+            <p class="reading-text" id="readingSummary"></p>
+            <button type="button" class="listen" id="readingListen" hidden>🔊 Yorumu sesli dinle</button>
+          </div>
+          <div class="reading-grid" id="readingGrid"></div>
+          <div class="dlg-grid two">
+            <div class="card"><h3>✦ Güçlü yanların</h3><ul class="ticks" id="strengths"></ul></div>
+            <div class="card"><h3>◇ Hayat derslerin</h3><ul class="ticks shadow" id="lessons"></ul></div>
+          </div>
+          <div class="card" id="aspectReadingCard" hidden>
+            <h3>Haritanın en güçlü açıları</h3>
+            <ul class="aspect-readings" id="aspectReadings"></ul>
+          </div>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Haritan hazır. Dilersen uzmanlarımızdan birini seç; haritanı kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <p class="disclaimer">Doğum haritası kendini tanımak için ilham veren bir rehberdir; hayatının yönünü sen belirlersin.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astro.js?v=1"></script>
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/dogum-haritasi-hesap.js?v=1"></script>
+    <script src="/dogum-haritasi-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/dogum-haritasi-sayfa.js?v=1"></script>
+  </body>
+</html>

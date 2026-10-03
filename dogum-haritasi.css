@@ -1,0 +1,167 @@
+/* Ayrıntılı doğum haritası sayfası: astroloji.css'in üzerine. */
+
+/* --- Form --- */
+.birth-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: end; }
+.birth-form label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 0.9rem; font-weight: 700; }
+.birth-form label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--muted); font-weight: 600; cursor: pointer; }
+.birth-form label.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.birth-form input[type="date"], .birth-form input[type="time"], .birth-form select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+}
+.birth-form select option { color: #111; }
+.birth-form input:disabled { opacity: 0.45; }
+.birth-form .check { grid-column: 1 / 2; }
+.birth-form .btn { grid-column: 3 / 4; }
+.birth-form .form-hint { grid-column: 1 / -1; }
+.birth-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.birth-summary p { font-size: 1.02rem; }
+
+/* --- Çark --- */
+.wheel-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-bottom: 16px; }
+.wheel-wrap { padding: 14px; }
+.wheel { display: block; width: 100%; height: auto; overflow: visible; }
+.wheel text { font-family: "Segoe UI Symbol", "Noto Sans Symbols", "Apple Symbols", var(--serif), sans-serif; dominant-baseline: central; text-anchor: middle; }
+
+.w-ring { opacity: 0; transform-origin: 0 0; animation: wheelIn 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+@keyframes wheelIn { from { opacity: 0; transform: rotate(-40deg) scale(0.86); } to { opacity: 1; transform: none; } }
+.w-sign { stroke: rgba(243, 194, 107, 0.35); stroke-width: 1; }
+.w-sign.ates { fill: rgba(255, 110, 70, 0.16); }
+.w-sign.toprak { fill: rgba(140, 200, 110, 0.13); }
+.w-sign.hava { fill: rgba(140, 200, 255, 0.13); }
+.w-sign.su { fill: rgba(120, 120, 255, 0.16); }
+.w-glyph { fill: var(--gold); font-size: 22px; }
+.w-tick { stroke: rgba(243, 194, 107, 0.4); stroke-width: 1; }
+.w-circle { fill: none; stroke: rgba(243, 194, 107, 0.35); stroke-width: 1; }
+.w-inner { fill: rgba(7, 9, 20, 0.55); stroke: rgba(243, 194, 107, 0.3); }
+
+.w-house { opacity: 0; animation: fadeIn 0.6s ease forwards; }
+.w-cusp { stroke: rgba(255, 255, 255, 0.22); stroke-width: 1; }
+.w-cusp.axis { stroke: var(--gold); stroke-width: 2; }
+.w-house-no { fill: rgba(195, 189, 214, 0.7); font-size: 13px; font-family: var(--serif) !important; font-weight: 700; }
+.w-axis-label { fill: var(--gold); font-size: 13px; font-weight: 800; font-family: Manrope, sans-serif !important; letter-spacing: 0.06em; }
+
+.w-aspect { fill: none; stroke-width: 1.4; opacity: 0.8; stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 1.2s ease forwards; transition: opacity 0.25s, stroke-width 0.25s; }
+.w-aspect.dim { opacity: 0.08; }
+.w-aspect.hot { opacity: 1; stroke-width: 2.6; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fadeIn { to { opacity: 1; } }
+
+.w-planet { cursor: pointer; opacity: 0; animation: pop 0.55s cubic-bezier(0.3, 1.6, 0.5, 1) forwards; }
+.w-planet circle { fill: rgba(11, 13, 34, 0.92); stroke: rgba(243, 194, 107, 0.55); stroke-width: 1.2; transition: fill 0.2s, stroke 0.2s; }
+.w-planet text { fill: #fff3d6; font-size: 19px; }
+.w-planet .w-deg { fill: var(--muted); font-size: 10px; font-family: Manrope, sans-serif !important; }
+.w-planet:hover circle, .w-planet.is-active circle { fill: var(--gold); stroke: #fff; }
+.w-planet:hover text:first-of-type, .w-planet.is-active text:first-of-type { fill: #070914; }
+.w-pointer { stroke: rgba(243, 194, 107, 0.5); stroke-width: 1; }
+@keyframes pop { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: none; } }
+.w-planet { transform-box: fill-box; transform-origin: center; }
+
+.wheel-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 10px 0 0; padding: 0; list-style: none; color: var(--muted); font-size: 0.8rem; }
+.wheel-legend i { display: inline-block; width: 18px; height: 3px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+
+/* --- Odak paneli --- */
+.focus { position: sticky; top: 80px; min-height: 260px; }
+.focus-empty { color: var(--muted); }
+.focus-title { display: flex; align-items: center; gap: 12px; margin: 6px 0 10px; }
+.focus-title .glyph { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; color: #070914; background: var(--gold); font-size: 1.7rem; }
+.focus-title b { display: block; font-family: var(--serif); font-size: 1.6rem; line-height: 1.1; }
+.focus-title small { color: var(--muted); }
+.focus p { margin-bottom: 10px; color: #e3dff0; font-size: 0.93rem; }
+.focus p b { color: var(--gold); }
+.focus ul { margin: 0; padding: 0; list-style: none; }
+.focus li { padding: 6px 0; border-top: 1px dashed rgba(255, 255, 255, 0.08); font-size: 0.88rem; }
+.focus li span { font-weight: 800; }
+
+.big-three { margin-bottom: 16px; }
+.dlg-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.aspects-more { display: block; margin: 14px auto 0; }
+
+/* --- Tablo ve denge --- */
+.planet-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.planet-table td { padding: 7px 6px; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); }
+.planet-table tr { cursor: pointer; transition: background 0.2s; }
+.planet-table tr:hover, .planet-table tr.is-active { background: rgba(243, 194, 107, 0.1); }
+.planet-table .g { width: 30px; color: var(--gold); font-size: 1.15rem; text-align: center; }
+.planet-table .ev { color: var(--muted); text-align: right; white-space: nowrap; }
+.planet-table .retro { color: #ff9b9b; font-weight: 800; }
+
+.balance { display: grid; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
+.balance li { display: grid; grid-template-columns: 104px 1fr 28px; gap: 10px; align-items: center; font-size: 0.9rem; }
+.balance .bar { position: relative; height: 10px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.08); }
+.balance .bar span { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.balance .bar span.ates { background: linear-gradient(90deg, #ff6a3d, #ffb35c); }
+.balance .bar span.toprak { background: linear-gradient(90deg, #6aa84f, #c5e17a); }
+.balance .bar span.hava { background: linear-gradient(90deg, #5aa9e6, #b8e3ff); }
+.balance .bar span.su { background: linear-gradient(90deg, #5a5ae6, #9a8cff); }
+.balance b { text-align: right; color: #f6dca0; }
+.balance-note { color: #e3dff0; font-size: 0.92rem; }
+
+/* --- Evler --- */
+.section-head.sub { margin-top: 36px; }
+.houses { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.houses li { padding: 14px; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); animation: rise 0.5s ease both; }
+.houses .no { color: var(--gold); font-size: 0.74rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.houses b { display: block; font-family: var(--serif); font-size: 1.35rem; }
+.houses .kw { color: var(--muted); font-size: 0.76rem; }
+.houses .cusp { margin: 8px 0 4px; font-size: 0.86rem; }
+.houses .in { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.houses .in button { padding: 3px 8px; border: 1px solid rgba(243, 194, 107, 0.35); border-radius: 999px; color: var(--gold); background: rgba(243, 194, 107, 0.08); font: inherit; font-size: 0.8rem; cursor: pointer; }
+.houses p { color: #d8d3e8; font-size: 0.82rem; }
+.houses li.has-planets { border-color: rgba(243, 194, 107, 0.5); }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* --- Açılar --- */
+.aspects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.aspects li { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); cursor: pointer; transition: border-color 0.2s; }
+.aspects li:hover { border-color: var(--gold); }
+.aspects .sym { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-size: 1.4rem; background: rgba(255, 255, 255, 0.05); }
+.aspects b { display: block; font-size: 0.98rem; }
+.aspects small { color: var(--muted); font-size: 0.78rem; }
+.aspects p { margin-top: 4px; color: #d8d3e8; font-size: 0.86rem; }
+
+/* --- Derin yorum --- */
+.reading-start { display: flex; align-items: center; gap: 18px; }
+.reading-start img { width: 110px; height: 110px; object-fit: contain; }
+.reading-start p { margin-bottom: 12px; }
+.reading-wait { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 36px; text-align: center; }
+.orbit { position: relative; width: 120px; height: 120px; border: 1px dashed rgba(243, 194, 107, 0.4); border-radius: 50%; animation: spin 6s linear infinite; }
+.orbit span { position: absolute; top: -7px; left: 50%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 16px var(--gold); }
+.orbit span:nth-child(2) { top: auto; bottom: -7px; background: #9a8cff; box-shadow: 0 0 16px #9a8cff; }
+.orbit span:nth-child(3) { top: 50%; left: -7px; margin: -7px 0 0; background: var(--accent); box-shadow: 0 0 16px var(--accent); }
+.reading-hero { margin-bottom: 12px; }
+.reading-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+.reading-grid .card { animation: rise 0.6s ease both; }
+.reading-grid .card p { color: #e3dff0; font-size: 0.95rem; }
+.reading-grid h3 { display: flex; align-items: center; gap: 8px; }
+.aspect-readings { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.aspect-readings li { padding-left: 14px; border-left: 3px solid var(--gold); }
+.aspect-readings b { display: block; margin-bottom: 2px; }
+.aspect-readings p { color: #e3dff0; font-size: 0.93rem; }
+#yorum .expert { margin-top: 16px; }
+
+@media (max-width: 920px) {
+  .wheel-layout { grid-template-columns: 1fr; }
+  .focus { position: static; min-height: 0; }
+  .houses { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .birth-form { grid-template-columns: 1fr; }
+  .birth-form .check, .birth-form .btn { grid-column: auto; }
+  .aspects, .reading-grid, .dlg-grid.two { grid-template-columns: 1fr; }
+  .houses { grid-template-columns: 1fr; }
+  .wheel-wrap { padding: 6px; }
+  .reading-start { flex-direction: column; text-align: center; }
+}

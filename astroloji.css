@@ -685,3 +685,5 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
 .is-playing .expert-face video { opacity: 1; }
 .expert-slot:disabled .expert-face { filter: saturate(0.75); }
 .expert-slot:disabled { opacity: 0.8; }
+
+.chart-more { margin-top: 14px; }
