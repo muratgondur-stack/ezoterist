@@ -17,6 +17,7 @@ const { yuzKaydiOku, fotoYolu: yuzFotoYolu } = require("./yuz-okuma-api");
 const { analizKaydiOku, fotoYolu: analizFotoYolu } = require("./fotograf-analiz-api");
 const { askKaydiOku } = require("./ask-uyumu-api");
 const { melekKaydiOku, ALANLAR: MELEK_ALANLARI } = require("./melek-sayilari-api");
+const { ichingKaydiOku, ALANLAR: ICHING_ALANLARI } = require("./iching-api");
 const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
@@ -182,6 +183,18 @@ const BOLUMLER = {
       baslik: `${k.sayi} · ${k.yorum.baslik}`,
       girdiMetni: `Gördüğü sayı: ${k.sayi}${k.nerede ? ` (${k.nerede})` : ""}`,
       ozet: [`Merak ettiği alan: ${MELEK_ALANLARI[k.alan] || "genel yaşam"}`, k.an ? `O an aklından geçen: ${k.an}` : ""].filter(Boolean).join(" — "),
+      kayitId: k.id,
+    }),
+  },
+  iching: {
+    ad: "I Ching",
+    link: "/iching#gunluk",
+    yukle: (dataDir, userId, body) => ichingKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: `${k.ana.no}. ${k.ana.ad}${k.sonra ? ` → ${k.sonra.no}. ${k.sonra.ad}` : ""}`,
+      girdiMetni: `Sorusu: ${k.soru}`,
+      ozet: [`Konu: ${ICHING_ALANLARI[k.alan] || "genel yaşam"}`, `Atışlar (alttan üste): ${k.atislar.join(", ")}`,
+        k.degisen.length ? `Değişen çizgiler: ${k.degisen.join(", ")}` : "Değişen çizgi yok"].join(" — "),
       kayitId: k.id,
     }),
   },

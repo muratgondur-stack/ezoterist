@@ -22,6 +22,8 @@ COPY ask-uyumu-hesap.js ask-uyumu-api.js ask-uyumu.html ask-uyumu.css ask-uyumu-
 COPY dogum-haritasi-hesap.js dogum-haritasi-veri.js dogum-haritasi-api.js dogum-haritasi.html dogum-haritasi.css dogum-haritasi-sayfa.js ./
 COPY melek-sayilari-veri.js melek-sayilari-api.js melek-sayilari.html melek-sayilari.css melek-sayilari-sayfa.js ./
 COPY melek ./melek
+COPY iching-veri.js iching-api.js iching.html iching.css iching-sayfa.js ./
+COPY iching ./iching
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi
 COPY fal ./fal

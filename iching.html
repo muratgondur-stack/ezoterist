@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist I Ching: sorunu yaz, üç parayı altı kez at; heksagramın, değişen çizgilerin ve sana özel yorumun. 64 heksagram ve 8 trigram rehberi." />
+    <title>I Ching · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/iching.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · I Ching</p>
+          <h1>Değişimler<br />Kitabı'na sor</h1>
+          <p class="lead">Üç bin yıllık bilgelik: sorunu yaz, üç parayı altı kez at. Çizgiler alttan yukarı bir heksagram kurar; değişen çizgiler durumun nereye aktığını gösterir. Yorumunu oku, sesli dinle.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#sor">Sorumu sor</a>
+            <a class="btn btn-ghost" href="#heksagramlar">64 heksagram</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="iching-cover" src="/iching/kapak.webp?v=1" alt="" width="720" height="720" />
+        </div>
+      </section>
+
+      <section id="sor" aria-labelledby="askTitle">
+        <div class="section-head">
+          <h2 id="askTitle">Sorunu yaz</h2>
+          <p class="section-note" id="quota">Her gün 3 soru sorabilirsin.</p>
+        </div>
+        <form class="card ask-form" id="askForm">
+          <label class="field">
+            <span>Sorun</span>
+            <textarea name="soru" rows="3" maxlength="300" required placeholder="Örneğin: Yeni işe geçmek konusunda nasıl bir tutum almalıyım?"></textarea>
+          </label>
+          <p class="form-hint">İpucu: "evet mi hayır mı" yerine "nasıl yaklaşmalıyım, neye dikkat etmeliyim" gibi açık sorular I Ching'in diline daha uygundur.</p>
+          <div class="field">
+            <span>Konu</span>
+            <div class="chips" id="areaChips"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="askSubmit">🪙 Paraları at</button>
+        </form>
+      </section>
+
+      <section id="atis" hidden aria-labelledby="throwTitle">
+        <div class="card throw-stage">
+          <h2 id="throwTitle">Paralar atılıyor…</h2>
+          <p class="section-note" id="throwNote">Sorun üzerine düşün. Altı atış, alttan yukarı altı çizgi.</p>
+          <div class="coins" id="coins">
+            <div class="coin"><div class="face front"></div><div class="face back"></div></div>
+            <div class="coin"><div class="face front"></div><div class="face back"></div></div>
+            <div class="coin"><div class="face front"></div><div class="face back"></div></div>
+          </div>
+          <p class="throw-value" id="throwValue">&nbsp;</p>
+          <div class="build" id="build"></div>
+        </div>
+      </section>
+
+      <section id="sonuc" hidden aria-labelledby="resultTitle">
+        <div class="card result-head">
+          <p class="sky-label" id="resultQuestion"></p>
+          <h2 id="resultTitle"></h2>
+          <span class="badge" id="resultBadge"></span>
+          <div class="hex-pair" id="hexPair"></div>
+        </div>
+
+        <div class="card reading">
+          <p class="reading-lead" id="readingSummary"></p>
+          <div class="reading-block" id="stateBlock"><h3>☯ Şu anki durum</h3><p id="stateText"></p></div>
+          <div class="reading-block" id="linesBlock"><h3>✦ Değişen çizgiler</h3><ul class="moving-list" id="movingList"></ul></div>
+          <div class="reading-block" id="futureBlock"><h3>➶ Durum nereye akıyor</h3><p id="futureText"></p></div>
+          <div class="reading-block answer" id="answerBlock"><h3>Sorunun cevabı</h3><p id="answerText"></p></div>
+          <div class="reading-block" id="adviceBlock"><h3>Tavsiye</h3><p id="adviceText"></p></div>
+          <button type="button" class="listen" id="resultListen" hidden>🔊 Yorumu sesli dinle</button>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Heksagramın hazır. Dilersen uzmanlarımızdan birini seç; sorunu ve çıkan heksagramı kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">I Ching günlüğüm</h2>
+          <p class="section-note" id="journalNote">Sorduğun sorular ve çıkan heksagramlar burada saklanır.</p>
+        </div>
+        <ul class="hex-journal" id="journal"></ul>
+      </section>
+
+      <section id="trigramlar" aria-labelledby="trigramTitle">
+        <div class="section-head">
+          <h2 id="trigramTitle">Sekiz trigram</h2>
+          <p class="section-note">Her heksagram iki trigramdan oluşur: alttaki iç dünyayı, üstteki dış dünyayı anlatır.</p>
+        </div>
+        <ul class="trigram-grid" id="trigramGrid"></ul>
+      </section>
+
+      <section id="heksagramlar" aria-labelledby="hexTitle">
+        <div class="section-head">
+          <h2 id="hexTitle">64 heksagram</h2>
+          <p class="section-note">Bir heksagrama dokun, anlamını oku.</p>
+        </div>
+        <ul class="hex-grid" id="hexGrid"></ul>
+      </section>
+
+      <p class="disclaimer">I Ching düşünmene ve kendini dinlemene yardım eden bir bilgelik aracıdır; kararlarını her zaman kendi aklın ve kalbinle ver.</p>
+    </main>
+
+    <dialog class="sign-dialog hex-dialog" id="hexDialog">
+      <form method="dialog" class="dlg-close-form"><button class="dlg-close" aria-label="Kapat">✕</button></form>
+      <div id="hexDialogBody"></div>
+    </dialog>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/iching-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/iching-sayfa.js?v=1"></script>
+  </body>
+</html>
