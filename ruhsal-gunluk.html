@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Ruhsal Günlük: her gün duygun, enerjin, şükranın ve niyetin; o günün Ay'ı, sana özel yansıma, haftalık özet ve ruh hâli takvimin." />
+    <title>Ruhsal Günlük · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/ruhsal-gunluk.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Ruhsal Günlük</p>
+          <h1>Kendinle<br />buluştuğun sayfa</h1>
+          <p class="lead">Her gün birkaç dakika: nasıl hissettiğin, neye şükrettiğin, neye niyet ettiğin. O günün Ay'ı kaydına eklenir; istersen günlüğüne şefkatli bir yansıma, hafta sonunda da özet alırsın. Günlüğün yalnızca sana aittir.</p>
+          <div class="streak" id="streak"></div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="journal-cover" src="/sembol/gunluk-kapak.webp?v=1" alt="" width="720" height="720" />
+        </div>
+      </section>
+
+      <section id="yaz" aria-labelledby="writeTitle">
+        <form class="card entry" id="entryForm">
+          <div class="entry-head">
+            <div>
+              <h2 id="writeTitle">Bugünün sayfası</h2>
+              <p class="moon-chip" id="moonChip"></p>
+            </div>
+            <label class="date-pick"><span>Gün</span><input type="date" name="gun" /></label>
+          </div>
+
+          <div class="block">
+            <h3>Nasıl hissediyorsun? <small>(en fazla 4)</small></h3>
+            <div class="moods" id="moods"></div>
+          </div>
+
+          <div class="block">
+            <h3>Enerjin <b id="energyValue">5</b><small>/10</small></h3>
+            <input type="range" name="enerji" min="1" max="10" value="5" class="energy" />
+          </div>
+
+          <div class="block">
+            <h3>Bugün neye şükrediyorsun?</h3>
+            <div class="gratitude">
+              <input name="sukran1" maxlength="160" placeholder="1. Sabah kahvemin tadı…" />
+              <input name="sukran2" maxlength="160" placeholder="2." />
+              <input name="sukran3" maxlength="160" placeholder="3." />
+            </div>
+          </div>
+
+          <div class="block">
+            <h3>Niyetin</h3>
+            <input name="niyet" maxlength="240" placeholder="Bugün… / Yarın…" />
+          </div>
+
+          <div class="block">
+            <h3>Günün sorusu</h3>
+            <p class="prompt" id="prompt"></p>
+            <textarea name="metin" rows="7" maxlength="4000" placeholder="İçinden geldiği gibi yaz…"></textarea>
+            <div class="write-tools">
+              <button type="button" class="mic" id="micButton" hidden>🎙️ Sesle yaz</button>
+              <span class="mic-status" id="micStatus"></span>
+              <span class="count" id="charCount">0 / 4000</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="saveButton">Sayfamı kaydet</button>
+            <span class="saved" id="saved" hidden>✓ Kaydedildi</span>
+            <button type="button" class="btn btn-ghost" id="reflectButton" hidden>✨ Yansımamı al</button>
+          </div>
+          <p class="section-note" id="quota"></p>
+        </form>
+
+        <div class="card reflection" id="reflection" hidden>
+          <p class="sky-label">Günlüğüne yansıma</p>
+          <p class="reflection-text" id="reflectionText"></p>
+          <p class="tomorrow" id="reflectionQuestion"></p>
+          <p class="affirmation" id="reflectionAffirmation"></p>
+          <button type="button" class="listen" id="reflectionListen" hidden>🔊 Sesli dinle</button>
+        </div>
+      </section>
+
+      <section id="ritim" aria-labelledby="rhythmTitle">
+        <div class="section-head">
+          <h2 id="rhythmTitle">Ruh hâli ritmin</h2>
+          <p class="section-note">Son beş haftan: her kare bir gün, rengi o günün baskın duygusu.</p>
+        </div>
+        <div class="rhythm">
+          <div class="card">
+            <div class="heat-days"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
+            <div class="heat" id="heat"></div>
+          </div>
+          <div class="card">
+            <h3>Enerji çizgin <small>(son 30 gün)</small></h3>
+            <svg class="energy-chart" id="energyChart" viewBox="0 0 300 120" preserveAspectRatio="none" role="img" aria-label="Son 30 günün enerji grafiği"></svg>
+            <h3 class="top-title">En sık duyguların</h3>
+            <ul class="top-moods" id="topMoods"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="ozet" aria-labelledby="weekTitle">
+        <div class="section-head">
+          <h2 id="weekTitle">Haftalık özet</h2>
+          <p class="section-note">Son yedi günündeki örüntüler; günde bir kez çıkarılabilir.</p>
+        </div>
+        <div class="card week-start">
+          <p>Son yedi gününe bakıp sende fark ettiklerimi yazayım.</p>
+          <button type="button" class="btn btn-primary" id="weekButton">Haftamı özetle</button>
+        </div>
+        <div id="weeks"></div>
+      </section>
+
+      <section id="kayitlar" aria-labelledby="listTitle">
+        <div class="section-head">
+          <h2 id="listTitle">Sayfalarım</h2>
+          <p class="section-note" id="listNote"></p>
+        </div>
+        <ul class="pages" id="pages"></ul>
+      </section>
+
+      <p class="disclaimer">Ruhsal günlük kendini tanıman için bir alandır; zor zamanlarda bir uzmandan ya da güvendiğin birinden destek almaktan çekinme. Acil durumda 112'yi ara.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astro.js?v=1"></script>
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/ruhsal-gunluk-veri.js?v=1"></script>
+    <script src="/ruhsal-gunluk-sayfa.js?v=1"></script>
+  </body>
+</html>

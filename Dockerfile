@@ -31,6 +31,8 @@ COPY ay ./ay
 COPY cakra-veri.js kristal-veri.js cakra-kristal-api.js cakralar.html cakralar.css cakralar-sayfa.js kristaller.html kristaller.css kristaller-sayfa.js ./
 COPY kristal ./kristal
 COPY kontor.js arsiv-api.js arsiv.html arsiv.css arsiv-sayfa.js ./
+COPY ruhsal-gunluk-veri.js ruhsal-gunluk-api.js ruhsal-gunluk.html ruhsal-gunluk.css ruhsal-gunluk-sayfa.js ./
+COPY sembol ./sembol
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi
 COPY fal ./fal

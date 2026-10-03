@@ -1,0 +1,112 @@
+/* Ruhsal günlük sayfası: astroloji.css'in üzerine. */
+
+.journal-cover { position: relative; width: min(100%, 440px); height: auto; border-radius: 28px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 50px rgba(243, 194, 107, 0.2); }
+.streak { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.streak div { padding: 10px 16px; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); }
+.streak b { display: block; color: var(--gold); font-family: var(--serif); font-size: 1.8rem; line-height: 1; }
+.streak small { color: var(--muted); font-size: 0.78rem; }
+
+/* --- Sayfa formu --- */
+.entry { display: flex; flex-direction: column; gap: 18px; }
+.entry-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.entry h2 { font-size: 1.9rem; }
+.moon-chip { margin-top: 4px; color: var(--muted); font-size: 0.9rem; }
+.date-pick { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; font-weight: 800; color: var(--muted); }
+.entry input:not([type="range"]), .entry textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.entry textarea { line-height: 1.6; resize: vertical; font-size: 1rem; }
+.entry input:focus, .entry textarea:focus { outline: none; border-color: var(--gold); }
+.block h3 { margin-bottom: 8px; font-size: 1.05rem; }
+.block h3 small { color: var(--muted); font-weight: 500; font-size: 0.8rem; }
+.block h3 b { margin-left: 6px; color: var(--gold); font-family: var(--serif); font-size: 1.4rem; }
+.moods { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.moods button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; color: var(--foreground); background: rgba(255, 255, 255, 0.03); font: inherit; font-size: 0.8rem; cursor: pointer; transition: transform 0.15s, border-color 0.2s, background 0.2s; }
+.moods button span { font-size: 1.6rem; }
+.moods button:hover { transform: translateY(-2px); }
+.moods button[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 22%, transparent); box-shadow: 0 0 16px color-mix(in srgb, var(--c) 40%, transparent); }
+.energy { width: 100%; accent-color: var(--gold); }
+.gratitude { display: grid; gap: 8px; }
+.prompt { margin-bottom: 8px; font-family: var(--serif); font-size: 1.35rem; font-style: italic; color: #fff3d6; }
+.write-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; }
+.mic { padding: 8px 14px; border: 1px solid var(--card-border); border-radius: 999px; color: var(--foreground); background: rgba(255, 255, 255, 0.04); font: inherit; font-weight: 700; cursor: pointer; }
+.mic.is-recording { border-color: #ff6b6b; background: rgba(255, 90, 90, 0.2); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(255, 90, 90, 0.15); } }
+.mic-status { color: var(--muted); font-size: 0.85rem; }
+.count { margin-left: auto; color: var(--muted); font-size: 0.8rem; }
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.saved { color: #8ff0b8; font-weight: 800; }
+
+.reflection { margin-top: 14px; border-color: rgba(179, 136, 235, 0.45); background: radial-gradient(circle at 90% 0%, rgba(179, 136, 235, 0.16), transparent 55%), var(--card); animation: rise 0.6s ease both; }
+.reflection-text { margin-top: 6px; color: #efeaf9; font-size: 1.06rem; line-height: 1.7; }
+.tomorrow { margin-top: 12px; padding-left: 14px; border-left: 3px solid var(--gold); color: #f6dca0; font-style: italic; }
+.tomorrow:empty, .affirmation:empty { display: none; }
+.affirmation { margin-top: 12px; padding: 12px 16px; border: 1px solid rgba(179, 136, 235, 0.3); border-radius: 14px; color: #fff3d6; background: rgba(179, 136, 235, 0.07); font-family: var(--serif); font-size: 1.25rem; font-style: italic; text-align: center; }
+
+/* --- Ritim --- */
+.rhythm { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.heat-days, .heat { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.heat-days span { color: var(--muted); font-size: 0.72rem; font-weight: 800; text-align: center; }
+.heat { margin-top: 6px; }
+.heat span { position: relative; aspect-ratio: 1; border-radius: 8px; background: rgba(255, 255, 255, 0.05); display: grid; place-items: center; font-size: 0.95rem; cursor: default; }
+.heat span.dolu { background: color-mix(in srgb, var(--c) 55%, #0b0d22); cursor: pointer; box-shadow: 0 0 10px color-mix(in srgb, var(--c) 35%, transparent); }
+.heat span.bugun { outline: 2px solid var(--gold); outline-offset: 1px; }
+.heat span.gelecek { visibility: hidden; }
+.energy-chart { width: 100%; height: 130px; margin: 8px 0 4px; overflow: visible; }
+.energy-chart .grid { stroke: rgba(255, 255, 255, 0.06); stroke-width: 1; }
+.energy-chart .line { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.energy-chart .area { fill: url(#enerjiDolgu); }
+.energy-chart circle { fill: #fff3d6; }
+.top-title { margin-top: 12px; }
+.top-moods { display: grid; gap: 6px; margin: 8px 0 0; padding: 0; list-style: none; }
+.top-moods li { display: grid; grid-template-columns: 110px 1fr 28px; gap: 8px; align-items: center; font-size: 0.86rem; }
+.top-moods .bar { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+.top-moods .bar span { display: block; height: 100%; background: var(--c); border-radius: 999px; }
+.top-moods b { text-align: right; color: var(--muted); }
+
+/* --- Haftalık --- */
+.week-start { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+.week { margin-top: 12px; animation: rise 0.5s ease both; }
+.week h3 { font-size: 1.4rem; }
+.week .range { color: var(--muted); font-size: 0.84rem; }
+.week p { color: #e3dff0; margin: 8px 0; }
+.week ul { margin: 8px 0; padding-left: 20px; color: #e3dff0; }
+
+/* --- Sayfalar --- */
+.pages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.pages li { position: relative; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); }
+.pages li.is-current { border-color: var(--gold); }
+.pages .open { display: block; width: 100%; padding: 14px 40px 14px 16px; border: 0; color: inherit; background: none; font: inherit; text-align: left; cursor: pointer; }
+.pages .emo { font-size: 1.3rem; letter-spacing: 2px; }
+.pages b { display: block; margin-top: 4px; font-family: var(--serif); font-size: 1.15rem; }
+.pages small { color: var(--muted); font-size: 0.78rem; }
+.pages p { margin-top: 4px; color: #d8d3e8; font-size: 0.84rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.pages .del { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border: 0; border-radius: 50%; color: var(--muted); background: rgba(255, 255, 255, 0.06); cursor: pointer; }
+.pages .del:hover { color: #fff; background: rgba(255, 90, 90, 0.4); }
+.empty { color: var(--muted); }
+
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 860px) {
+  .moods { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rhythm { grid-template-columns: 1fr; }
+  .pages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .moods { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pages { grid-template-columns: 1fr; }
+  .heat { gap: 4px; }
+  .top-moods li { grid-template-columns: 96px 1fr 24px; }
+}

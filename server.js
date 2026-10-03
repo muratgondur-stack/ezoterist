@@ -19,6 +19,7 @@ const { createHandler: createRunHandler } = require("./run-api");
 const { createHandler: createAyHandler } = require("./ay-takvimi-api");
 const { createHandler: createCakraKristalHandler } = require("./cakra-kristal-api");
 const { createHandler: createArsivHandler } = require("./arsiv-api");
+const { createHandler: createRuhsalHandler } = require("./ruhsal-gunluk-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -151,6 +152,7 @@ const pageRoutes = {
   "/cakralar": "cakralar.html",
   "/kristaller": "kristaller.html",
   "/arsiv": "arsiv.html",
+  "/ruhsal-gunluk": "ruhsal-gunluk.html",
 };
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
@@ -170,6 +172,7 @@ const handleRunRequest = createRunHandler({ dataDir, currentUser, sendFile });
 const handleAyRequest = createAyHandler({ dataDir, currentUser, sendFile });
 const handleCakraKristalRequest = createCakraKristalHandler({ dataDir, currentUser, sendFile });
 const handleArsivRequest = createArsivHandler({ dataDir, currentUser });
+const handleRuhsalRequest = createRuhsalHandler({ dataDir, currentUser, sendFile });
 
 const server = http.createServer((request, response) => {
   let url;
@@ -200,6 +203,7 @@ const server = http.createServer((request, response) => {
   if (handleAyRequest(request, response, url)) return;
   if (handleCakraKristalRequest(request, response, url)) return;
   if (handleArsivRequest(request, response, url)) return;
+  if (handleRuhsalRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {

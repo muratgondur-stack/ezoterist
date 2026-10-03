@@ -43,6 +43,11 @@ async function analizleriTopla(dataDir, userId) {
   const numeroloji = await readCache(path.join(dataDir, "numeroloji", "kullanici", `${id}.json`));
   if (numeroloji?.olusturma) liste.push({ bolum: "Numeroloji", ikon: "🔢", link: "/numeroloji", tarih: numeroloji.olusturma, baslik: `${numeroloji.girdi?.adSoyad || "Numeroloji"} profili`, ai: numeroloji.kaynak === "ai" });
 
+  // Ruhsal günlük: yansıma alınmış sayfalar ve haftalık özetler.
+  const ruhsal = await readCache(path.join(dataDir, "ruhsal-gunluk", id, "gunluk.json"));
+  (ruhsal?.kayitlar || []).filter((k) => k.yansima).forEach((k) => liste.push({ bolum: "Ruhsal Günlük", ikon: "📖", link: "/ruhsal-gunluk#kayitlar", tarih: k.yansima.tarih, baslik: `${k.gun} sayfasına yansıma`, ai: true }));
+  (ruhsal?.ozetler || []).forEach((o) => liste.push({ bolum: "Ruhsal Günlük", ikon: "📖", link: "/ruhsal-gunluk#ozet", tarih: o.tarih, baslik: `Haftalık özet · ${o.baslik}`, ai: true }));
+
   // Ay döngüsü rehberleri.
   const ayDizin = path.join(dataDir, "ay-takvimi", id);
   const ayDosyalar = (await fs.promises.readdir(ayDizin).catch(() => [])).filter((f) => /^rehber-.*\.json$/.test(f));
