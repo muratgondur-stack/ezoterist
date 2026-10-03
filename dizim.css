@@ -62,7 +62,7 @@
 /* Boş masa yazısı: üst kenardaki boşlukta (köşe işaretlerinin arasında), ortadaki rozeti kapatmaz */
 .table-hint { position: absolute; top: calc(14px + 2.2%); left: 22%; right: 22%; margin: 0; color: rgba(255, 240, 220, 0.78); font-family: var(--serif); font-size: clamp(0.8rem, 1.9vw, 1.2rem); font-style: italic; line-height: 1.25; text-align: center; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); pointer-events: none; }
 /* Ortadaki sedef rozet: tıklanınca taşları rastgele dizer */
-.merkez-rozet { position: absolute; left: 50%; top: 50%; width: 21%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; transform: translate(-50%, -50%); cursor: pointer; transition: box-shadow 0.2s ease; }
+.merkez-rozet { position: absolute; left: 50%; top: 50%; width: 20%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; transform: translate(-50%, -50%); cursor: pointer; transition: box-shadow 0.2s ease; }
 .merkez-rozet:hover, .merkez-rozet:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(243, 194, 107, 0.55), 0 0 28px rgba(243, 194, 107, 0.45); }
 .merkez-rozet:active { box-shadow: 0 0 0 3px rgba(243, 194, 107, 0.9), 0 0 36px rgba(243, 194, 107, 0.6); }
 .bench-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; }

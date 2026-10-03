@@ -6,12 +6,15 @@ const tasResmi = (g) => `/dizim/${g}.webp?v=1`;
 const MAX_TAS = 24;
 
 // Masadaki gedikler (Murat 2026-10-03): taşlar serbest durmaz, iç ve dış iki çemberdeki gediklere oturur.
-// Kare masada iki tam çember; yarıçaplar masa kenarı cinsinden. Merkezdeki sedef mandala iç çemberin içinde,
-// köşelerdeki sedef işaretler dış çemberin dışında kalır (dizim/masa-kare.webp).
+// Kare masada üç tam çember, dıştan içe 12-7-5 gedik (Murat 2026-10-03); yarıçaplar masa kenarı cinsinden.
+// Merkezdeki sedef rozet iç çemberin içinde, köşelerdeki sedef işaretler dış çemberin dışında kalır (dizim/masa-kare.webp).
+// Rastgele dizimde kişiler dışta, kavramlar ortada, mekânlar içte durur.
 const HALKALAR = [
-  { ad: "ic", adet: 8, rx: 0.2, ry: 0.2, kayma: 0 },
-  { ad: "dis", adet: 16, rx: 0.385, ry: 0.385, kayma: 0.5 },
+  { ad: "dis", adet: 12, rx: 0.39, ry: 0.39, kayma: 0 },
+  { ad: "orta", adet: 7, rx: 0.277, ry: 0.277, kayma: 0.5 },
+  { ad: "ic", adet: 5, rx: 0.168, ry: 0.168, kayma: 0 },
 ];
+const HALKA_TURU = { kisi: "dis", ben: "dis", kavram: "orta", mekan: "ic" };
 const GEDIKLER = HALKALAR.flatMap((h) => Array.from({ length: h.adet }, (_, i) => {
   const aci = -Math.PI / 2 + ((i + h.kayma) * 2 * Math.PI) / h.adet;
   return { halka: h.ad, x: 0.5 + (h.rx * Math.cos(aci)) * ORAN, y: 0.5 + h.ry * Math.sin(aci) };
@@ -291,16 +294,38 @@ function merkezRozet() {
   return b;
 }
 
+function karistir(dizi) {
+  for (let i = dizi.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [dizi[i], dizi[j]] = [dizi[j], dizi[i]];
+  }
+  return dizi;
+}
+
+// Her taş türünün çemberine (kişi dış, kavram orta, mekân iç) rastgele bir gediğe; o çember doluysa en yakın çembere.
 function rastgeleDiz() {
   if (!taslar.length) { toast("Önce yukarıdan taşlarını seç."); return; }
-  const sira = GEDIKLER.map((_, i) => i);
-  for (let i = sira.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [sira[i], sira[j]] = [sira[j], sira[i]];
-  }
-  taslar.forEach((t, i) => { gedigeKoy(t, i < sira.length ? sira[i] : null); t.yeni = true; });
+  const bos = Object.fromEntries(HALKALAR.map((h) => [h.ad, karistir(GEDIKLER.map((g, i) => i).filter((i) => GEDIKLER[i].halka === h.ad))]));
+  const sira = HALKALAR.map((h) => h.ad);
+  const yedek = (ad) => [...sira].sort((a, b) => Math.abs(sira.indexOf(a) - sira.indexOf(ad)) - Math.abs(sira.indexOf(b) - sira.indexOf(ad)));
+  karistir([...taslar]).forEach((t) => {
+    const halka = yedek(HALKA_TURU[t.tur] || "dis").find((h) => bos[h].length);
+    gedigeKoy(t, halka ? bos[halka].pop() : null);
+    t.yeni = true;
+  });
   renderBench();
-  toast("Taşlar rastgele dizildi. İstediğin taşı sürükleyip yerini değiştirebilirsin.");
+  toast("Taşlar dizildi: kişiler dışta, kavramlar ortada, mekânlar içte. İstediğin taşı sürükleyip yerini değiştirebilirsin.");
+}
+
+// Hazır listedeki bütün taşlar tek tuşla masa yanındaki tablaya gelir; hepsi zaten varsa masadakiler tablaya döner.
+function hepsiniGetir() {
+  const once = taslar.length;
+  Object.values(HAZIR).flat().forEach(([ad, tur]) => {
+    if (taslar.length < MAX_TAS && !taslar.some((t) => kucuk(t.ad) === kucuk(ad))) tasEkle(ad, tur);
+  });
+  if (taslar.length === once) taslar.forEach((t) => gedigeKoy(t, null));
+  renderAll();
+  toast(taslar.length > once ? `${taslar.length - once} taş tablaya geldi.` : "Bütün taşlar tablada.");
 }
 
 function gedikElleri() {
@@ -332,6 +357,8 @@ function renderAll() {
   renderPresets();
   renderBench();
 }
+
+$("bringAll").addEventListener("click", hepsiniGetir);
 
 $("clearTable").addEventListener("click", () => {
   taslar.forEach((t) => gedigeKoy(t, null));
@@ -383,7 +410,7 @@ async function goruntuCiz(liste) {
     ctx.ellipse(gx, gy, W * 0.036, W * 0.025, 0, 0, Math.PI * 2);
     ctx.fill();
   }
-  const TAS = W * 0.08;
+  const TAS = W * 0.075;
   for (const t of liste) {
     const img = await resimYukle(tasResmi(t.gorunum));
     const s = Math.min(TAS / img.width, (TAS * 0.82) / img.height);

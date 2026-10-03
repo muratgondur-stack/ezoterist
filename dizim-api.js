@@ -39,21 +39,19 @@ function jsonAyikla(metin) {
 // Masada iç ve dış çemberde gedikler var (dizim-sayfa.js GEDIKLER ile aynı ölçüler). Bütün taşlar gediklerdeyse
 // kimin iç çemberde (merkeze yakın), kimin dış çemberde olduğu yapay zekâya ayrıca söylenir.
 function halkaSatiri(kayit) {
-  // Kare masa (oran 1): tam çemberler; ilk sürüm 3:2 masa: yatık elipsler. Yarıçaplar masa yüksekliği cinsinden.
+  // Kare masa (oran 1): dıştan içe 12-7-5 gedikli üç tam çember. Yarıçaplar masa kenarı cinsinden (dizim-sayfa.js HALKALAR).
   const oran = Number(kayit.oran) || 2 / 3;
-  const [icR, disR] = Math.abs(oran - 1) < 0.01 ? [[0.2, 0.2], [0.385, 0.385]] : [[0.3, 0.21], [0.56, 0.4]];
+  if (Math.abs(oran - 1) > 0.01) return "";
+  const HALKALAR = [["dis", 0.39], ["orta", 0.277], ["ic", 0.168]];
   const halka = (t) => {
-    const dx = (t.x - 0.5) / oran;
-    const dy = t.y - 0.5;
-    if (Math.abs(Math.hypot(dx / icR[0], dy / icR[1]) - 1) < 0.12) return "ic";
-    if (Math.abs(Math.hypot(dx / disR[0], dy / disR[1]) - 1) < 0.12) return "dis";
-    return null;
+    const r = Math.hypot(t.x - 0.5, t.y - 0.5);
+    const h = HALKALAR.find(([, yr]) => Math.abs(r / yr - 1) < 0.08);
+    return h ? h[0] : null;
   };
   const h = kayit.taslar.map((t) => [t.ad, halka(t)]);
   if (h.some(([, x]) => !x)) return "";
-  const ic = h.filter(([, x]) => x === "ic").map(([ad]) => ad);
-  const dis = h.filter(([, x]) => x === "dis").map(([ad]) => ad);
-  return `Masada iki çember gedik var; kişi taşları bunlara yerleştirdi. İç çember (merkeze yakın): ${ic.join(", ") || "boş"}. Dış çember (çevrede): ${dis.join(", ") || "boş"}.`;
+  const liste = (ad) => h.filter(([, x]) => x === ad).map(([a]) => a).join(", ") || "boş";
+  return `Masada üç çember gedik var (dıştan içe 12, 7, 5). Dış çember (çevrede): ${liste("dis")}. Orta çember: ${liste("orta")}. İç çember (merkeze en yakın): ${liste("ic")}.`;
 }
 
 // Yapay zekâya giden özet: ham koordinat yerine yorumlanmış ölçümler (0-100 ölçeği).

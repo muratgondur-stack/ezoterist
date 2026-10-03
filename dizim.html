@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=10" />
-    <link rel="stylesheet" href="/dizim.css?v=5" />
+    <link rel="stylesheet" href="/dizim.css?v=6" />
   </head>
   <body>
     <header class="topbar">
@@ -67,7 +67,7 @@
         <div class="section-head">
           <p class="step">2. adım</p>
           <h2 id="step2Title">Taşları masaya yerleştir</h2>
-          <p class="section-note">Taşları kenardan sürükleyip masadaki gediklere bırak; taş en yakın boş gediğe oturur. İç çember merkeze yakın, dış çember çevrede. Ortadaki rozete dokunursan taşlar rastgele dizilir. Hangi taşın nereye gideceği tamamen sana ait. Acele etme; her taşı koyarken bir an dur ve hisset. Masadan geri almak için taşı kenara sürükle.</p>
+          <p class="section-note">Taşları kenardan sürükleyip masadaki gediklere bırak; taş en yakın boş gediğe oturur. Masada dıştan içe 12, 7 ve 5 gedikli üç çember var. "Tüm taşları tablaya getir" hazır taşların hepsini yanına getirir; ortadaki rozete dokunursan taşlar rastgele dizilir: kişiler dışta, kavramlar ortada, mekânlar içte. Hangi taşın nereye gideceği tamamen sana ait. Acele etme; her taşı koyarken bir an dur ve hisset. Masadan geri almak için taşı kenara sürükle.</p>
         </div>
         <div class="workbench">
           <div class="tray" id="tray" aria-label="Masaya konmamış taşlar"></div>
@@ -77,6 +77,7 @@
           </div>
         </div>
         <div class="bench-actions">
+          <button type="button" class="btn btn-ghost" id="bringAll">Tüm taşları tablaya getir</button>
           <button type="button" class="btn btn-ghost" id="clearTable">Masayı boşalt</button>
           <span class="count" id="placedCount"></span>
           <button type="button" class="btn btn-primary" id="analyzeButton" disabled>Yerleşimim tamam · Yansıt</button>
@@ -174,7 +175,7 @@
     <script src="/dizim-hesap.js?v=1"></script>
     <script src="/uzmanlar.js?v=3"></script>
     <script src="/uzman-kart.js?v=3"></script>
-    <script src="/dizim-sayfa.js?v=4"></script>
+    <script src="/dizim-sayfa.js?v=5"></script>
     <script src="/ust-cubuk.js?v=2" defer></script>
 </body>
 </html>
