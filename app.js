@@ -170,25 +170,56 @@ if (returnedTo) {
 currentUser.then((user) => {
   if (!user || !authBar) return;
 
-  // Ad, kişisel arşive (profil, kontör, analizler) götürür.
-  const name = document.createElement("a");
+  // Kullanıcı simgesi bir menü açar: arşiv, profil, (yöneticiye) yönetim paneli ve çıkış (Murat 2026-10-03).
+  const kim = user.name || user.email;
+  const name = document.createElement("button");
+  name.type = "button";
   name.className = "auth-bar-user";
-  name.href = "/arsiv";
-  // Yalnız simge (Murat 2026-10-03); ad ipucunda ve ekran okuyucuda.
-  name.title = `${user.name || user.email} · Kişisel arşivim`;
-  name.setAttribute("aria-label", `${user.name || user.email} · Kişisel arşivim`);
+  name.title = kim;
+  name.setAttribute("aria-label", `${kim} · kullanıcı menüsü`);
+  name.setAttribute("aria-haspopup", "menu");
+  name.setAttribute("aria-expanded", "false");
   name.textContent = "👤";
 
-  const logout = document.createElement("button");
-  logout.type = "button";
-  logout.className = "auth-bar-link";
-  logout.textContent = "Çıkış";
-  logout.addEventListener("click", () => {
+  const menu = document.createElement("div");
+  menu.className = "user-menu";
+  menu.setAttribute("role", "menu");
+  menu.hidden = true;
+  const baslik = document.createElement("div");
+  baslik.className = "user-menu-head";
+  const ad = document.createElement("b");
+  ad.textContent = user.name || "Hesabım";
+  const eposta = document.createElement("small");
+  eposta.textContent = user.email;
+  baslik.append(ad, eposta);
+  const oge = (metin, href) => {
+    const a = document.createElement("a");
+    a.href = href;
+    a.setAttribute("role", "menuitem");
+    a.textContent = metin;
+    return a;
+  };
+  const cikis = document.createElement("button");
+  cikis.type = "button";
+  cikis.setAttribute("role", "menuitem");
+  cikis.className = "user-menu-logout";
+  cikis.textContent = "⎋ Çıkış yap";
+  cikis.addEventListener("click", () => {
     fetch("/api/logout", { method: "POST", credentials: "same-origin" })
       .finally(() => window.location.reload());
   });
+  menu.append(baslik, oge("🗂️ Kişisel arşivim", "/arsiv"), oge("👤 Profilim", "/arsiv#profil"),
+    ...(user.yonetici ? [oge("⚙️ Yönetim paneli", "/yonetim")] : []), cikis);
 
-  authBar.replaceChildren(name, logout);
+  const menuyuAc = (acik) => {
+    menu.hidden = !acik;
+    name.setAttribute("aria-expanded", String(acik));
+  };
+  name.addEventListener("click", (e) => { e.stopPropagation(); menuyuAc(menu.hidden); });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target)) menuyuAc(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { menuyuAc(false); name.focus(); } });
+
+  authBar.replaceChildren(name, menu);
   refit();
 });
 

@@ -219,6 +219,34 @@ body.banner-below { padding-top: 68px; }
   white-space: nowrap;
 }
 
+button.auth-bar-user { border: 2px solid var(--border); font: inherit; font-size: 1.1rem; line-height: 1; cursor: pointer; }
+button.auth-bar-user:hover, button.auth-bar-user[aria-expanded="true"] { background: rgba(255, 122, 0, 0.3); }
+
+/* Kullanıcı menüsü (👤) */
+.auth-bar { position: fixed; }
+.user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(10, 10, 22, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  animation: menuAc 0.16s ease both;
+}
+.user-menu[hidden] { display: none; }
+@keyframes menuAc { from { opacity: 0; transform: translateY(-6px); } }
+.user-menu-head { padding: 8px 12px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 4px; }
+.user-menu-head b { display: block; font-size: 0.95rem; }
+.user-menu-head small { color: rgba(255, 255, 255, 0.6); font-size: 0.78rem; }
+.user-menu a, .user-menu button { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 10px; color: #fff; background: none; font: inherit; font-size: 0.92rem; text-align: left; text-decoration: none; cursor: pointer; }
+.user-menu a:hover, .user-menu button:hover, .user-menu a:focus-visible, .user-menu button:focus-visible { background: rgba(255, 122, 0, 0.22); outline: none; }
+.user-menu-logout { margin-top: 4px; border-top: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 0 0 10px 10px !important; color: #ffb4a0 !important; }
+
 .auth-bar-link {
   padding: 8px 18px;
   border: 2px solid var(--border);

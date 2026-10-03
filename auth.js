@@ -77,6 +77,7 @@ const publicUser = (user) => ({
   sifreVar: Boolean(user.passwordHash),
   google: Boolean(user.googleId),
   createdAt: user.createdAt || null,
+  yonetici: Ayarlar.yoneticiMi(user),
 });
 
 async function createUser({ email, name, passwordHash = null, googleId = null }) {
