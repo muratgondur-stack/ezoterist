@@ -4,10 +4,11 @@ const crypto = require("node:crypto");
 const path = require("node:path");
 const MelekVeri = require("./melek-sayilari-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
-const GUNLUK_SINIR = 5;
+const GUNLUK_SINIR = () => Ayarlar.sinir("melek-sayilari"); // yönetim panelinden (0 = sınırsız)
 const ALANLAR = { genel: "genel yaşam", ask: "aşk ve ilişkiler", kariyer: "iş ve para", ruhsal: "ruhsal yol", aile: "aile ve ev" };
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 const kisalt = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
@@ -87,7 +88,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   }
 
   async function yorumUret(user, body) {
-    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR) throw hata(`Bugün ${GUNLUK_SINIR} kişisel yorum hakkını kullandın. Yarın yeniden bekleriz.`, 429);
+    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR()) throw hata(`Bugün ${GUNLUK_SINIR()} kişisel yorum hakkını kullandın. Yarın yeniden bekleriz.`, 429);
     const sayi = String(body?.sayi || "").replace(/\D/g, "");
     if (sayi.length < 2 || sayi.length > 6) throw hata("2 ile 6 basamaklı bir sayı yaz (ör. 111, 1212).");
     const nerede = kisalt(body?.nerede, 120);
@@ -119,7 +120,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const kayit = { id: crypto.randomBytes(8).toString("hex"), tarih: Date.now(), sayi, nerede, an, alan, yorum, kaynak };
     await kayitGuncelle(user.id, (g) => { g.unshift(kayit); g.splice(200); });
     await writeCache(sayacDosyasi(user.id), { gun: bugun(), adet: (await bugunkuSayi(user.id)) + 1 });
-    return { kayit, kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))) };
+    return { kayit, kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))) };
   }
 
   return function handleMelekRequest(request, response, url) {
@@ -137,7 +138,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     };
     const routes = {
       "GET /api/melek/gunluk": async () => sendJson(response, 200, {
-        kayitlar: await gunlukOku(dataDir, user.id), kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR, ses: sesVar(), ai: llmEnabled,
+        kayitlar: await gunlukOku(dataDir, user.id), kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR(), ses: sesVar(), ai: llmEnabled,
       }),
       "POST /api/melek/yorum": async () => sendJson(response, 201, await yorumUret(user, await readJson(request))),
       "POST /api/melek/sil": async () => {

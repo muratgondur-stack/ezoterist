@@ -5,10 +5,11 @@ const path = require("node:path");
 const Astro = require("./astro");
 const Numeroloji = require("./numeroloji-hesap");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri, askLlm, bugun, llmEnabled } = yardimci;
 
-const GUNLUK_SINIR = 30;
+const GUNLUK_SINIR = () => Ayarlar.sinir("asistan"); // yönetim panelinden (0 = sınırsız)
 const GECMIS = 12; // modele giden son mesaj sayısı
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 const temizId = (userId) => String(userId).replace(/[^a-zA-Z0-9-]/g, "");
@@ -89,7 +90,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
 
   async function mesajGonder(user, body) {
     if (!llmEnabled) throw hata("Ezo şu an dinleniyor; lütfen biraz sonra tekrar dene.", 503);
-    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR) throw hata(`Bugün ${GUNLUK_SINIR} mesaj hakkını kullandın. Yarın sohbetimize devam edelim.`, 429);
+    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR()) throw hata(`Bugün ${GUNLUK_SINIR()} mesaj hakkını kullandın. Yarın sohbetimize devam edelim.`, 429);
     const metin = String(body?.metin || "").replace(/\r/g, "").trim().slice(0, 1500);
     if (metin.length < 2) throw hata("Bir şey yaz ya da sor.");
     const sohbetId = String(body?.sohbetId || "").replace(/[^0-9a-f]/g, "");
@@ -121,7 +122,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       return s;
     });
     await writeCache(sayacDosyasi(user.id), { gun: bugun(), adet: (await bugunkuSayi(user.id)) + 1 });
-    return { sohbet: ozet(sohbet), mesajlar: [kullaniciMesaji, ezoMesaji], kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))) };
+    return { sohbet: ozet(sohbet), mesajlar: [kullaniciMesaji, ezoMesaji], kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))) };
   }
 
   return function handleAsistanRequest(request, response, url) {
@@ -134,7 +135,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const idParam = (ad) => String(url.searchParams.get(ad) || "").replace(/[^0-9a-f]/g, "");
     const routes = {
       "GET /api/asistan/durum": async () => sendJson(response, 200, {
-        sohbetler: (await oku(user.id)).map(ozet), kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR,
+        sohbetler: (await oku(user.id)).map(ozet), kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR(),
         ses: sesVar(), ai: llmEnabled, ad: (user.name || "").split(" ")[0],
       }),
       "GET /api/asistan/sohbet": async () => {

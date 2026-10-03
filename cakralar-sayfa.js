@@ -158,10 +158,10 @@ function renderQuiz() {
 $("quizBack").addEventListener("click", () => { soruNo = Math.max(0, soruNo - 1); renderQuiz(); });
 
 function renderKota() {
-  $("quota").textContent = durum.kalan > 0
+  $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
     ? `21 kısa ifade. İçinden geleni işaretle; doğru ya da yanlış cevap yok. Bugün ${durum.kalan} test hakkın var.`
     : `Bugünkü ${durum.sinir} test hakkını kullandın. Çakralar zamanla değişir; yarın yeniden ölç.`;
-  $("quizSubmit").disabled = durum.kalan <= 0;
+  $("quizSubmit").disabled = (durum.kalan != null && durum.kalan <= 0);
 }
 
 $("quizSubmit").addEventListener("click", async () => {

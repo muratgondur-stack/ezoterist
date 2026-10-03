@@ -114,7 +114,9 @@ function renderSpreads() {
 function renderKota() {
   $("quota").textContent = !durum.ai
     ? "Okuyucumuz şu an müsait değil; kartları yine açabilirsin, yorum sözlükten gelir."
-    : `Bugün ${durum.kalan} açılım hakkın kaldı (günde ${durum.sinir}); günün kartı ayrıca günde bir.`;
+    : durum.kalan == null
+      ? "Günün kartı günde bir."
+      : `Bugün ${durum.kalan} açılım hakkın kaldı (günde ${durum.sinir}); günün kartı ayrıca günde bir.`;
 }
 
 function acilimSec(kod) {
@@ -132,7 +134,7 @@ function acilimSec(kod) {
       return;
     }
   }
-  if (kod !== "gunun" && durum.kalan <= 0) {
+  if (kod !== "gunun" && (durum.kalan != null && durum.kalan <= 0)) {
     toast("Bugünkü açılım hakkını kullandın. Günün kartını yine görebilirsin.");
     return;
   }

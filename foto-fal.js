@@ -5,6 +5,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
@@ -68,6 +69,9 @@ function fotoFal(ayar) {
       return is;
     }
 
+    // Günlük sınır yönetim panelinden (0 = sınırsız → Infinity; JSON'da null).
+    const bolumId = Ayarlar.BOLUMLER.find((b) => b.dizin === ayar.dizinAdi)?.id;
+    const sinir = () => (bolumId ? Ayarlar.sinir(bolumId) : ayar.gunlukSinir || Infinity);
     const sayacDosyasi = (userId) => path.join(dizin(userId), "sayac.json");
     async function bugunkuSayi(userId) {
       const sayac = await readCache(sayacDosyasi(userId));
@@ -92,8 +96,7 @@ function fotoFal(ayar) {
 
     async function bak(user, body) {
       if (!llmEnabled) throw hata(ayar.mesajlar.musaitDegil, 503);
-      // gunlukSinir 0 ise sınır yok (Murat 2026-10-03: fotoğraflı bölümlerde deneme için kaldırıldı).
-      if (ayar.gunlukSinir && (await bugunkuSayi(user.id)) >= ayar.gunlukSinir) throw hata(ayar.mesajlar.sinir, 429);
+      if ((await bugunkuSayi(user.id)) >= sinir()) throw hata(ayar.mesajlar.sinir, 429);
       const fotolar = (Array.isArray(body?.fotolar) ? body.fotolar : []).slice(0, ayar.maxFoto).map(fotoCoz);
       if (!fotolar.length) throw hata("Fotoğraf ekle.");
       const girdi = { ...ayar.girdiAl(body, fotolar.length), fotoSayisi: fotolar.length };
@@ -116,7 +119,7 @@ function fotoFal(ayar) {
       await Promise.all(fotolar.map((b, n) => fs.promises.writeFile(fotoYolu(dataDir, user.id, kayit.id, n), b)));
       await kayitGuncelle(user.id, (g) => { g.unshift(kayit); });
       await sayacArttir(user.id);
-      return { kayit, kalan: ayar.gunlukSinir ? Math.max(0, ayar.gunlukSinir - (await bugunkuSayi(user.id))) : null };
+      return { kayit, kalan: Math.max(0, sinir() - (await bugunkuSayi(user.id))) };
     }
 
     return function handleFotoFalRequest(request, response, url) {
@@ -137,7 +140,7 @@ function fotoFal(ayar) {
       const routes = {
         [`GET ${yol("gunluk")}`]: async () => {
           const gunluk = await gunlukOku(dataDir, user.id);
-          sendJson(response, 200, { kayitlar: gunluk, kalan: ayar.gunlukSinir ? Math.max(0, ayar.gunlukSinir - (await bugunkuSayi(user.id))) : null, sinir: ayar.gunlukSinir || null, ses: sesVar(), ai: llmEnabled });
+          sendJson(response, 200, { kayitlar: gunluk, kalan: Math.max(0, sinir() - (await bugunkuSayi(user.id))), sinir: sinir(), ses: sesVar(), ai: llmEnabled });
         },
         [`POST ${yol("bak")}`]: async () => sendJson(response, 201, await bak(user, await govdeOku(request))),
         [`POST ${yol("sil")}`]: async () => {

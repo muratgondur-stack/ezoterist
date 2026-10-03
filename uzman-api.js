@@ -6,6 +6,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { epostaYolla, epostaSablon, htmlKacis } = require("./eposta");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 const Uzmanlar = require("./uzmanlar");
 const { numerolojiKullaniciDosyasi } = require("./numeroloji-api");
 const NumVeri = require("./numeroloji-veri");
@@ -32,10 +33,11 @@ const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu, "yuz-
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } = yardimci;
 
-const TESLIM_SURESI_MS = 48 * 60 * 60 * 1000;
+// Uzman yanıt süresi yönetim panelinden (saat).
+const teslimSuresi = () => Ayarlar.get("sure.uzmanSaat") * 60 * 60 * 1000;
 const SITE = (process.env.SITE_URL || "https://ezoter.ist").replace(/\/$/, "");
-const uzmanEpostalari = () =>
-  String(process.env.UZMAN_EPOSTA || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+// Uzman e-postaları yönetim panelinden (varsayılanı UZMAN_EPOSTA ortam değişkeni).
+const uzmanEpostalari = () => Ayarlar.get("izin.uzmanlar");
 const uzmanMi = (user) => Boolean(user?.email) && uzmanEpostalari().includes(String(user.email).toLowerCase());
 
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
@@ -303,7 +305,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       kaynak: { girdi: analiz.girdi, ...bolum.kaynak(analiz), aiMetin: analiz.metin },
       durum: "sirada",
       olusturma: simdi,
-      sonTarih: simdi + TESLIM_SURESI_MS,
+      sonTarih: simdi + teslimSuresi(),
     };
     await writeCache(talepDosyasi(talep.id), talep);
 

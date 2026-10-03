@@ -1,0 +1,89 @@
+/* Yönetim paneli: astroloji.css'in üzerine. Yoğun, okunaklı bir iş ekranı. */
+
+.admin { padding-top: 20px; }
+.admin section { padding-top: 0; }
+.admin-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 16px 0 12px; }
+.admin-head h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); }
+.tabs { position: sticky; top: 64px; z-index: 5; display: flex; gap: 6px; padding: 6px; overflow-x: auto; border: 1px solid var(--card-border); border-radius: 999px; background: rgba(7, 9, 20, 0.9); backdrop-filter: blur(10px); scrollbar-width: none; }
+.tabs button { flex: 1 0 auto; padding: 9px 14px; border: 0; border-radius: 999px; color: var(--foreground); background: none; font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: #070914; background: var(--gold); }
+.panel { display: grid; gap: 14px; margin-top: 14px; }
+.panel[hidden] { display: none; }
+.card h2 { font-size: 1.5rem; margin-bottom: 10px; }
+
+/* --- Özet --- */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.stat { padding: 16px; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); }
+.stat b { display: block; color: var(--gold); font-family: var(--serif); font-size: 2.2rem; line-height: 1; }
+.stat span { color: var(--muted); font-size: 0.82rem; }
+.stat p { margin-top: 6px; font-size: 0.84rem; color: #d8d3e8; }
+.ok { color: #8ff0b8; } .bad { color: #ffb4b4; }
+.table-wrap { overflow-x: auto; }
+.grid-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.grid-table th, .grid-table td { padding: 9px 8px; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); text-align: left; white-space: nowrap; }
+.grid-table th { color: var(--muted); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.grid-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.grid-table small { display: block; color: var(--muted); font-size: 0.76rem; }
+.pill { padding: 2px 9px; border-radius: 999px; font-size: 0.74rem; font-weight: 800; }
+.pill.acik { color: #070914; background: #8ff0b8; }
+.pill.kapali { color: #fff; background: #c0392b; }
+
+/* --- Ayarlar --- */
+.save-bar { position: sticky; top: 118px; z-index: 4; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--gold); border-radius: 16px; background: rgba(30, 22, 8, 0.95); }
+.save-bar span { flex: 1; color: #f6dca0; font-weight: 700; }
+.group h2 { display: flex; align-items: center; gap: 10px; }
+.rows { display: grid; gap: 2px; }
+.row { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 8px; border-radius: 12px; }
+.row:hover { background: rgba(255, 255, 255, 0.025); }
+.row.degisti { background: rgba(243, 194, 107, 0.08); }
+.row.ozel .label b::after { content: " •"; color: var(--gold); }
+.row .label b { display: block; font-size: 0.95rem; }
+.row .label small { color: var(--muted); font-size: 0.76rem; }
+.row .control { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.row input[type="number"], .row input[type="text"], .row select, .row textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+}
+.row input[type="number"] { max-width: 120px; }
+.row select option { color: #111; }
+.row input[type="range"] { flex: 1; accent-color: var(--gold); }
+.row .unit { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+.row .reset, .row .play { width: 32px; height: 32px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 50%; color: var(--muted); background: none; cursor: pointer; }
+.row .reset:hover, .row .play:hover { color: var(--gold); border-color: var(--gold); }
+.row .reset[hidden] { display: inline-block; visibility: hidden; }
+.switch { position: relative; width: 50px; height: 28px; flex: 0 0 50px; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+.switch span { position: absolute; inset: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); transition: background 0.2s; }
+.switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
+.switch input:checked + span { background: #27ae60; }
+.switch input:checked + span::after { transform: translateX(22px); }
+.switch input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* --- Kullanıcılar ve geçmiş --- */
+.users-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.users-head small { color: var(--muted); font-family: Manrope, sans-serif; font-size: 0.9rem; }
+.users-head input { min-width: 240px; min-height: 40px; padding: 8px 12px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px; color: var(--foreground); background: rgba(255, 255, 255, 0.06); font: inherit; }
+.mini-btn { padding: 5px 10px; border: 1px solid var(--card-border); border-radius: 999px; color: var(--gold); background: none; font: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.history { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 0.88rem; }
+.history li { padding: 8px 10px; border-left: 3px solid var(--gold); border-radius: 0 10px 10px 0; background: rgba(255, 255, 255, 0.03); }
+.history small { color: var(--muted); }
+.history code { color: #f6dca0; }
+.credit-dialog { width: min(420px, calc(100vw - 24px)); }
+.credit-form { display: flex; flex-direction: column; gap: 12px; }
+.credit-form label { display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: 0.9rem; }
+.credit-form small { color: var(--muted); font-weight: 500; }
+.credit-form input { min-height: 42px; padding: 8px 12px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px; color: var(--foreground); background: rgba(255, 255, 255, 0.06); font: inherit; }
+
+@media (max-width: 860px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .row { grid-template-columns: 1fr auto; }
+  .row .control { grid-column: 1 / -1; grid-row: 2; }
+}

@@ -131,7 +131,7 @@ form.elements.gun.addEventListener("change", () => {
 
 function renderKota() {
   $("quota").textContent = durum.ai
-    ? `Bugün ${durum.kalan} yansıma hakkın var. Günlüğünü kaydettikten sonra "Yansımamı al" ile şefkatli bir ayna tutabilirim.`
+    ? `${durum.kalan == null ? "Yansıma hakkın sınırsız." : `Bugün ${durum.kalan} yansıma hakkın var.`} Günlüğünü kaydettikten sonra "Yansımamı al" ile şefkatli bir ayna tutabilirim.`
     : "";
 }
 
@@ -183,7 +183,7 @@ $("reflectButton").addEventListener("click", async () => {
   try {
     const { yansima } = await post("/api/ruhsal/yansima", { id: acik.id });
     acik.yansima = yansima;
-    durum.kalan = Math.max(0, durum.kalan - 1);
+    if (durum.kalan != null) durum.kalan = Math.max(0, durum.kalan - 1);
     yansimaGoster(acik);
     renderKota();
     $("reflection").scrollIntoView({ behavior: "smooth", block: "nearest" });

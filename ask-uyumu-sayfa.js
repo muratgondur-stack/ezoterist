@@ -74,10 +74,10 @@ const kisiOku = (kisi) => ({
 });
 
 function renderKota() {
-  $("quota").textContent = durum.kalan > 0
+  $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
     ? `Bugün ${durum.kalan} uyum hesaplama hakkın kaldı (günde ${durum.sinir}).`
     : `Bugünkü ${durum.sinir} uyum hakkını kullandın. Yarın yeniden bekleriz.`;
-  $("loveSubmit").disabled = durum.kalan <= 0;
+  $("loveSubmit").disabled = (durum.kalan != null && durum.kalan <= 0);
 }
 
 form.addEventListener("submit", async (event) => {

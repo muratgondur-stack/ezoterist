@@ -7,10 +7,12 @@ const fs = require("node:fs");
 const Numeroloji = require("./numeroloji-hesap");
 const Veri = require("./numeroloji-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, askLlm, once, bugun, llmEnabled } = yardimci;
 
-const PROFIL_ARALIK_MS = 3 * 24 * 60 * 60 * 1000;
+// Yeni profil aralığı yönetim panelinden (gün).
+const profilAraligi = () => Ayarlar.get("sure.numerolojiGun") * 24 * 60 * 60 * 1000;
 const NUMEROLOG_SISTEM =
   "Sen Ezoter.ist'in baş numeroloğusun. Türkçe, sıcak, akıcı ve umut veren bir dille yazarsın; metnin sesli okunacak. " +
   "Kesin kehanetlerde bulunma, korkutma; sağlık, hukuk ve para konularında kesin tavsiye verme. " +
@@ -114,7 +116,7 @@ async function profilMetni(cfg, p) {
 
 // Kilit yalnız yapay zekâ yorumunda işler; bağlantı yokken üretilen sabit yorum yenilenebilir.
 function profilCevabi(kayit, extra = {}) {
-  const kilitBitis = kayit.kaynak === "ai" ? kayit.olusturma + PROFIL_ARALIK_MS : 0;
+  const kilitBitis = kayit.kaynak === "ai" ? kayit.olusturma + profilAraligi() : 0;
   return { ...kayit, yeniProfilTarihi: kilitBitis > Date.now() ? kilitBitis : null, ...extra };
 }
 
@@ -123,7 +125,7 @@ async function profilOlustur(cfg, userId, girdi) {
   const kayit = await readCache(file);
   if (kayit?.kaynak === "ai") {
     if (ayniGirdi(kayit.girdi, girdi)) return profilCevabi(kayit);
-    if (Date.now() - kayit.olusturma < PROFIL_ARALIK_MS) return profilCevabi(kayit, { kilitli: true });
+    if (Date.now() - kayit.olusturma < profilAraligi()) return profilCevabi(kayit, { kilitli: true });
   }
   const p = Numeroloji.profil(girdi.adSoyad, girdi.tarih);
   const yorum = await profilMetni(cfg, p);

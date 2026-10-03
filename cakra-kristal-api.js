@@ -5,11 +5,12 @@ const path = require("node:path");
 const Cakra = require("./cakra-veri");
 const Kristal = require("./kristal-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri, askLlm, bugun, llmEnabled } = yardimci;
 
-const TEST_SINIRI = 3;
-const ONERI_SINIRI = 5;
+const TEST_SINIRI = () => Ayarlar.sinir("cakralar"); // yönetim panelinden (0 = sınırsız)
+const ONERI_SINIRI = () => Ayarlar.sinir("kristaller"); // yönetim panelinden (0 = sınırsız)
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 const kisalt = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
 const dizi = (v, n, u) => (Array.isArray(v) ? v : []).slice(0, n).map((x) => kisalt(x, u)).filter(Boolean);
@@ -144,7 +145,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   }
 
   async function cakraTesti(user, body) {
-    if ((await bugunkuSayi("cakra", user.id)) >= TEST_SINIRI) throw hata(`Bugün ${TEST_SINIRI} test hakkını kullandın. Çakralar zamanla değişir; yarın yeniden ölç.`, 429);
+    if ((await bugunkuSayi("cakra", user.id)) >= TEST_SINIRI()) throw hata(`Bugün ${TEST_SINIRI()} test hakkını kullandın. Çakralar zamanla değişir; yarın yeniden ölç.`, 429);
     const cevaplar = (Array.isArray(body?.cevaplar) ? body.cevaplar : []).map(Number);
     if (cevaplar.length !== Cakra.sorular.length || cevaplar.some((v) => !Number.isInteger(v) || v < 1 || v > 5)) throw hata("Lütfen bütün soruları cevapla.");
     const not = kisalt(body?.not, 300);
@@ -169,11 +170,11 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const kayit = { id: crypto.randomBytes(8).toString("hex"), tarih: Date.now(), cevaplar, not, puanlar, yorum, kaynak };
     await kayitGuncelle("cakra", user.id, (g) => { g.unshift(kayit); g.splice(100); });
     await sayacArtir("cakra", user.id);
-    return { kayit, kalan: Math.max(0, TEST_SINIRI - (await bugunkuSayi("cakra", user.id))) };
+    return { kayit, kalan: Math.max(0, TEST_SINIRI() - (await bugunkuSayi("cakra", user.id))) };
   }
 
   async function kristalOner(user, body) {
-    if ((await bugunkuSayi("kristal", user.id)) >= ONERI_SINIRI) throw hata(`Bugün ${ONERI_SINIRI} öneri hakkını kullandın. Yarın yeniden bekleriz.`, 429);
+    if ((await bugunkuSayi("kristal", user.id)) >= ONERI_SINIRI()) throw hata(`Bugün ${ONERI_SINIRI()} öneri hakkını kullandın. Yarın yeniden bekleriz.`, 429);
     const ihtiyac = kisalt(body?.ihtiyac, 400);
     const niyet = Kristal.niyetler[body?.niyet] ? body.niyet : "";
     if (!ihtiyac && !niyet) throw hata("Bir niyet seç ya da ihtiyacını birkaç kelimeyle yaz.");
@@ -199,7 +200,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const kayit = { id: crypto.randomBytes(8).toString("hex"), tarih: Date.now(), ihtiyac, niyet, yorum, kaynak };
     await kayitGuncelle("kristal", user.id, (g) => { g.unshift(kayit); g.splice(100); });
     await sayacArtir("kristal", user.id);
-    return { kayit, kalan: Math.max(0, ONERI_SINIRI - (await bugunkuSayi("kristal", user.id))) };
+    return { kayit, kalan: Math.max(0, ONERI_SINIRI() - (await bugunkuSayi("kristal", user.id))) };
   }
 
   // Rehberli meditasyon: giriş + yedi çakra; metinler sabit olduğundan sesler herkes için bir kez üretilir.
@@ -222,7 +223,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     };
     const routes = {
       "GET /api/cakra/durum": async () => sendJson(response, 200, {
-        kayitlar: await gunlukOku(dataDir, "cakra", user.id), kalan: Math.max(0, TEST_SINIRI - (await bugunkuSayi("cakra", user.id))), sinir: TEST_SINIRI, ses: sesVar(), ai: llmEnabled,
+        kayitlar: await gunlukOku(dataDir, "cakra", user.id), kalan: Math.max(0, TEST_SINIRI() - (await bugunkuSayi("cakra", user.id))), sinir: TEST_SINIRI(), ses: sesVar(), ai: llmEnabled,
       }),
       "POST /api/cakra/test": async () => sendJson(response, 201, await cakraTesti(user, await readJson(request))),
       "POST /api/cakra/sil": sil("cakra"),
@@ -241,7 +242,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       "GET /api/kristal/durum": async () => {
         const harita = await readCache(kullaniciDosyasi(cfg, user.id));
         sendJson(response, 200, {
-          kayitlar: await gunlukOku(dataDir, "kristal", user.id), kalan: Math.max(0, ONERI_SINIRI - (await bugunkuSayi("kristal", user.id))), sinir: ONERI_SINIRI,
+          kayitlar: await gunlukOku(dataDir, "kristal", user.id), kalan: Math.max(0, ONERI_SINIRI() - (await bugunkuSayi("kristal", user.id))), sinir: ONERI_SINIRI(),
           yerlesim: harita?.yerlesim ? { gunes: harita.yerlesim.sun, ay: harita.yerlesim.moon, yukselen: harita.yukselen || "" } : null, ses: sesVar(), ai: llmEnabled,
         });
       },

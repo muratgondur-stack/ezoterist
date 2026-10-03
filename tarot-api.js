@@ -5,10 +5,11 @@ const crypto = require("node:crypto");
 const path = require("node:path");
 const Tarot = require("./tarot-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
-const ACILIM_SINIRI = 3;
+const ACILIM_SINIRI = () => Ayarlar.sinir("tarot"); // yönetim panelinden (0 = sınırsız)
 const TERS_OLASILIGI = 0.3;
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 const kisalt = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
@@ -132,9 +133,9 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     // Günün kartı: aynı gün tekrar istenirse kayıtlı olan döner.
     if (acilimKodu === "gunun" && s.gununKarti) {
       const kayit = (await gunlukOku(dataDir, user.id)).find((k) => k.id === s.gununKarti);
-      if (kayit) return { kayit, tekrar: true, kalan: Math.max(0, ACILIM_SINIRI - s.acilim) };
+      if (kayit) return { kayit, tekrar: true, kalan: Math.max(0, ACILIM_SINIRI() - s.acilim) };
     }
-    if (acilimKodu !== "gunun" && s.acilim >= ACILIM_SINIRI) throw hata(`Bugün ${ACILIM_SINIRI} açılım hakkını kullandın. Yarın kartlar seni yine bekliyor.`, 429);
+    if (acilimKodu !== "gunun" && s.acilim >= ACILIM_SINIRI()) throw hata(`Bugün ${ACILIM_SINIRI()} açılım hakkını kullandın. Yarın kartlar seni yine bekliyor.`, 429);
 
     const secimler = (Array.isArray(body?.secimler) ? body.secimler : []).map(Number);
     if (secimler.length !== adet || new Set(secimler).size !== adet || secimler.some((n) => !Number.isInteger(n) || n < 0 || n > 77)) {
@@ -149,7 +150,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     await kayitGuncelle(user.id, (g) => { g.unshift(kayit); });
     const yeni = { ...s, gun: bugun(), acilim: s.acilim + (acilimKodu === "gunun" ? 0 : 1), gununKarti: acilimKodu === "gunun" ? kayit.id : s.gununKarti };
     await writeCache(sayacDosyasi(user.id), yeni);
-    return { kayit, kalan: Math.max(0, ACILIM_SINIRI - yeni.acilim) };
+    return { kayit, kalan: Math.max(0, ACILIM_SINIRI() - yeni.acilim) };
   }
 
   return function handleTarotRequest(request, response, url) {
@@ -171,7 +172,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         const s = await sayac(user.id);
         sendJson(response, 200, {
           kayitlar: await gunlukOku(dataDir, user.id),
-          kalan: Math.max(0, ACILIM_SINIRI - s.acilim), sinir: ACILIM_SINIRI, gununKarti: s.gununKarti, ses: sesVar(), ai: llmEnabled,
+          kalan: Math.max(0, ACILIM_SINIRI() - s.acilim), sinir: ACILIM_SINIRI(), gununKarti: s.gununKarti, ses: sesVar(), ai: llmEnabled,
         });
       },
       "POST /api/tarot/cek": async () => sendJson(response, 201, await cek(user, await readJson(request))),

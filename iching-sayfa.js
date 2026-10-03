@@ -90,10 +90,10 @@ function renderAreas() {
 }
 
 function renderKota() {
-  $("quota").textContent = durum.kalan > 0
+  $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
     ? `Bugün ${durum.kalan} soru hakkın kaldı (günde ${durum.sinir}).`
     : `Bugünkü ${durum.sinir} soru hakkını kullandın. I Ching aynı soruyu tekrar tekrar sormamayı öğütler; yarın yeniden bekleriz.`;
-  $("askSubmit").disabled = durum.kalan <= 0;
+  $("askSubmit").disabled = (durum.kalan != null && durum.kalan <= 0);
 }
 
 let calisiyor = false;

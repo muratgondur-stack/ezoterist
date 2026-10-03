@@ -6,18 +6,19 @@ const fs = require("node:fs");
 const path = require("node:path");
 const Astro = require("./astro");
 const Veri = require("./astroloji-veri");
+const Ayarlar = require("./ayarlar");
 
 const llm = {
   url: (process.env.LLM_URL || "").trim(),
   token: (process.env.LLM_TOKEN || "").trim(),
-  model: (process.env.LLM_MODEL || "gpt-4.1-mini").trim(),
+  // Model, zaman aşımı ve yaratıcılık yönetim panelinden (ayarlar.js) okunur.
+  get model() { return Ayarlar.get("llm.model"); },
 };
 const llmEnabled = Boolean(llm.url && llm.token);
 
 const tts = {
   url: (process.env.TTS_URL || "").trim(),
   token: (process.env.TTS_TOKEN || process.env.LLM_TOKEN || "").trim(),
-  voice: (process.env.TTS_VOICE || "arabella").trim(),
 };
 
 const TIME_ZONE = "Europe/Istanbul";
@@ -76,7 +77,8 @@ function once(key, task) {
 async function askLlm(system, user, { maxTokens = 700, temperature = 0.85 } = {}) {
   const body = {
     model: llm.model,
-    temperature,
+    // Yönetim panelindeki yaratıcılık çarpanı bölümün sıcaklık değerini ölçekler.
+    temperature: Math.min(1.5, Math.max(0, temperature * Ayarlar.get("llm.yaraticilik"))),
     max_tokens: maxTokens,
     messages: [{ role: "system", content: system }, { role: "user", content: user }],
   };
@@ -85,7 +87,7 @@ async function askLlm(system, user, { maxTokens = 700, temperature = 0.85 } = {}
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${llm.token}` },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(120_000),
+    signal: AbortSignal.timeout(Ayarlar.get("llm.zamanAsimi") * 1000),
   });
   const data = await result.json().catch(() => null);
   if (!result.ok) throw new Error(`LLM ${result.status}: ${String(data?.error?.message || data?.error || "").slice(0, 160)}`);
@@ -154,7 +156,8 @@ async function gunlukYorum(cfg, burc) {
 // farklı bilgilerle yeni harita ancak 3 günde bir üretilebilir.
 
 const BODY_KEYS = Astro.BODIES;
-const HARITA_ARALIK_MS = 3 * 24 * 60 * 60 * 1000;
+// Yeni harita aralığı yönetim panelinden (gün).
+const haritaAraligi = () => Ayarlar.get("sure.haritaGun") * 24 * 60 * 60 * 1000;
 
 function girdiDogrula(body) {
   const g = body?.girdi || {};
@@ -222,7 +225,7 @@ const ayniGirdi = (a, b) => Boolean(a && b) && a.tarih === b.tarih && a.saat ===
 
 // Kilit yalnız yapay zekâ yorumunda işler; bağlantı yokken üretilen sabit yorum yenilenebilir.
 function haritaCevabi(kayit, extra = {}) {
-  const kilitBitis = kayit.kaynak === "ai" ? kayit.olusturma + HARITA_ARALIK_MS : 0;
+  const kilitBitis = kayit.kaynak === "ai" ? kayit.olusturma + haritaAraligi() : 0;
   return { ...kayit, yeniHaritaTarihi: kilitBitis > Date.now() ? kilitBitis : null, ...extra };
 }
 
@@ -231,7 +234,7 @@ async function haritaOlustur(cfg, userId, girdi) {
   const kayit = await readCache(file);
   if (kayit?.kaynak === "ai") {
     if (ayniGirdi(kayit.girdi, girdi)) return haritaCevabi(kayit);
-    if (Date.now() - kayit.olusturma < HARITA_ARALIK_MS) return haritaCevabi(kayit, { kilitli: true });
+    if (Date.now() - kayit.olusturma < haritaAraligi()) return haritaCevabi(kayit, { kilitli: true });
   }
   const harita = haritaHesapla(girdi);
   const yorum = await haritaMetni(cfg, harita);
@@ -242,7 +245,7 @@ async function haritaOlustur(cfg, userId, girdi) {
 
 // --- Ses (V100'deki Piper, arabella sesi) ---
 
-const sesVar = () => Boolean(tts.url && tts.token);
+const sesVar = () => Boolean(tts.url && tts.token) && Ayarlar.get("ses.acik");
 
 // Sesli okumada sembol, emoji ve kısaltmalar takılmasın.
 const sesMetni = (text) =>
@@ -256,14 +259,18 @@ const sesMetni = (text) =>
 // özet, metin değişirse (ör. yapay zekâ sonradan açılırsa) yeni sesin üretilmesini sağlar.
 async function sesDosyasi(text, dir, name) {
   const clean = sesMetni(text).slice(0, 4000);
-  const hash = crypto.createHash("sha1").update(`${tts.voice}|${clean}`).digest("hex").slice(0, 10);
+  // Ses ve hız yönetim panelinden: bölüme özel ses (veri klasöründen anlaşılır) yoksa varsayılan ses.
+  const voice = Ayarlar.sesFor(Ayarlar.bolumDizini(dir));
+  const rate = Ayarlar.get("ses.hiz");
+  // Hız 1 iken eski dosya adları geçerli kalsın diye hız özete yalnız 1'den farklıysa katılır.
+  const hash = crypto.createHash("sha1").update(rate === 1 ? `${voice}|${clean}` : `${voice}|${rate}|${clean}`).digest("hex").slice(0, 10);
   const mp3 = path.join(dir, `${name}-${hash}.mp3`);
   if (fs.existsSync(mp3)) return mp3;
   return once(`ses:${mp3}`, async () => {
     const result = await fetch(tts.url, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${tts.token}` },
-      body: JSON.stringify({ text: clean, voice: tts.voice, format: "mp3" }),
+      body: JSON.stringify({ text: clean, voice, rate, format: "mp3" }),
       signal: AbortSignal.timeout(120_000),
     });
     if (!result.ok) throw new Error(`TTS ${result.status}`);
@@ -275,6 +282,31 @@ async function sesDosyasi(text, dir, name) {
     await fs.promises.rename(tmp, mp3);
     return mp3;
   });
+}
+
+// Yönetim panelinde sesi denemek için: önbelleğe yazmadan kısa bir örnek üretir.
+async function sesOrnek(text, voice, rate) {
+  if (!(tts.url && tts.token)) throw Object.assign(new Error("Seslendirme ayarlı değil."), { status: 503 });
+  const result = await fetch(tts.url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${tts.token}` },
+    body: JSON.stringify({ text: sesMetni(text).slice(0, 400), voice, rate, format: "mp3" }),
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (!result.ok) throw new Error(`TTS ${result.status}`);
+  return Buffer.from(await result.arrayBuffer());
+}
+
+// Ses sunucusunun durumu (yönetim paneli özeti).
+async function sesSaglik() {
+  if (!(tts.url && tts.token)) return { ok: false, hata: "ayarlı değil" };
+  try {
+    const r = await fetch(tts.url.replace(/\/synthesize$/, "/health"), { headers: { Authorization: `Bearer ${tts.token}` }, signal: AbortSignal.timeout(5000) });
+    const d = await r.json().catch(() => ({}));
+    return { ok: r.ok && d.ok !== false, yuklu: d.loaded || [], tamamlanan: d.done, calisma: d.uptime_s };
+  } catch (error) {
+    return { ok: false, hata: error.message };
+  }
 }
 
 // Günlük yorum klasörleri (metin + ses) bir hafta tutulur.
@@ -368,5 +400,5 @@ function createHandler({ dataDir, currentUser, sendFile }) {
 // Uzman talepleri (uzman-api.js) ve numeroloji (numeroloji-api.js) aynı önbellek, ses ve yapay zekâ yardımcılarını kullanır.
 module.exports = {
   createHandler,
-  yardimci: { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri, askLlm, once, bugun, llmEnabled },
+  yardimci: { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri, askLlm, once, bugun, llmEnabled, sesOrnek, sesSaglik },
 };

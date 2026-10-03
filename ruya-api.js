@@ -6,11 +6,12 @@ const fs = require("node:fs");
 const path = require("node:path");
 const RuyaVeri = require("./ruya-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
-const GUNLUK_SINIR = 3;
-const STT_GUNLUK_SINIR = 20;
+const GUNLUK_SINIR = () => Ayarlar.sinir("ruya"); // yönetim panelinden (0 = sınırsız)
+const STT_GUNLUK_SINIR = () => (Ayarlar.get("sinir.sesleAnlatma") || Infinity); // yönetim panelinden (0 = sınırsız)
 const MAX_SES_BAYT = 12 * 1024 * 1024;
 
 const resim = {
@@ -156,7 +157,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     };
     if (girdi.metin.length < 20) throw hata("Rüyanı biraz daha ayrıntılı anlat (en az birkaç cümle).");
 
-    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR) throw hata(`Bugün ${GUNLUK_SINIR} rüya yorumu hakkını kullandın. Yarın yeniden bekleriz.`, 429);
+    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR()) throw hata(`Bugün ${GUNLUK_SINIR()} rüya yorumu hakkını kullandın. Yarın yeniden bekleriz.`, 429);
 
     let yorum;
     let tarif = "";
@@ -189,14 +190,14 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     await kayitGuncelle(user.id, (g) => { g.unshift(kayit); });
     await sayacArttir(user.id);
     if (kayit.resim === "bekliyor") void resimUret(user.id, kayit, tarif);
-    return { kayit, kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))) };
+    return { kayit, kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))) };
   }
 
   // Tarayıcıdan gelen ses kaydı (webm/mp4) Whisper'a iletilir; ses saklanmaz.
   async function sesiYaziyaCevir(user, request) {
     const sayacKey = `${user.id}:${bugun()}`;
     const adet = sttSayaci.get(sayacKey) || 0;
-    if (adet >= STT_GUNLUK_SINIR) throw hata("Bugünkü sesle anlatma hakkın doldu; rüyanı yazarak anlatabilirsin.", 429);
+    if (adet >= STT_GUNLUK_SINIR()) throw hata("Bugünkü sesle anlatma hakkın doldu; rüyanı yazarak anlatabilirsin.", 429);
     const parcalar = [];
     let boyut = 0;
     for await (const parca of request) {
@@ -235,7 +236,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const routes = {
       "GET /api/ruya/gunluk": async () => {
         const gunluk = await gunlukOku(dataDir, user.id);
-        sendJson(response, 200, { kayitlar: gunluk, kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR, ses: sesVar(), stt: sttVar });
+        sendJson(response, 200, { kayitlar: gunluk, kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR(), ses: sesVar(), stt: sttVar });
       },
       "GET /api/ruya/kayit": async () => sendJson(response, 200, { kayit: await kayitBul() }),
       "POST /api/ruya/yorum": async () => sendJson(response, 201, await yorumla(user, await readJson(request))),

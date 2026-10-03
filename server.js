@@ -1,7 +1,9 @@
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
-const { handleAuthRequest, dataDir, currentUser } = require("./auth");
+const { handleAuthRequest, dataDir, currentUser, kullaniciListesi } = require("./auth");
+const Ayarlar = require("./ayarlar");
+const { createHandler: createYonetimHandler } = require("./yonetim-api");
 const { createHandler: createAstrolojiHandler } = require("./astroloji-api");
 const { createHandler: createUzmanHandler } = require("./uzman-api");
 const { createHandler: createNumerolojiHandler } = require("./numeroloji-api");
@@ -179,6 +181,7 @@ const handleArsivRequest = createArsivHandler({ dataDir, currentUser });
 const handleRuhsalRequest = createRuhsalHandler({ dataDir, currentUser, sendFile });
 const handleSembolRequest = createSembolHandler({ dataDir, currentUser, sendFile });
 const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser, sendFile });
+const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi });
 
 const server = http.createServer((request, response) => {
   let url;
@@ -192,6 +195,33 @@ const server = http.createServer((request, response) => {
     return;
   }
 
+  // Yönetim panelinden kapatılan bölüm: sayfası menüye döner, API'si 503 verir. Yönetici her zaman girebilir.
+  // Rüya bölümündeki ses→yazı ucu günlük ve asistan tarafından da kullanıldığından kapatılmaz.
+  const kapali = Ayarlar.BOLUMLER.find((b) => !Ayarlar.bolumAcik(b.id) && (requestPath === b.sayfa || (url.pathname.startsWith(b.api) && url.pathname !== "/api/ruya/dinle")));
+  if (kapali && !Ayarlar.yoneticiMi(currentUser(request))) {
+    if (url.pathname.startsWith("/api/")) {
+      response.writeHead(503, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+      response.end(JSON.stringify({ error: `${kapali.ad} bölümü şu an bakımda. Lütfen daha sonra tekrar dene.` }));
+    } else {
+      response.writeHead(302, { Location: `/?kapali=${encodeURIComponent(kapali.id)}`, "Cache-Control": "no-store" });
+      response.end();
+    }
+    return;
+  }
+
+  // Yönetim paneli sayfası yalnızca yöneticiye; giriş yapmamışsa girişe, başkasına ana sayfa gösterilir.
+  if (requestPath === "/yonetim" || requestPath === "/yonetim.html") {
+    const user = currentUser(request);
+    if (!user) {
+      response.writeHead(302, { Location: "/login?next=%2Fyonetim", "Cache-Control": "no-store" });
+      response.end();
+    } else {
+      sendFile(request, response, path.join(root, Ayarlar.yoneticiMi(user) ? "yonetim.html" : "index.html"));
+    }
+    return;
+  }
+
+  if (handleYonetimRequest(request, response, url)) return;
   if (handleAstrolojiRequest(request, response, url)) return;
   if (handleUzmanRequest(request, response, url)) return;
   if (handleNumerolojiRequest(request, response, url)) return;

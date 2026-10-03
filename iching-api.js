@@ -5,10 +5,11 @@ const crypto = require("node:crypto");
 const path = require("node:path");
 const IChing = require("./iching-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, once, bugun, llmEnabled } = yardimci;
 
-const GUNLUK_SINIR = 3;
+const GUNLUK_SINIR = () => Ayarlar.sinir("iching"); // yönetim panelinden (0 = sınırsız)
 const ALANLAR = { genel: "genel yaşam", ask: "aşk ve ilişkiler", kariyer: "iş ve para", karar: "bir karar", ruhsal: "ruhsal yol" };
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 const kisalt = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
@@ -104,7 +105,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   }
 
   async function at(user, body) {
-    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR) throw hata(`Bugün ${GUNLUK_SINIR} soru hakkını kullandın. I Ching aynı soruyu tekrar tekrar sormamayı öğütler; yarın yeniden bekleriz.`, 429);
+    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR()) throw hata(`Bugün ${GUNLUK_SINIR()} soru hakkını kullandın. I Ching aynı soruyu tekrar tekrar sormamayı öğütler; yarın yeniden bekleriz.`, 429);
     const soru = kisalt(body?.soru, 300);
     if (soru.length < 5) throw hata("Sorunu birkaç kelimeyle yaz.");
     const alan = ALANLAR[body?.alan] ? body.alan : "genel";
@@ -115,7 +116,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     };
     await kayitGuncelle(user.id, (g) => { g.unshift(kayit); g.splice(200); });
     await writeCache(sayacDosyasi(user.id), { gun: bugun(), adet: (await bugunkuSayi(user.id)) + 1 });
-    return { kayit, kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))) };
+    return { kayit, kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))) };
   }
 
   async function yorumla(user, kayitId) {
@@ -162,7 +163,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     }
     const routes = {
       "GET /api/iching/gunluk": async () => sendJson(response, 200, {
-        kayitlar: await gunlukOku(dataDir, user.id), kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR, ses: sesVar(), ai: llmEnabled,
+        kayitlar: await gunlukOku(dataDir, user.id), kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR(), ses: sesVar(), ai: llmEnabled,
       }),
       "POST /api/iching/at": async () => sendJson(response, 201, await at(user, await readJson(request))),
       "POST /api/iching/yorum": async () => {

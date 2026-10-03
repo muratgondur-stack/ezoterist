@@ -195,10 +195,10 @@ personal.elements.nerede.addEventListener("input", () => {
 });
 
 function renderKota() {
-  $("quota").textContent = durum.kalan > 0
+  $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
     ? `Bugün ${durum.kalan} kişisel mesaj hakkın kaldı (günde ${durum.sinir}).`
     : `Bugünkü ${durum.sinir} kişisel mesaj hakkını kullandın. Sözlük her zaman açık; yarın yeniden bekleriz.`;
-  $("personalSubmit").disabled = durum.kalan <= 0;
+  $("personalSubmit").disabled = (durum.kalan != null && durum.kalan <= 0);
 }
 
 personal.addEventListener("submit", async (e) => {

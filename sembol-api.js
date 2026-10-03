@@ -4,10 +4,11 @@ const crypto = require("node:crypto");
 const path = require("node:path");
 const SembolVeri = require("./sembol-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
-const GUNLUK_SINIR = 5;
+const GUNLUK_SINIR = () => Ayarlar.sinir("semboller"); // yönetim panelinden (0 = sınırsız)
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 const kisalt = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
 
@@ -72,7 +73,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   }
 
   async function sor(user, body) {
-    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR) throw hata(`Bugün ${GUNLUK_SINIR} sembol sorma hakkını kullandın. Ansiklopedi her zaman açık; yarın yeniden bekleriz.`, 429);
+    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR()) throw hata(`Bugün ${GUNLUK_SINIR()} sembol sorma hakkını kullandın. Ansiklopedi her zaman açık; yarın yeniden bekleriz.`, 429);
     const sembol = kisalt(body?.sembol, 80);
     const nerede = kisalt(body?.nerede, 300);
     if (sembol.length < 2) throw hata("Merak ettiğin sembolü yaz ya da tarif et.");
@@ -91,7 +92,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     const kayit = { id: crypto.randomBytes(8).toString("hex"), tarih: Date.now(), soru: sembol, nerede, yorum, kaynak: "ai" };
     await kayitGuncelle(user.id, (g) => { g.unshift(kayit); g.splice(200); });
     await writeCache(sayacDosyasi(user.id), { gun: bugun(), adet: (await bugunkuSayi(user.id)) + 1 });
-    return { kayit, kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))) };
+    return { kayit, kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))) };
   }
 
   return function handleSembolRequest(request, response, url) {
@@ -103,7 +104,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     }
     const routes = {
       "GET /api/sembol/gunluk": async () => sendJson(response, 200, {
-        kayitlar: await gunlukOku(dataDir, user.id), kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR, ses: sesVar(), ai: llmEnabled,
+        kayitlar: await gunlukOku(dataDir, user.id), kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR(), ses: sesVar(), ai: llmEnabled,
       }),
       "POST /api/sembol/sor": async () => sendJson(response, 201, await sor(user, await readJson(request))),
       "POST /api/sembol/sil": async () => {

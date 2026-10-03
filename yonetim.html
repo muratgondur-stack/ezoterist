@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Yönetim · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/yonetim.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page admin">
+      <div class="admin-head">
+        <div>
+          <p class="eyebrow">Ezoter.ist · Yönetim Paneli</p>
+          <h1>Arka plan ayarları</h1>
+        </div>
+        <button type="button" class="btn btn-ghost" id="refresh">↻ Yenile</button>
+      </div>
+
+      <nav class="tabs" role="tablist">
+        <button type="button" data-tab="ozet" aria-selected="true">📊 Özet</button>
+        <button type="button" data-tab="ayarlar" aria-selected="false">⚙️ Ayarlar</button>
+        <button type="button" data-tab="kullanicilar" aria-selected="false">👥 Kullanıcılar</button>
+        <button type="button" data-tab="gecmis" aria-selected="false">🕓 Değişiklik geçmişi</button>
+      </nav>
+
+      <section class="panel" id="tab-ozet">
+        <div class="stats" id="stats"></div>
+        <div class="card">
+          <h2>Bölümler</h2>
+          <div class="table-wrap">
+            <table class="grid-table" id="sectionTable">
+              <thead><tr><th>Bölüm</th><th>Durum</th><th class="num">Bugün</th><th class="num">Kullanan</th><th class="num">Toplam kayıt</th><th class="num">Günlük sınır</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="tab-ayarlar" hidden>
+        <div class="save-bar" id="saveBar" hidden>
+          <span id="saveInfo"></span>
+          <button type="button" class="btn btn-ghost" id="discard">Vazgeç</button>
+          <button type="button" class="btn btn-primary" id="save">Kaydet</button>
+        </div>
+        <div id="settings"></div>
+      </section>
+
+      <section class="panel" id="tab-kullanicilar" hidden>
+        <div class="card">
+          <div class="users-head">
+            <h2>Kullanıcılar <small id="userCount"></small></h2>
+            <input type="search" id="userSearch" placeholder="Ad ya da e-posta ara…" autocomplete="off" />
+          </div>
+          <div class="table-wrap">
+            <table class="grid-table" id="userTable">
+              <thead><tr><th>Kullanıcı</th><th>Kayıt</th><th>Giriş</th><th class="num">Kontör</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="tab-gecmis" hidden>
+        <div class="card">
+          <h2>Değişiklik geçmişi</h2>
+          <ul class="history" id="history"></ul>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="sign-dialog credit-dialog" id="creditDialog">
+      <form method="dialog" class="dlg-close-form"><button class="dlg-close" aria-label="Kapat">✕</button></form>
+      <form class="credit-form" id="creditForm">
+        <h2>Kontör ekle / düş</h2>
+        <p class="section-note" id="creditUser"></p>
+        <label><span>Miktar <small>(eksi değer düşer)</small></span><input type="number" name="miktar" step="1" required /></label>
+        <label><span>Açıklama</span><input name="aciklama" maxlength="120" placeholder="Örneğin: Hoş geldin hediyesi" /></label>
+        <button type="submit" class="btn btn-primary">Uygula</button>
+      </form>
+    </dialog>
+
+    <audio id="sample" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+    <script src="/yonetim-sayfa.js?v=1"></script>
+  </body>
+</html>

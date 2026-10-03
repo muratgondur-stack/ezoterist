@@ -77,8 +77,26 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
 // Hazır olan bölümlerin kendi sayfaları var; diğerleri "çok yakında" der.
 const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji", "#ruya-yorumu": "/ruya", "#kahve-fali": "/kahve-fali", "#el-fali": "/el-fali", "#tarot": "/tarot", "#yuz-okuma": "/yuz-okuma", "#fotograf-analizi": "/fotograf-analizi", "#ask-uyumu": "/ask-uyumu", "#dogum-haritasi": "/dogum-haritasi", "#melek-sayilari": "/melek-sayilari", "#i-ching": "/iching", "#run-taslari": "/run-taslari", "#ay-takvimi": "/ay-takvimi", "#cakralar": "/cakralar", "#kristaller": "/kristaller", "#kisisel-arsiv": "/arsiv", "#ruhsal-gunluk": "/ruhsal-gunluk", "#semboller": "/semboller", "#ezoterik-asistan": "/asistan" };
 
+// Yönetim panelinden gelen genel ayarlar: kapatılan bölümler ve müzik seviyesi.
+let genelAyarlar = { kapali: [], muzik: 0.1 };
+const genelAyarlarHazir = fetch("/api/ayarlar/genel", { credentials: "same-origin" })
+  .then((r) => (r.ok ? r.json() : null))
+  .then((d) => { if (d) genelAyarlar = d; })
+  .catch(() => {});
+
+const kisaBildirim = (metin) => {
+  toast.textContent = metin;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.hidden = true; }, 2600);
+};
+
 const openSection = (button) => {
   const page = SECTION_PAGES[button.getAttribute("href")];
+  if (page && genelAyarlar.kapali.includes(page)) {
+    kisaBildirim(`${button.dataset.title} şu an bakımda, çok yakında yeniden açılacak.`);
+    return;
+  }
   if (page) {
     window.location.assign(page);
     return;
@@ -156,7 +174,8 @@ currentUser.then((user) => {
 
 // Arka plan müziği: çok kısık, döngüde. Tarayıcılar sesi ilk dokunuş/tıklamadan önce başlatmaz.
 // iPhone'da audio.volume değiştirilemediği için ses seviyesi Web Audio ile kısılır.
-const MUSIC_VOLUME = 0.1;
+// Müzik seviyesi yönetim panelinden (genel.muzik); gelmezse 0.1.
+const musicVolume = () => (Number.isFinite(genelAyarlar.muzik) ? genelAyarlar.muzik : 0.1);
 const musicToggle = document.getElementById("musicToggle");
 const music = new Audio("/audio/anamenu.m4a?v=1");
 music.loop = true;
@@ -172,10 +191,10 @@ const startMusic = () => {
   if (!audioContext && AudioContextClass) {
     audioContext = new AudioContextClass();
     const gain = audioContext.createGain();
-    gain.gain.value = MUSIC_VOLUME;
+    gain.gain.value = musicVolume();
     audioContext.createMediaElementSource(music).connect(gain).connect(audioContext.destination);
   } else if (!AudioContextClass) {
-    music.volume = MUSIC_VOLUME;
+    music.volume = musicVolume();
   }
   audioContext?.resume().catch(() => {});
   music.play().catch(() => {});
@@ -216,3 +235,10 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden) music.pause();
   else if (!musicMuted && audioContext) startMusic();
 });
+
+// Kapatılmış bir bölümün adresinden yönlendirildiyse bilgi ver.
+const kapaliBolum = new URLSearchParams(window.location.search).get("kapali");
+if (kapaliBolum) {
+  history.replaceState(null, "", "/");
+  genelAyarlarHazir.then(() => kisaBildirim("Bu bölüm şu an bakımda, çok yakında yeniden açılacak."));
+}

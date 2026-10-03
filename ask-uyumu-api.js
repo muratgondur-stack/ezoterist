@@ -5,10 +5,11 @@ const path = require("node:path");
 const AskUyumu = require("./ask-uyumu-hesap");
 const AstroVeri = require("./astroloji-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
-const GUNLUK_SINIR = 3;
+const GUNLUK_SINIR = () => Ayarlar.sinir("ask-uyumu"); // yönetim panelinden (0 = sınırsız)
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 const kisalt = (v, n) => String(v || "").replace(/\s+/g, " ").trim().slice(0, n);
 const burcAdi = (k) => AstroVeri.burclar[k].ad;
@@ -105,7 +106,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   }
 
   async function hesapla(user, body) {
-    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR) throw hata(`Bugün ${GUNLUK_SINIR} uyum hakkını kullandın. Yarın yeniden bekleriz.`, 429);
+    if ((await bugunkuSayi(user.id)) >= GUNLUK_SINIR()) throw hata(`Bugün ${GUNLUK_SINIR()} uyum hakkını kullandın. Yarın yeniden bekleriz.`, 429);
     const sen = kisiDogrula(body?.sen, "Senin");
     const o = kisiDogrula(body?.o, "Partnerin");
     const not = kisalt(body?.not, 300);
@@ -139,7 +140,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     };
     await kayitGuncelle(user.id, (g) => { g.unshift(kayit); });
     await writeCache(sayacDosyasi(user.id), { gun: bugun(), adet: (await bugunkuSayi(user.id)) + 1 });
-    return { kayit, kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))) };
+    return { kayit, kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))) };
   }
 
   return function handleAskRequest(request, response, url) {
@@ -157,7 +158,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     };
     const routes = {
       "GET /api/ask-uyumu/gunluk": async () => sendJson(response, 200, {
-        kayitlar: await gunlukOku(dataDir, user.id), kalan: Math.max(0, GUNLUK_SINIR - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR, ses: sesVar(), ai: llmEnabled,
+        kayitlar: await gunlukOku(dataDir, user.id), kalan: Math.max(0, GUNLUK_SINIR() - (await bugunkuSayi(user.id))), sinir: GUNLUK_SINIR(), ses: sesVar(), ai: llmEnabled,
       }),
       "POST /api/ask-uyumu/hesapla": async () => sendJson(response, 201, await hesapla(user, await readJson(request))),
       "POST /api/ask-uyumu/sil": async () => {

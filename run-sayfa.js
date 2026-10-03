@@ -149,7 +149,7 @@ function renderPickNote() {
   $("pickNote").textContent = secimler.length < n
     ? `Sorunu düşünerek masadan ${n} taş seç (${secimler.length}/${n}). Sırası: ${acilimlar[seciliAcilim].pozisyonlar.join(" → ")}`
     : "Taşların seçildi. Hazır olduğunda çevir.";
-  $("revealButton").disabled = secimler.length < n || durum.kalan <= 0;
+  $("revealButton").disabled = secimler.length < n || (durum.kalan != null && durum.kalan <= 0);
 }
 
 // Taşların masadaki rastgele duruşu sayfa açılışında bir kez belirlenir.
@@ -183,7 +183,7 @@ function renderTable() {
 $("resetButton").addEventListener("click", () => { secimler = []; renderTable(); });
 
 function renderKota() {
-  $("quota").textContent = durum.kalan > 0
+  $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
     ? `Bugün ${durum.kalan} açılım hakkın kaldı (günde ${durum.sinir}). Günün rünü buna dahil değil.`
     : `Bugünkü ${durum.sinir} açılım hakkını kullandın. Yarın taşlar seni yine bekliyor.`;
   renderPickNote();

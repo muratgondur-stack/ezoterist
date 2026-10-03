@@ -140,10 +140,10 @@ function renderIntentChips() {
 }
 
 function renderKota() {
-  $("quota").textContent = durum.kalan > 0
+  $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
     ? `Bir niyet seç ve/veya ihtiyacını yaz; listemizden sana en uygun üç kristali seçelim. Bugün ${durum.kalan} öneri hakkın var.`
     : `Bugünkü ${durum.sinir} öneri hakkını kullandın. Rehber her zaman açık; yarın yeniden bekleriz.`;
-  $("suggestSubmit").disabled = durum.kalan <= 0;
+  $("suggestSubmit").disabled = (durum.kalan != null && durum.kalan <= 0);
 }
 
 $("suggestForm").addEventListener("submit", async (e) => {

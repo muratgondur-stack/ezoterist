@@ -34,6 +34,7 @@ COPY kontor.js arsiv-api.js arsiv.html arsiv.css arsiv-sayfa.js ./
 COPY ruhsal-gunluk-veri.js ruhsal-gunluk-api.js ruhsal-gunluk.html ruhsal-gunluk.css ruhsal-gunluk-sayfa.js ./
 COPY sembol-veri.js sembol-api.js semboller.html semboller.css semboller-sayfa.js ./
 COPY asistan-api.js asistan.html asistan.css asistan-sayfa.js ./
+COPY ayarlar.js yonetim-api.js yonetim.html yonetim.css yonetim-sayfa.js ./
 COPY sembol ./sembol
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi

@@ -4,6 +4,7 @@ const path = require("node:path");
 const { promisify } = require("node:util");
 const { epostaYolla, epostaSablon, htmlKacis } = require("./eposta");
 const { sehirler } = require("./astroloji-veri");
+const Ayarlar = require("./ayarlar");
 
 const scrypt = promisify(crypto.scrypt);
 
@@ -13,7 +14,8 @@ const usersFile = path.join(dataDir, "users.json");
 const SESSION_COOKIE = "ezo_session";
 const STATE_COOKIE = "ezo_oauth_state";
 const NEXT_COOKIE = "ezo_oauth_next";
-const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
+// "Beni hatırla" oturum süresi yönetim panelinden (gün).
+const sessionMaxAge = () => 60 * 60 * 24 * Ayarlar.get("sure.oturumGun");
 // "Beni hatırla" seçilmezse oturum tarayıcı kapanınca biter, en geç 1 günde düşer.
 const SHORT_SESSION_MAX_AGE = 60 * 60 * 24;
 const MAX_BODY_BYTES = 10 * 1024;
@@ -159,7 +161,7 @@ function cookie(request, name, value, { maxAge, path: cookiePath = "/" } = {}) {
 
 const sessionCookie = (request, user, remember = true) =>
   remember
-    ? cookie(request, SESSION_COOKIE, createSessionToken(user, SESSION_MAX_AGE), { maxAge: SESSION_MAX_AGE })
+    ? cookie(request, SESSION_COOKIE, createSessionToken(user, sessionMaxAge()), { maxAge: sessionMaxAge() })
     : cookie(request, SESSION_COOKIE, createSessionToken(user, SHORT_SESSION_MAX_AGE));
 
 // Girişten sonra dönülecek adres yalnızca site içi bir yol olabilir ("//" ile başlayan başka siteye gider).
@@ -697,4 +699,10 @@ function handleAuthRequest(request, response, url) {
   return true;
 }
 
-module.exports = { handleAuthRequest, dataDir, currentUser };
+// Yönetim paneli için: kullanıcıların yalnızca görünür alanları (şifre özeti ve oturum bilgisi verilmez).
+const kullaniciListesi = () => users.map((u) => ({
+  id: u.id, email: u.email, name: u.name || "", createdAt: u.createdAt || null,
+  google: Boolean(u.googleId), sifreVar: Boolean(u.passwordHash), profilVar: Boolean(u.profil?.dogumTarihi),
+}));
+
+module.exports = { handleAuthRequest, dataDir, currentUser, kullaniciListesi };

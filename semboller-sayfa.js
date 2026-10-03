@@ -133,10 +133,10 @@ $("search").addEventListener("input", renderGrid);
 // --- Sor ---
 
 function renderKota() {
-  $("quota").textContent = durum.kalan > 0
+  $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
     ? `Ansiklopedide olmasa da olur: sembolü adıyla ya da tarif ederek yaz. Bugün ${durum.kalan} sorma hakkın var.`
     : `Bugünkü ${durum.sinir} sorma hakkını kullandın. Ansiklopedi her zaman açık.`;
-  $("askSubmit").disabled = durum.kalan <= 0 || !durum.ai;
+  $("askSubmit").disabled = (durum.kalan != null && durum.kalan <= 0) || !durum.ai;
 }
 
 $("askForm").addEventListener("submit", async (e) => {

@@ -6,10 +6,11 @@ const path = require("node:path");
 const Astro = require("./astro");
 const Gunluk = require("./ruhsal-gunluk-veri");
 const { yardimci } = require("./astroloji-api");
+const Ayarlar = require("./ayarlar");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, Veri, askLlm, bugun, llmEnabled } = yardimci;
 
-const YANSIMA_SINIRI = 3;
+const YANSIMA_SINIRI = () => Ayarlar.sinir("ruhsal-gunluk"); // yönetim panelinden (0 = sınırsız)
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 const kisalt = (v, n) => String(v || "").replace(/[ \t]+/g, " ").trim().slice(0, n);
 
@@ -94,7 +95,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
 
   async function yansit(user, id) {
     const s = await sayac(user.id);
-    if (s.yansima >= YANSIMA_SINIRI) throw hata(`Bugün ${YANSIMA_SINIRI} yansıma hakkını kullandın. Yarın yeniden yazalım.`, 429);
+    if (s.yansima >= YANSIMA_SINIRI()) throw hata(`Bugün ${YANSIMA_SINIRI()} yansıma hakkını kullandın. Yarın yeniden yazalım.`, 429);
     const k = (await oku(user.id)).kayitlar.find((x) => x.id === id);
     if (!k) throw hata("Kayıt bulunamadı.", 404);
     if (!llmEnabled) throw hata("Yansıma şu an hazır değil.", 503);
@@ -144,7 +145,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       "GET /api/ruhsal/durum": async () => {
         const d = await oku(user.id);
         const s = await sayac(user.id);
-        sendJson(response, 200, { ...d, bugun: bugun(), kalan: Math.max(0, YANSIMA_SINIRI - s.yansima), ozetHakki: s.ozet < 1, ses: sesVar(), ai: llmEnabled });
+        sendJson(response, 200, { ...d, bugun: bugun(), kalan: Math.max(0, YANSIMA_SINIRI() - s.yansima), ozetHakki: s.ozet < 1, ses: sesVar(), ai: llmEnabled });
       },
       "POST /api/ruhsal/kaydet": async () => sendJson(response, 200, { kayit: await kaydet(user, await readJson(request)) }),
       "POST /api/ruhsal/yansima": async () => {
