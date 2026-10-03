@@ -1,0 +1,94 @@
+/* Aşk uyumu sayfası: astroloji.css ve ruya.css'in üzerine. */
+
+:root { --pembe: #ff7aa8; }
+
+/* --- Giriş --- */
+.love-art { position: relative; }
+.love-card { position: relative; width: min(70%, 300px); height: auto; border-radius: 16px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 50px rgba(255, 122, 168, 0.25); transform: rotate(-4deg); animation: float 7s ease-in-out infinite; }
+.love-heart { position: absolute; right: 16%; bottom: 10%; color: var(--pembe); font-size: 3.4rem; text-shadow: 0 0 24px rgba(255, 122, 168, 0.8); animation: beat 1.4s ease-in-out infinite; }
+@keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.22); } 30% { transform: scale(1); } 45% { transform: scale(1.14); } }
+@keyframes float { 50% { transform: translateY(-10px) rotate(-2deg); } }
+
+/* --- Form --- */
+.love-form { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; }
+.person { display: flex; flex-direction: column; gap: 12px; margin: 0; }
+.person legend { padding: 0 8px; font-family: var(--serif); font-size: 1.6rem; font-weight: 700; color: var(--gold); }
+.person[data-kisi="o"] legend { color: var(--pembe); }
+.person label, .love-note { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; font-weight: 700; }
+.person input, .person select, .love-note textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+  font: inherit;
+}
+.person select option { color: #111; }
+.person input:focus, .person select:focus, .love-note textarea:focus { outline: none; border-color: var(--pembe); box-shadow: 0 0 0 3px rgba(255, 122, 168, 0.22); }
+.optional { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.optional label { color: var(--muted); font-weight: 600; }
+.form-heart { color: var(--pembe); font-size: 2.6rem; text-shadow: 0 0 20px rgba(255, 122, 168, 0.7); animation: beat 1.6s ease-in-out infinite; }
+.love-note, .love-form > .btn, .love-form > .form-hint { grid-column: 1 / -1; }
+.love-form > .btn { justify-self: start; background: linear-gradient(120deg, var(--accent), var(--pembe)); border-color: transparent; }
+
+/* --- Sonuç: çift ve kalp ölçer --- */
+.couple { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; margin-bottom: 12px; }
+.partner { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; animation: rise 0.6s ease both; }
+.partner img { width: min(150px, 30vw); height: auto; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.55)); }
+.partner b { font-family: var(--serif); font-size: 1.6rem; }
+.partner small { color: var(--muted); font-size: 0.82rem; }
+#partnerO { animation-delay: 0.15s; }
+
+.love-meter { position: relative; width: 190px; height: 190px; }
+.love-meter svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.meter-bg { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 9; }
+.meter-fill { fill: none; stroke: url(#kalpGradyan); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 326.7; stroke-dashoffset: 326.7; filter: drop-shadow(0 0 8px rgba(255, 122, 168, 0.7)); transition: stroke-dashoffset 2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.meter-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.meter-heart { color: var(--pembe); font-size: 1.6rem; animation: beat 1.3s ease-in-out infinite; }
+.meter-text b { font-family: var(--serif); font-size: 2.8rem; line-height: 1; font-variant-numeric: lining-nums; }
+.meter-text small { max-width: 130px; color: var(--gold); font-size: 0.72rem; font-weight: 800; text-align: center; }
+
+.couple-title { text-align: center; font-size: clamp(1.9rem, 4.5vw, 2.6rem); }
+.couple-summary { max-width: 760px; margin: 8px auto 20px; color: #e3dff0; text-align: center; font-size: 1.04rem; }
+
+/* --- Kategori çubukları --- */
+.score-bars { display: grid; gap: 10px; margin: 0 0 16px; padding: 0; list-style: none; }
+.score-bars li { display: grid; grid-template-columns: 210px 1fr 54px; gap: 14px; align-items: center; padding: 12px 16px; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); }
+.score-bars .lbl b { display: block; font-size: 0.98rem; }
+.score-bars .lbl small { color: var(--muted); font-size: 0.76rem; }
+.score-bars .ikon { margin-right: 6px; color: var(--gold); }
+.bar { position: relative; height: 12px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.08); }
+.bar span { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--pembe), var(--gold)); box-shadow: 0 0 12px rgba(255, 122, 168, 0.5); transition: width 1.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.score-bars .val { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; text-align: right; color: #f6dca0; font-variant-numeric: lining-nums; }
+
+.placement-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.placement-table th, .placement-table td { padding: 8px 6px; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); text-align: left; }
+.placement-table th { color: var(--muted); font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.placement-table td:first-child { color: var(--gold); font-weight: 700; }
+
+/* --- Burç uyum haritası --- */
+.sign-picker { margin-bottom: 14px; }
+.sign-match { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 18px; margin: 0; padding: 0; list-style: none; }
+.sign-match li { display: grid; grid-template-columns: 40px 110px 1fr 46px; gap: 10px; align-items: center; padding: 6px 0; }
+.sign-match img { width: 40px; height: 40px; }
+.sign-match .val { font-weight: 800; text-align: right; color: #f6dca0; }
+
+.journal-thumb.pair { display: flex; align-items: center; justify-content: center; gap: 6px; background: radial-gradient(circle, rgba(255, 122, 168, 0.22), rgba(11, 13, 34, 0.9)); }
+.journal-thumb.pair img { width: 34%; height: auto; }
+.journal-thumb.pair span { color: var(--pembe); font-size: 1.6rem; }
+.journal-thumb.pair b { position: absolute; bottom: 8px; right: 12px; font-family: var(--serif); font-size: 1.4rem; color: #f6dca0; }
+
+@media (max-width: 860px) {
+  .love-form { grid-template-columns: 1fr; }
+  .form-heart { justify-self: center; }
+  .score-bars li { grid-template-columns: 1fr 50px; }
+  .score-bars .bar { grid-column: 1 / -1; grid-row: 2; }
+  .sign-match { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 680px) {
+  .couple { grid-template-columns: 1fr 1fr; }
+  .love-meter { grid-column: 1 / -1; grid-row: 1; justify-self: center; width: 170px; height: 170px; }
+  .optional { grid-template-columns: 1fr; }
+}

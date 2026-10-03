@@ -15,6 +15,7 @@ const { elKaydiOku, fotoYolu: elFotoYolu } = require("./el-fali-api");
 const { tarotKaydiOku } = require("./tarot-api");
 const { yuzKaydiOku, fotoYolu: yuzFotoYolu } = require("./yuz-okuma-api");
 const { analizKaydiOku, fotoYolu: analizFotoYolu } = require("./fotograf-analiz-api");
+const { askKaydiOku } = require("./ask-uyumu-api");
 const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
@@ -156,6 +157,21 @@ const BOLUMLER = {
       kayitId: k.id,
       fotoSayisi: k.girdi.fotoSayisi,
     }),
+  },
+  "ask-uyumu": {
+    ad: "aşk uyumu",
+    link: "/ask-uyumu#gunluk",
+    yukle: (dataDir, userId, body) => askKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => {
+      const b = (x) => Veri.burclar[x].ad;
+      const kisi = (ad, h) => `${ad}: Güneş ${b(h.gunes)}, Ay ${b(h.ay)}, Venüs ${b(h.venus)}, Mars ${b(h.mars)}, yaşam yolu ${h.yasamYolu}`;
+      return {
+        baslik: `${k.sen.ad} ♥ ${k.o.ad} · %${k.sonuc.toplam}`,
+        girdiMetni: `${k.sen.ad} (${k.sen.tarih}) ve ${k.o.ad} (${k.o.tarih})`,
+        ozet: `${kisi(k.sen.ad, k.hesap.sen)} — ${kisi(k.o.ad, k.hesap.o)}${k.not ? ` — Notu: ${k.not}` : ""}`,
+        kayitId: k.id,
+      };
+    },
   },
 };
 

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Aşk Uyumu: iki kişinin burç ve numeroloji uyumu; ruh, duygu, tutku, iletişim ve kader puanları." />
+    <title>Aşk Uyumu · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=5" />
+    <link rel="stylesheet" href="/ruya.css?v=1" />
+    <link rel="stylesheet" href="/ask-uyumu.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Aşk Uyumu</p>
+          <h1>Yıldızlar ikiniz<br />için ne diyor?</h1>
+          <p class="lead">Güneş'iniz, Ay'ınız, Venüs ile Mars'ınız ve yaşam yolu sayılarınız: iki kalbin uyumunu gerçek gök hesabıyla ölçüyoruz. Puanlarınızı gör, yorumunuzu sesli dinle.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#hesapla">Uyumumuzu hesapla</a>
+            <a class="btn btn-ghost" href="#tablo">Burcumun uyum haritası</a>
+          </div>
+        </div>
+        <div class="hero-art love-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="love-card" src="/tarot/kart/asiklar.webp" alt="" width="540" height="810" />
+          <span class="love-heart">♥</span>
+        </div>
+      </section>
+
+      <section id="hesapla" aria-labelledby="formTitle">
+        <div class="section-head">
+          <h2 id="formTitle">İki kalp, iki doğum tarihi</h2>
+          <p class="section-note" id="quota">Her gün 3 uyum hesaplayabilirsin.</p>
+        </div>
+        <form class="love-form" id="loveForm">
+          <fieldset class="card person" data-kisi="sen">
+            <legend>Sen</legend>
+            <label><span>Adın</span><input name="ad" maxlength="60" required placeholder="Adın" /></label>
+            <label><span>Doğum tarihin</span><input name="tarih" type="date" min="1900-01-01" max="2049-12-31" required /></label>
+            <div class="optional">
+              <label><span>Doğum saatin (isteğe bağlı)</span><input name="saat" type="time" /></label>
+              <label><span>Doğum yerin (isteğe bağlı)</span><select name="sehir"></select></label>
+            </div>
+          </fieldset>
+          <div class="form-heart" aria-hidden="true">♥</div>
+          <fieldset class="card person" data-kisi="o">
+            <legend>O</legend>
+            <label><span>Adı</span><input name="ad" maxlength="60" required placeholder="Onun adı" /></label>
+            <label><span>Doğum tarihi</span><input name="tarih" type="date" min="1900-01-01" max="2049-12-31" required /></label>
+            <div class="optional">
+              <label><span>Doğum saati (isteğe bağlı)</span><input name="saat" type="time" /></label>
+              <label><span>Doğum yeri (isteğe bağlı)</span><select name="sehir"></select></label>
+            </div>
+          </fieldset>
+          <label class="love-note"><span>Merak ettiğin bir şey var mı? (isteğe bağlı)</span>
+            <textarea name="not" rows="2" maxlength="300" placeholder="Örneğin: Uzun vadede birbirimize iyi gelir miyiz?"></textarea>
+          </label>
+          <button type="submit" class="btn btn-primary" id="loveSubmit">Uyumumuzu hesapla</button>
+          <p class="form-hint">Doğum saatiyle Ay burcu daha doğru hesaplanır. Bilgiler yalnızca senin günlüğünde saklanır.</p>
+        </form>
+      </section>
+
+      <section class="dream-result" id="sonuc" hidden aria-labelledby="coupleTitle">
+        <div class="couple">
+          <div class="partner" id="partnerSen"></div>
+          <div class="love-meter">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <defs>
+                <linearGradient id="kalpGradyan" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#ff7aa8" /><stop offset="100%" stop-color="#f3c26b" />
+                </linearGradient>
+              </defs>
+              <circle class="meter-bg" cx="60" cy="60" r="52" />
+              <circle class="meter-fill" id="meterFill" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="meter-text"><span class="meter-heart">♥</span><b id="meterValue">%0</b><small id="meterLabel"></small></div>
+          </div>
+          <div class="partner" id="partnerO"></div>
+        </div>
+        <h2 class="couple-title" id="coupleTitle"></h2>
+        <p class="couple-summary" id="coupleSummary"></p>
+
+        <ul class="score-bars" id="scoreBars"></ul>
+
+        <div class="card">
+          <h3>Gökyüzündeki yerleşimleriniz</h3>
+          <table class="placement-table" id="placementTable"></table>
+        </div>
+
+        <div class="dlg-grid two">
+          <div class="card" id="strongCard"><h3>💞 Güçlü yanlarınız</h3><ul class="ticks" id="strongList"></ul></div>
+          <div class="card" id="growCard"><h3>🌱 Üzerinde çalışabileceğiniz</h3><ul class="ticks shadow" id="growList"></ul></div>
+        </div>
+        <div class="dlg-grid">
+          <div class="card"><h3>🔥 Aşk ve tutku</h3><p id="loveText"></p></div>
+          <div class="card"><h3>💬 İletişim</h3><p id="talkText"></p></div>
+          <div class="card"><h3>🌙 Gelecek</h3><p id="futureText"></p></div>
+        </div>
+        <div class="card story">
+          <h3>Tavsiyelerim</h3>
+          <ul class="ticks" id="adviceList"></ul>
+          <button type="button" class="listen" id="resultListen" hidden>🔊 Sesli dinle</button>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Uyumunuz hazır. Dilersen uzmanlarımızdan birini seç; ikinizin haritasını kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">Uyum günlüğüm</h2>
+          <p class="section-note" id="journalNote">Hesapladığın uyumlar burada saklanır.</p>
+        </div>
+        <ul class="journal" id="journal"></ul>
+      </section>
+
+      <section id="tablo" aria-labelledby="tableTitle">
+        <div class="section-head">
+          <h2 id="tableTitle">Burcunun uyum haritası</h2>
+          <p class="section-note" id="tableNote">Güneş burcunun diğer 11 burçla (ve kendisiyle) uyumu.</p>
+        </div>
+        <div class="chips sign-picker" id="signPicker"></div>
+        <ul class="sign-match" id="signMatch"></ul>
+      </section>
+
+      <p class="disclaimer">Aşk uyumu, ilişkinizi daha iyi anlamak için ilham veren bir rehberdir; ilişkinizin geleceğini ancak siz belirlersiniz.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astro.js?v=1"></script>
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/numeroloji-hesap.js?v=1"></script>
+    <script src="/ask-uyumu-hesap.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/ask-uyumu-sayfa.js?v=1"></script>
+  </body>
+</html>

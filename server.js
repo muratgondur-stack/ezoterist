@@ -11,6 +11,7 @@ const { createHandler: createElFaliHandler } = require("./el-fali-api");
 const { createHandler: createTarotHandler } = require("./tarot-api");
 const { createHandler: createYuzHandler } = require("./yuz-okuma-api");
 const { createHandler: createAnalizHandler } = require("./fotograf-analiz-api");
+const { createHandler: createAskHandler } = require("./ask-uyumu-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -134,6 +135,7 @@ const pageRoutes = {
   "/tarot": "tarot.html",
   "/yuz-okuma": "yuz-okuma.html",
   "/fotograf-analizi": "fotograf-analizi.html",
+  "/ask-uyumu": "ask-uyumu.html",
 };
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
@@ -145,6 +147,7 @@ const handleElFaliRequest = createElFaliHandler({ dataDir, currentUser, sendFile
 const handleTarotRequest = createTarotHandler({ dataDir, currentUser, sendFile });
 const handleYuzRequest = createYuzHandler({ dataDir, currentUser, sendFile });
 const handleAnalizRequest = createAnalizHandler({ dataDir, currentUser, sendFile });
+const handleAskRequest = createAskHandler({ dataDir, currentUser, sendFile });
 
 const server = http.createServer((request, response) => {
   let url;
@@ -167,6 +170,7 @@ const server = http.createServer((request, response) => {
   if (handleTarotRequest(request, response, url)) return;
   if (handleYuzRequest(request, response, url)) return;
   if (handleAnalizRequest(request, response, url)) return;
+  if (handleAskRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {
