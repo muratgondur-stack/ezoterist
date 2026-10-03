@@ -28,6 +28,20 @@ const fitLayout = () => {
     root.style.setProperty("--banner-shift", below ? "0px" : `${(leftEdge + barLeft) / 2 - window.innerWidth / 2}px`);
   }
 
+  // Hoparlör ve hesap butonlarının dikey merkezi banner'ın dikey merkezine hizalanır (Murat 2026-10-03).
+  const music = document.getElementById("musicToggle");
+  const authBarEl = document.getElementById("authBar");
+  const banner = document.querySelector(".home-banner");
+  const bannerRect = banner?.getBoundingClientRect();
+  if (bannerRect && bannerRect.height && !document.body.classList.contains("banner-below")) {
+    const merkez = bannerRect.top + window.scrollY + bannerRect.height / 2;
+    if (music) music.style.top = `${Math.max(4, merkez - music.offsetHeight / 2)}px`;
+    if (authBarEl) authBarEl.style.top = `${Math.max(4, merkez - authBarEl.offsetHeight / 2)}px`;
+  } else {
+    if (music) music.style.top = "";
+    if (authBarEl) authBarEl.style.top = "";
+  }
+
   if (!grid || !firstButton) return;
   const count = grid.children.length;
   const gridStyle = getComputedStyle(grid);
@@ -65,6 +79,8 @@ const refit = () => {
 
 refit();
 window.addEventListener("resize", refit);
+// Banner resmi yüklenince yüksekliği belli olur; hizalama yeniden yapılır.
+document.querySelector(".home-banner")?.addEventListener("load", refit);
 document.fonts?.ready.then(refit);
 let toastTimer;
 
