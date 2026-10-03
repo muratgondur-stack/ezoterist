@@ -166,3 +166,9 @@
 .number-grid .sign-name,
 .loshu span,
 #dlgName { font-variant-numeric: lining-nums; font-feature-settings: "lnum" 1; }
+
+/* Numerolog seçiminde yüzler %50 büyük (84 → 126 px) */
+.expert-slot .expert-face,
+.expert-slot img,
+.expert-slot .expert-q { width: 126px; height: 126px; }
+.expert-slot .expert-q { font-size: 3.4rem; }
