@@ -158,8 +158,10 @@ currentUser.then((user) => {
   const name = document.createElement("a");
   name.className = "auth-bar-user";
   name.href = "/arsiv";
-  name.title = "Kişisel arşivim";
-  name.textContent = `👤 ${user.name || user.email}`;
+  // Yalnız simge (Murat 2026-10-03); ad ipucunda ve ekran okuyucuda.
+  name.title = `${user.name || user.email} · Kişisel arşivim`;
+  name.setAttribute("aria-label", `${user.name || user.email} · Kişisel arşivim`);
+  name.textContent = "👤";
 
   const logout = document.createElement("button");
   logout.type = "button";
