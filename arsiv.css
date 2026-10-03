@@ -14,7 +14,7 @@ section.card, .tab-panel { padding-top: 0; }
 .balance-chip b { color: var(--gold); font-family: var(--serif); font-size: 2rem; line-height: 1; }
 
 /* --- Sekmeler --- */
-.tabs { position: sticky; top: 64px; z-index: 5; display: flex; gap: 6px; margin-top: 14px; padding: 6px; overflow-x: auto; border: 1px solid var(--card-border); border-radius: 999px; background: rgba(7, 9, 20, 0.85); backdrop-filter: blur(10px); scrollbar-width: none; }
+.tabs { position: sticky; top: calc(var(--ust, 64px) + 6px); z-index: 5; display: flex; gap: 6px; margin-top: 14px; padding: 6px; overflow-x: auto; border: 1px solid var(--card-border); border-radius: 999px; background: rgba(7, 9, 20, 0.85); backdrop-filter: blur(10px); scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
 .tabs button { flex: 1 0 auto; padding: 10px 16px; border: 0; border-radius: 999px; color: var(--foreground); background: none; font: inherit; font-weight: 700; white-space: nowrap; cursor: pointer; }
 .tabs button[aria-selected="true"] { color: #070914; background: var(--gold); }

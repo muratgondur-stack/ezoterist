@@ -72,7 +72,7 @@
 .wheel-legend i { display: inline-block; width: 18px; height: 3px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
 
 /* --- Odak paneli --- */
-.focus { position: sticky; top: 80px; min-height: 260px; }
+.focus { position: sticky; top: calc(var(--ust, 64px) + 16px); min-height: 260px; }
 .focus-empty { color: var(--muted); }
 .focus-title { display: flex; align-items: center; gap: 12px; margin: 6px 0 10px; }
 .focus-title .glyph { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; color: #070914; background: var(--gold); font-size: 1.7rem; }

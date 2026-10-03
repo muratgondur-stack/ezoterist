@@ -92,7 +92,7 @@
 #sonuc .expert { margin-top: 16px; }
 
 /* --- Dizimlerim ve karşılaştırma --- */
-.compare-bar { position: sticky; top: 70px; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; padding: 10px 14px; border: 1px solid var(--gold); border-radius: 16px; background: rgba(30, 22, 8, 0.95); }
+.compare-bar { position: sticky; top: calc(var(--ust, 64px) + 6px); z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; padding: 10px 14px; border: 1px solid var(--gold); border-radius: 16px; background: rgba(30, 22, 8, 0.95); }
 .dizim-journal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
 .dizim-journal li { position: relative; overflow: hidden; border: 1px solid var(--card-border); border-radius: 16px; background: var(--card); }
 .dizim-journal li.is-current, .dizim-journal li.secili { border-color: var(--gold); }
