@@ -78,7 +78,7 @@ const yuz = fotoFal({
   ad: "Yüz okuma",
   apiYolu: "/api/yuz-okuma/",
   dizinAdi: "yuz-okuma",
-  gunlukSinir: 3,
+  gunlukSinir: 0, // 0 = sınırsız
   maxFoto: 1,
   sistem: YUZ_SISTEM,
   kontrolAlani: "uygun",

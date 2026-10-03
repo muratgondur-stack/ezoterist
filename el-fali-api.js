@@ -60,7 +60,7 @@ const el = fotoFal({
   ad: "El falı",
   apiYolu: "/api/el-fali/",
   dizinAdi: "el-fali",
-  gunlukSinir: 3,
+  gunlukSinir: 0, // 0 = sınırsız
   maxFoto: 2,
   sistem: EL_SISTEM,
   kontrolAlani: "elMi",

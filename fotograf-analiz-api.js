@@ -59,7 +59,7 @@ const analiz = fotoFal({
   ad: "Fotoğraf analizi",
   apiYolu: "/api/fotograf-analizi/",
   dizinAdi: "fotograf-analizi",
-  gunlukSinir: 3,
+  gunlukSinir: 0, // 0 = sınırsız
   maxFoto: 1,
   sistem: ANALIZ_SISTEM,
   kontrolAlani: "uygun",

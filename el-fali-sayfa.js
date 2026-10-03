@@ -88,10 +88,12 @@ function renderSlots() {
 function renderKota() {
   $("quota").textContent = !durum.ai
     ? "Falcımız şu an müsait değil, biraz sonra tekrar dene."
-    : durum.kalan > 0
+    : !durum.sinir
+      ? ""
+      : durum.kalan > 0
       ? `Bugün ${durum.kalan} el falı hakkın kaldı (günde ${durum.sinir}).`
       : "Bugünkü 3 el falı hakkını kullandın. Yarın yeniden bekleriz.";
-  $("falSubmit").disabled = durum.kalan <= 0 || !durum.ai;
+  $("falSubmit").disabled = (durum.sinir && durum.kalan <= 0) || !durum.ai;
 }
 
 const form = $("falForm");

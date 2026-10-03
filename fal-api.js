@@ -52,7 +52,7 @@ const kahve = fotoFal({
   ad: "Kahve falı",
   apiYolu: "/api/fal/",
   dizinAdi: "fal",
-  gunlukSinir: 3,
+  gunlukSinir: 0, // 0 = sınırsız
   maxFoto: 3,
   sistem: FAL_SISTEM,
   kontrolAlani: "fincanMi",
