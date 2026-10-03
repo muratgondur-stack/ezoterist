@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Ezoterik Asistan Ezo: haritanı, sayılarını ve bugünün gökyüzünü bilen ezoterik sohbet arkadaşın." />
+    <title>Ezoterik Asistan · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/asistan.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="chat-page">
+      <aside class="threads" id="threads" aria-label="Sohbetlerim">
+        <button type="button" class="btn btn-primary new-chat" id="newChat">＋ Yeni sohbet</button>
+        <p class="threads-title">Sohbetlerim</p>
+        <ul id="threadList"></ul>
+        <p class="quota" id="quota"></p>
+      </aside>
+
+      <section class="chat" aria-label="Ezo ile sohbet">
+        <div class="chat-head">
+          <button type="button" class="threads-toggle" id="threadsToggle" aria-label="Sohbetleri göster">☰</button>
+          <img src="/sembol/asistan.webp?v=1" alt="" width="48" height="48" />
+          <div>
+            <b>Ezo</b>
+            <small id="sky">Ezoterik asistanın</small>
+          </div>
+        </div>
+
+        <div class="messages" id="messages" aria-live="polite">
+          <div class="welcome" id="welcome">
+            <img src="/sembol/asistan.webp?v=1" alt="" width="720" height="720" />
+            <h1 id="hello">Merhaba, ben Ezo.</h1>
+            <p>Yıldızlar, sayılar, kartlar, kristaller, rüyalar… Ne merak ediyorsan sor. Profilini, haritanı ve bugünün gökyüzünü biliyorum; cevaplarımı sana göre veririm.</p>
+            <div class="suggestions" id="suggestions"></div>
+          </div>
+        </div>
+
+        <form class="composer" id="composer">
+          <button type="button" class="mic" id="micButton" aria-label="Sesle sor" hidden>🎙️</button>
+          <textarea name="metin" rows="1" maxlength="1500" placeholder="Ezo'ya sor…" aria-label="Mesajın"></textarea>
+          <button type="submit" class="send" id="sendButton" aria-label="Gönder">➤</button>
+        </form>
+        <p class="note">Ezo bir yapay zekâdır; ilham verir ama kesin kehanette bulunmaz. Sağlık ve hukuk konularında bir uzmana danış.</p>
+      </section>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astro.js?v=1"></script>
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/asistan-sayfa.js?v=1"></script>
+  </body>
+</html>
