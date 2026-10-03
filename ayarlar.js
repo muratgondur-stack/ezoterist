@@ -44,7 +44,7 @@ const listeOrtam = (ad) => String(process.env[ad] || "").split(",").map((e) => e
 const SEMA = {
   "ses.acik": { grup: "Ses", ad: "Seslendirme açık", tur: "bool", vars: true },
   "ses.ses": { grup: "Ses", ad: "Varsayılan ses", tur: "secim", secenekler: SESLER, vars: SESLER.includes(process.env.TTS_VOICE) ? process.env.TTS_VOICE : "arabella" },
-  "ses.hiz": { grup: "Ses", ad: "Konuşma hızı", tur: "sayi", min: 0.6, max: 1.6, adim: 0.05, vars: 1.1, birim: "×", aciklama: "1 = sesin kendi hızı (Murat 2026-10-03: %10 hızlı)" },
+  "ses.hiz": { grup: "Ses", ad: "Konuşma hızı", tur: "sayi", min: 0.6, max: 1.6, adim: 0.05, vars: 1.2, birim: "×", aciklama: "1 = sesin kendi hızı (Murat 2026-10-03: 1.2×)" },
   "llm.model": { grup: "Yapay zekâ", ad: "Model", tur: "metin", vars: process.env.LLM_MODEL || "gemma4:26b-a4b-it-q4_K_M", aciklama: "V100'deki Ollama model adı" },
   "llm.zamanAsimi": { grup: "Yapay zekâ", ad: "Zaman aşımı", tur: "tam", min: 30, max: 300, vars: 120, birim: "sn" },
   "llm.yaraticilik": { grup: "Yapay zekâ", ad: "Yaratıcılık çarpanı", tur: "sayi", min: 0.5, max: 1.4, adim: 0.05, vars: 1, birim: "×", aciklama: "Bölümlerin sıcaklık değeri bununla çarpılır; düşük = tutarlı, yüksek = yaratıcı" },
