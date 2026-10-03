@@ -10,12 +10,13 @@
 @keyframes float { 50% { transform: translateY(-10px) rotate(-2deg); } }
 
 /* --- Form --- */
-.love-form { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; }
+.love-form { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; align-items: center; }
 .person { display: flex; flex-direction: column; gap: 12px; margin: 0; }
 .person legend { padding: 0 8px; font-family: var(--serif); font-size: 1.6rem; font-weight: 700; color: var(--gold); }
 .person[data-kisi="o"] legend { color: var(--pembe); }
 .person label, .love-note { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; font-weight: 700; }
 .person input, .person select, .love-note textarea {
+  box-sizing: border-box;
   width: 100%;
   padding: 11px 12px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -25,8 +26,13 @@
   font: inherit;
 }
 .person select option { color: #111; }
+/* iOS Safari tarih/saat kutularına kendi genişliğini verir; kutuları kartın içinde tut. */
+.person, .person label, .optional > label { min-width: 0; }
+.person input, .person select { box-sizing: border-box; max-width: 100%; min-width: 0; min-height: 46px; }
+.person input[type="date"], .person input[type="time"] { -webkit-appearance: none; appearance: none; display: block; text-align: left; line-height: 1.4; }
+.person input::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .person input:focus, .person select:focus, .love-note textarea:focus { outline: none; border-color: var(--pembe); box-shadow: 0 0 0 3px rgba(255, 122, 168, 0.22); }
-.optional { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.optional { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .optional label { color: var(--muted); font-weight: 600; }
 .form-heart { color: var(--pembe); font-size: 2.6rem; text-shadow: 0 0 20px rgba(255, 122, 168, 0.7); animation: beat 1.6s ease-in-out infinite; }
 .love-note, .love-form > .btn, .love-form > .form-hint { grid-column: 1 / -1; }
