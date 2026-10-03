@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css?v=29" />
+    <link rel="stylesheet" href="/styles.css?v=30" />
   </head>
   <body>
     <button type="button" class="music-toggle" id="musicToggle" aria-label="Müziği kapat" aria-pressed="false">
@@ -52,7 +52,26 @@
         <li><a class="menu-button" href="#ezoterik-asistan" data-title="Ezoterik Asistan"><img src="/menu/buton_T.png" alt="" width="200" height="180" loading="lazy" decoding="async" /><span>Ezoterik Asistan</span></a></li>
       </ul>
     </main>
+    <footer class="home-footer">
+      <p class="footer-links">
+        <span>Tüm hakları saklıdır © 2026</span>
+        <a href="/gizlilik">Gizlilik Politikası</a>
+        <a href="/kullanim-kosullari">Kullanım Koşulları</a>
+        <button type="button" id="iletisimAc" aria-haspopup="dialog">İletişim</button>
+      </p>
+      <p class="footer-meta"><span>Sürüm 1.0</span><span id="ziyaretSayac" hidden></span></p>
+      <p class="footer-ai" aria-label="Kullandığımız yapay zekâlar"><span>Gemma</span><span>Whisper</span><span>Piper</span><span>MediaPipe</span><span>OpenAI</span><span>Claude</span></p>
+    </footer>
+    <dialog class="iletisim" id="iletisim" aria-labelledby="iletisimBaslik">
+      <button type="button" class="iletisim-kapat" id="iletisimKapat" aria-label="Kapat">✕</button>
+      <h2 id="iletisimBaslik">İletişim</h2>
+      <p class="iletisim-marka">EZOTER.IST</p>
+      <p>VÜCUT DESTEK SİSTEM MEDİKAL TİCARET LİMİTED ŞİRKETİ</p>
+      <p>Merkez Mah. Abide-i Hürriyet Cad. No: 211 İç Kapı No: 64 Şişli / İstanbul</p>
+      <p>Şişli V.D. 9261011879</p>
+      <p><a href="https://wa.me/905323300293" target="_blank" rel="noopener">WhatsApp 532 330 02 93</a><br /><a href="mailto:bilgi@ezoter.ist">bilgi@ezoter.ist</a></p>
+    </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="/app.js?v=50"></script>
+    <script src="/app.js?v=51"></script>
   </body>
 </html>

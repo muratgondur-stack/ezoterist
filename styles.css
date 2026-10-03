@@ -283,3 +283,20 @@ button.auth-bar-user:hover, button.auth-bar-user[aria-expanded="true"] { backgro
 .music-toggle.is-muted .music-off { display: inline; }
 
 .music-toggle:hover { background: rgba(255, 122, 0, 0.3); }
+
+/* Menünün altındaki satırlar (quiz.ist'teki gibi): telif, yasal sayfalar, iletişim, sürüm ve sayaç, yapay zekâlar */
+.home-footer { display: grid; gap: 8px; justify-items: center; margin: 18px auto 4px; padding: 10px 12px; color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-align: center; text-transform: uppercase; }
+.home-footer p { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin: 0; }
+.home-footer a, .home-footer button { padding: 0; border: 0; color: rgba(255, 255, 255, 0.82); background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.home-footer a:hover, .home-footer button:hover { color: #ffb066; }
+.footer-meta span + span::before { content: "·"; margin-right: 14px; }
+.footer-ai { padding: 4px 12px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px; background: rgba(0, 0, 0, 0.35); font-size: 0.62rem; }
+.footer-ai span + span::before { content: ""; display: inline-block; width: 1px; height: 10px; margin-right: 14px; vertical-align: -1px; background: rgba(255, 255, 255, 0.25); }
+
+.iletisim { width: min(420px, calc(100vw - 32px)); padding: 26px 24px 20px; border: 1px solid rgba(243, 194, 107, 0.45); border-radius: 20px; color: #fff; background: rgba(10, 10, 22, 0.97); text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6); }
+.iletisim::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+.iletisim h2 { margin: 0 0 12px; font-size: 1.3rem; }
+.iletisim p { margin: 0 0 10px; color: rgba(255, 255, 255, 0.85); font-size: 0.88rem; line-height: 1.5; }
+.iletisim .iletisim-marka { color: #f3c26b; font-weight: 800; letter-spacing: 0.12em; }
+.iletisim a { color: #f3c26b; }
+.iletisim-kapat { position: absolute; top: 10px; right: 12px; padding: 4px 8px; border: 0; color: #fff; background: none; font-size: 1rem; cursor: pointer; }

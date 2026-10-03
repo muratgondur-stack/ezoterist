@@ -2,7 +2,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 COPY package.json ./
-COPY server.js auth.js eposta.js ust-cubuk.js ./
+COPY server.js auth.js eposta.js ust-cubuk.js ziyaret.js gizlilik.html kullanim-kosullari.html hukuk.css ./
 COPY index.html styles.css app.js login.html login.css login.js favicon.svg favicon.png apple-touch-icon.png ezoterist-bg.png ezoterist-bg-landscape.png ezoterist-bg-portrait.mp4 ezoterist-bg-landscape.mp4 README.md ./
 
 COPY astro.js astroloji-veri.js astroloji-api.js astroloji.html astroloji.css astroloji-sayfa.js ./
