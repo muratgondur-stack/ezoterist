@@ -90,6 +90,7 @@ p { margin: 0; }
   white-space: nowrap;
 }
 
+.topbar-back { font-size: 1.15rem; line-height: 1.2; }
 .topbar-back:hover { background: rgba(255, 122, 0, 0.25); }
 
 /* Banner ana menüdeki gibi: "← Ana Menü" ile kullanıcı butonu arasını doldurur (yatayda ezo_D, dik telefonda ezo_E). */
