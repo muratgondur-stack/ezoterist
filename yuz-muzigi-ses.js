@@ -28,6 +28,7 @@ window.YuzMuzigi = (() => {
     kutu: { ad: "Müzik kutusu", aciklama: "tarak sesi, dönen arpej", ses: "kutu", ezgiOktav: 5, eslik: "kutu", tempo: 1.12, kesik: true },
     gece: { ad: "Gece piyanosu", aciklama: "yedili akorlar, seyrek ezgi", ses: "piyano", ezgiOktav: 4, eslik: "blok", tempo: 0.82, yedili: true, seyrek: true },
     arp: { ad: "Arp masalı", aciklama: "tel çekme, akor yayılımı", ses: "arp", ezgiOktav: 4, eslik: "strum", tempo: 0.95 },
+    keman: { ad: "Keman ezgisi", aciklama: "keman ezgi, piyano eşlik", ses: "keman", eslikSes: "piyano", ezgiOktav: 4, eslik: "arpej", tempo: 0.88, legato: true },
     yagmur: { ad: "Yağmur damlası", aciklama: "beşli dizi, damla notalar", ses: "piyano", ezgiOktav: 5, eslik: "seyrek", tempo: 0.9, pentatonik: true, damla: true, kesik: true },
   };
   // Meditasyon tipleri: tını (çan/kâse sesi), drone parlaklığı ve çan sıklığı çarpanı.
@@ -116,6 +117,25 @@ window.YuzMuzigi = (() => {
       piyanoYukleniyor.catch(() => { piyanoYukleniyor = null; });
     }
     return piyanoYukleniyor;
+  }
+
+  // Keman örnekleri (tonejs-instruments, Nicholaus Brosowsky; kamu malı kaynaklardan, CC-BY 3.0): Sol3–Do6.
+  const KEMAN = ["G3", "A3", "C4", "E4", "G4", "A4", "C5", "E5", "G5", "A5", "C6"].map((ad) => {
+    const harf = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[ad[0]];
+    return { ad, midi: 12 * (Number(ad.slice(-1)) + 1) + harf };
+  });
+  let kemanYukleniyor = null;
+  const kemanTamponlari = new Map();
+  function kemanYukle(ctx) {
+    if (!kemanYukleniyor) {
+      kemanYukleniyor = Promise.all(KEMAN.map(async (p) => {
+        const r = await fetch(`/muzik/keman/${p.ad}.mp3?v=1`);
+        const veri = await r.arrayBuffer();
+        kemanTamponlari.set(p.midi, await new Promise((ok, red) => ctx.decodeAudioData(veri, ok, red)));
+      }));
+      kemanYukleniyor.catch(() => { kemanYukleniyor = null; });
+    }
+    return kemanYukleniyor;
   }
 
   function motor(t, { notaOlunca, mod = "meditasyon", stil = "ninni", medTip = null } = {}) {
@@ -323,14 +343,39 @@ window.YuzMuzigi = (() => {
       suz.connect(g).connect(sentezSes);
       bildir(zaman, midiNo, guc);
     }
+    const kemanSes = ctx.createGain();
+    kemanSes.gain.value = 1.3;
+    gonder(kemanSes);
+    function kemanNota(zaman, midiNo, guc, sure) {
+      let en = KEMAN[0];
+      KEMAN.forEach((p) => { if (Math.abs(p.midi - midiNo) < Math.abs(en.midi - midiNo)) en = p; });
+      const tampon = kemanTamponlari.get(en.midi);
+      if (!tampon) return;
+      const k = ctx.createBufferSource();
+      k.buffer = tampon;
+      k.playbackRate.value = 2 ** ((midiNo - en.midi) / 12);
+      const g = ctx.createGain();
+      const tut = Math.max(0.35, sure);
+      g.gain.setValueAtTime(0.0001, zaman);
+      g.gain.linearRampToValueAtTime(guc, zaman + Math.min(0.18, tut * 0.4)); // yay girişi
+      g.gain.setValueAtTime(guc, zaman + tut);
+      g.gain.linearRampToValueAtTime(0.0001, zaman + tut + 0.45); // yay bırakılır, bir sonrakiyle hafif örtüşür
+      k.connect(g).connect(kemanSes);
+      k.start(zaman, 0.03);
+      k.stop(zaman + tut + 0.5);
+      bildir(zaman, midiNo, guc);
+    }
     const cal = (zaman, midiNo, guc, sure, ses = st.ses) => {
-      if (ses === "kutu") kutuNota(zaman, midiNo, guc);
+      if (ses === "keman") kemanNota(zaman, midiNo, guc, sure);
+      else if (ses === "kutu") kutuNota(zaman, midiNo, guc);
       else if (ses === "arp") arpNota(zaman, midiNo, guc);
       else piyanoNota(zaman, midiNo, guc, sure);
     };
 
     const vurus = 60 / (m.bpm * st.tempo);
-    const RITIM = st.seyrek
+    const RITIM = st.legato
+      ? (m.olcu === 3 ? [[2, 1], [3], [1.5, 1.5], [1, 2]] : [[2, 2], [3, 1], [4], [2, 1, 1], [1.5, 0.5, 2]])
+      : st.seyrek
       ? (m.olcu === 3 ? [[3], [2, 1], [1, 2]] : [[4], [3, 1], [2, 2], [1, 3]])
       : m.olcu === 3
         ? [[2, 1], [1, 1, 1], [3], [1.5, 0.5, 1], [1, 2]]
@@ -369,31 +414,33 @@ window.YuzMuzigi = (() => {
       });
     }
     function eslikOlcusu(zaman, kokDerece, rr) {
+      const es = st.eslikSes || st.ses; // eşlik çalgısı (keman stilinde piyano)
+      const cal2 = (z, mn, g, su) => cal(z, mn, g, su, es);
       const olcuSure = m.olcu * vurus;
       const akor = akorNotalari(kokDerece);
       if (st.eslik === "arpej") {
         // Sol el: kökte bas, ardından akor arpeji (sekizlikler), yumuşak.
-        cal(zaman, dmidi(kokDerece, 2), 0.32, olcuSure);
+        cal2(zaman, dmidi(kokDerece, 2), 0.32, olcuSure);
         const arpej = [kokDerece, kokDerece + 4, kokDerece + 7, kokDerece + 9, kokDerece + 7, kokDerece + 4];
-        for (let i = 1; i < m.olcu * 2; i += 1) cal(zaman + i * vurus * 0.5 + (rr() - 0.5) * 0.015, dmidi(arpej[i % arpej.length], 3), 0.17 + rr() * 0.05, vurus * 0.9);
+        for (let i = 1; i < m.olcu * 2; i += 1) cal2(zaman + i * vurus * 0.5 + (rr() - 0.5) * 0.015, dmidi(arpej[i % arpej.length], 3), 0.17 + rr() * 0.05, vurus * 0.9);
       } else if (st.eslik === "kutu") {
         // Müzik kutusu: bas yok; ince, sürekli dönen arpej (ezgiyle aynı tını).
         const arpej = [kokDerece, kokDerece + 2, kokDerece + 4, kokDerece + 7];
-        for (let i = 0; i < m.olcu * 2; i += 1) cal(zaman + i * vurus * 0.5, dmidi(arpej[i % arpej.length], 4), 0.13 + rr() * 0.04, vurus * 0.5);
+        for (let i = 0; i < m.olcu * 2; i += 1) cal2(zaman + i * vurus * 0.5, dmidi(arpej[i % arpej.length], 4), 0.13 + rr() * 0.04, vurus * 0.5);
       } else if (st.eslik === "blok") {
         // Gece piyanosu: derin bas + yedili akor bloğu, ölçü ortasında yumuşak tekrar.
-        cal(zaman, dmidi(kokDerece, 2), 0.3, olcuSure);
-        akor.forEach((d, i) => cal(zaman + i * 0.025, dmidi(d, 3), 0.15, olcuSure * 0.95));
-        akor.slice(1).forEach((d, i) => cal(zaman + olcuSure * (m.olcu === 3 ? 2 / 3 : 0.5) + i * 0.02, dmidi(d, 3), 0.1, olcuSure * 0.45));
+        cal2(zaman, dmidi(kokDerece, 2), 0.3, olcuSure);
+        akor.forEach((d, i) => cal2(zaman + i * 0.025, dmidi(d, 3), 0.15, olcuSure * 0.95));
+        akor.slice(1).forEach((d, i) => cal2(zaman + olcuSure * (m.olcu === 3 ? 2 / 3 : 0.5) + i * 0.02, dmidi(d, 3), 0.1, olcuSure * 0.45));
       } else if (st.eslik === "strum") {
         // Arp: iki oktava yayılan, aşağıdan yukarı tellerin üzerinden geçen akor (ölçüde iki kez).
         [0, m.olcu === 3 ? 2 : 2].forEach((vurusNo, k) => {
-          [0, 2, 4, 7, 9, 11].forEach((ek, i) => cal(zaman + vurusNo * vurus + i * 0.065 + k * 0.01, dmidi(kokDerece + ek, 3), 0.2 - i * 0.015, vurus * 2));
+          [0, 2, 4, 7, 9, 11].forEach((ek, i) => cal2(zaman + vurusNo * vurus + i * 0.065 + k * 0.01, dmidi(kokDerece + ek, 3), 0.2 - i * 0.015, vurus * 2));
         });
       } else {
         // Seyrek (yağmur): ölçü başında derin bas, ara sıra yüksekte bir akor notası.
-        cal(zaman, dmidi(kokDerece, 2), 0.28, olcuSure);
-        if (rr() < 0.6) cal(zaman + vurus * (m.olcu - 1), dmidi(pentatonaOturt(akor[1 + Math.floor(rr() * 2)]), 4), 0.16, vurus);
+        cal2(zaman, dmidi(kokDerece, 2), 0.28, olcuSure);
+        if (rr() < 0.6) cal2(zaman + vurus * (m.olcu - 1), dmidi(pentatonaOturt(akor[1 + Math.floor(rr() * 2)]), 4), 0.16, vurus);
       }
     }
     // Şarkı: A A′ B A, her döngüde biraz farklı (döngü numarası tohuma katılır).
@@ -512,7 +559,7 @@ window.YuzMuzigi = (() => {
         if (audioEl) {
           try { await audioEl.play(); } catch { sikistir.disconnect(); sikistir.connect(ctx.destination); audioEl = null; }
         }
-        if (mod === "melodi") await piyanoYukle(ctx);
+        if (mod === "melodi") await Promise.all([piyanoYukle(ctx), st.ses === "keman" ? kemanYukle(ctx) : null]);
         if (!siradakiPad) { siradakiPad = ctx.currentTime + 0.5; siradakiCan = ctx.currentTime + 2; }
         if (!siradakiOlcu) siradakiOlcu = ctx.currentTime + 0.8;
         planla();
