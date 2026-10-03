@@ -23,6 +23,7 @@ const GUNLUKLER = [
   { dizin: "run", ad: "Rün Taşları", link: "/run-taslari#gunluk", ikon: "ᚱ" },
   { dizin: "cakra", ad: "Çakra Testi", link: "/cakralar#gunluk", ikon: "🌈" },
   { dizin: "kristal", ad: "Kristal Önerisi", link: "/kristaller#gunluk", ikon: "💎" },
+  { dizin: "semboller", ad: "Semboller", link: "/semboller#gunluk", ikon: "🔯", baslik: (k) => `${k.yorum?.sembol} · ${k.yorum?.baslik || ""}` },
 ];
 
 const baslikBul = (k) => k.yorum?.baslik || k.fal?.baslik || k.fal?.ozet?.slice(0, 80) || "";

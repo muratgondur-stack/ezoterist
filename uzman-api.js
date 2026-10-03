@@ -24,6 +24,7 @@ const { ayKaydiOku } = require("./ay-takvimi-api");
 const { cakraKaydiOku, kristalKaydiOku } = require("./cakra-kristal-api");
 const CakraVeri = require("./cakra-veri");
 const KristalVeri = require("./kristal-veri");
+const { sembolKaydiOku } = require("./sembol-api");
 const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
@@ -247,6 +248,17 @@ const BOLUMLER = {
       baslik: `Kristaller · ${k.yorum.secimler.map((s) => KristalVeri.kristalBul(s.id).ad).join(", ")}`,
       girdiMetni: [k.niyet ? `Niyeti: ${KristalVeri.niyetler[k.niyet]}` : "", k.ihtiyac ? `İhtiyacı: ${k.ihtiyac}` : ""].filter(Boolean).join(" — "),
       ozet: k.yorum.ozet,
+      kayitId: k.id,
+    }),
+  },
+  semboller: {
+    ad: "sembol yorumu",
+    link: "/semboller#gunluk",
+    yukle: (dataDir, userId, body) => sembolKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: `Sembol · ${k.yorum.sembol}`,
+      girdiMetni: `Sorduğu sembol: ${k.soru}${k.nerede ? ` — ${k.nerede}` : ""}`,
+      ozet: k.yorum.anlam,
       kayitId: k.id,
     }),
   },

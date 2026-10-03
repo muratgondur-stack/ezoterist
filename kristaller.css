@@ -6,7 +6,7 @@
 .chips button { padding: 6px 12px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 999px; color: var(--foreground); background: rgba(255, 255, 255, 0.04); font: inherit; font-size: 0.84rem; cursor: pointer; }
 .chips button[aria-pressed="true"] { border-color: var(--gold); background: rgba(243, 194, 107, 0.2); }
 
-.crystal-img { width: 100%; aspect-ratio: 1; border-radius: 16px; object-fit: cover; display: block; }
+.crystal-img { width: 100%; height: auto; aspect-ratio: 1; border-radius: 16px; object-fit: cover; display: block; }
 .dot { display: inline-block; width: 10px; height: 10px; margin-right: 4px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px var(--c); vertical-align: middle; }
 
 /* --- Günün kristali --- */

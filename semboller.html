@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Semboller: nazar, hamsa, ankh, hayat çiçeği ve daha fazlası; 32 ezoterik sembolün kökeni ve anlamı, gördüğün sembolü sor." />
+    <title>Semboller · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/semboller.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Semboller</p>
+          <h1>Simgelerin<br />gizli dili</h1>
+          <p class="lead">Kapıdaki nazar boncuğundan bir tapınak duvarındaki hayat çiçeğine… İnsanlık binlerce yıldır anlamı sembollerle anlatıyor. 32 sembolün kökenini ve anlamını keşfet; rüyanda, yolda ya da bir takıda gördüğün sembolü bize sor.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#sor">Bir sembol sor</a>
+            <a class="btn btn-ghost" href="#ansiklopedi">Ansiklopedi</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="symbol-cover" src="/sembol/sembol-kapak.webp?v=1" alt="" width="720" height="720" />
+        </div>
+      </section>
+
+      <section id="gunun" aria-labelledby="dailyTitle">
+        <div class="section-head">
+          <h2 id="dailyTitle">Günün sembolü</h2>
+          <p class="section-note" id="dailyDate"></p>
+        </div>
+        <div class="card daily-symbol" id="dailySymbol"></div>
+      </section>
+
+      <section id="sor" aria-labelledby="askTitle">
+        <div class="section-head">
+          <h2 id="askTitle">Gördüğün sembolü sor</h2>
+          <p class="section-note" id="quota">Ansiklopedide olmasa da olur: sembolü adıyla ya da tarif ederek yaz.</p>
+        </div>
+        <form class="card ask-form" id="askForm">
+          <label><span>Sembol</span><input name="sembol" maxlength="80" required placeholder="Örneğin: üç halkalı düğüm, baykuş, kırmızı ip, ters hilal…" /></label>
+          <label><span>Nerede gördün, neden merak ediyorsun? (isteğe bağlı)</span><textarea name="nerede" rows="2" maxlength="300" placeholder="Örneğin: Rüyamda bir kapının üzerinde gördüm; sonra da bir kolyede karşıma çıktı."></textarea></label>
+          <button type="submit" class="btn btn-primary" id="askSubmit">Anlamını anlat</button>
+        </form>
+      </section>
+
+      <section id="sonuc" hidden aria-labelledby="resultTitle">
+        <div class="card result">
+          <div class="reading-head">
+            <div><p class="sky-label" id="resultMeta"></p><h2 id="resultTitle"></h2><p class="result-sub" id="resultSub"></p></div>
+            <span class="badge">✨ Sembol rehberi</span>
+          </div>
+          <div class="result-grid">
+            <div><h3>📜 Kökeni</h3><p id="resultOrigin"></p></div>
+            <div><h3>🔮 Anlamı</h3><p id="resultMeaning"></p></div>
+          </div>
+          <div class="message" id="resultMessageBox"><h3>Sana mesajı</h3><p id="resultMessage"></p></div>
+          <div id="relatedBox"><h3>İlgili semboller</h3><div class="related" id="related"></div></div>
+          <p class="affirmation" id="resultAffirmation"></p>
+          <button type="button" class="listen" id="resultListen" hidden>🔊 Sesli dinle</button>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Sembolünün anlamı hazır. Dilersen uzmanlarımızdan birini seç; gördüğün sembolü kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="ansiklopedi" aria-labelledby="encTitle">
+        <div class="section-head">
+          <h2 id="encTitle">Sembol ansiklopedisi</h2>
+          <p class="section-note" id="encNote">32 sembol. Ara ya da bir kategori seç; bir sembole dokun.</p>
+        </div>
+        <div class="enc-tools">
+          <input type="search" id="search" placeholder="Sembol ara… (ör. göz, yılan, sonsuzluk)" autocomplete="off" />
+          <div class="chips" id="catChips"></div>
+        </div>
+        <ul class="symbol-grid" id="symbolGrid"></ul>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">Sembol günlüğüm</h2>
+          <p class="section-note" id="journalNote">Sorduğun semboller burada saklanır.</p>
+        </div>
+        <ul class="symbol-journal" id="journal"></ul>
+      </section>
+
+      <p class="disclaimer">Semboller farklı kültürlerde farklı anlamlar taşır; burada anlatılanlar ilham ve kendini tanıma içindir.</p>
+    </main>
+
+    <dialog class="sign-dialog symbol-dialog" id="symbolDialog">
+      <form method="dialog" class="dlg-close-form"><button class="dlg-close" aria-label="Kapat">✕</button></form>
+      <div id="symbolDialogBody"></div>
+    </dialog>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/sembol-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/semboller-sayfa.js?v=1"></script>
+  </body>
+</html>
