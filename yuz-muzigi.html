@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=11" />
     <link rel="stylesheet" href="/fal.css?v=7" />
-    <link rel="stylesheet" href="/yuz-muzigi.css?v=1" />
+    <link rel="stylesheet" href="/yuz-muzigi.css?v=2" />
   </head>
   <body>
     <header class="topbar">
@@ -27,7 +27,7 @@
         <div class="hero-text">
           <p class="eyebrow">Ezoter.ist · Yüz Müziği</p>
           <h1>Yüzünün<br />müziği</h1>
-          <p class="lead">Yüzünün oranları — altın orana yakınlığı, şekli, alnının ve çenenin dengesi — sana özel bir ezgiye dönüşür. Aynı yüz hep aynı ana motifi çalar; müzik ise hiç bitmeden, yavaşça değişerek akar. Gözlerini kapat, nefesine eşlik eden ışığı izle, uykuya dal.</p>
+          <p class="lead">Yüzünün oranları — altın orana yakınlığı, şekli, alnının ve çenenin dengesi — sana özel bir ezgiye dönüşür. Aynı yüz hep aynı ana motifi çalar; müzik ise hiç bitmeden, yavaşça değişerek akar. İster yüzünden doğan bir piyano ninnisi, ister kâse ve çanlarla bir meditasyon ambiyansı dinle; gözlerini kapat, uykuya dal.</p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="#yuz">Yüzümü seç</a>
             <a class="btn btn-ghost" href="#calar">Dinlemeye geç</a>
@@ -74,6 +74,10 @@
             </div>
           </div>
           <div class="controls">
+            <div class="modes" id="modeChips" role="group" aria-label="Müzik türü">
+              <button type="button" class="chip mode" data-mod="melodi" aria-pressed="true">🎹 Melodi <small>piyano ninnisi</small></button>
+              <button type="button" class="chip mode" data-mod="meditasyon" aria-pressed="false">🕉 Meditasyon <small>kâse ve çan ambiyansı</small></button>
+            </div>
             <label class="volume"><span>Ses</span><input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" /></label>
             <div class="toggles">
               <button type="button" class="chip" id="oceanToggle" aria-pressed="false">🌊 Okyanus</button>
@@ -88,7 +92,7 @@
                 <button type="button" class="chip" data-dk="60" aria-pressed="false">60 dk</button>
               </div>
             </div>
-            <p class="section-note small">Binaural vuruş yalnız kulaklıkla işe yarar. Ekran kilitlenince bazı telefonlar sesi durdurabilir; kesintisiz dinlemek için ekranı açık bırakıp "Tam ekran"da karartabilirsin.</p>
+            <p class="section-note small">Piyano sesi: Salamander Grand Piano (Alexander Holm, CC-BY 3.0). Binaural vuruş yalnız kulaklıkla işe yarar. Ekran kilitlenince bazı telefonlar sesi durdurabilir; kesintisiz dinlemek için ekranı açık bırakıp "Tam ekran"da karartabilirsin.</p>
           </div>
         </div>
       </section>
@@ -97,8 +101,8 @@
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script src="/foto-yuva.js?v=2"></script>
     <script src="/yuz-harita.js?v=2"></script>
-    <script src="/yuz-muzigi-ses.js?v=1"></script>
-    <script src="/yuz-muzigi-sayfa.js?v=1"></script>
+    <script src="/yuz-muzigi-ses.js?v=2"></script>
+    <script src="/yuz-muzigi-sayfa.js?v=2"></script>
     <script src="/ust-cubuk.js?v=4" defer></script>
   </body>
 </html>

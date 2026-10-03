@@ -15,7 +15,7 @@ let yuzler = [];
 let secili = null; // { id, ad, tarih, olcumler }
 let tarif = null;
 let motor = null;
-let ayar = { okyanus: false, binaural: false, ses: 0.8, dakika: 0 };
+let ayar = { okyanus: false, binaural: false, ses: 0.8, dakika: 0, mod: "melodi" };
 
 // --- 1. adım: yüzler ---
 
@@ -48,13 +48,37 @@ function sec(y, { kaydir = true } = {}) {
   secili = y;
   tarif = YuzMuzigi.tarif(y.olcumler);
   renderYuzler();
-  $("recipe").textContent = `${y.ad}: ${tarif.kokAdi} kökünde ${tarif.makamAdi} makamı, ${tarif.tiniAdi} sesi, çanlar ~${tarif.aralik.toFixed(1)} sn arayla, nefes ritmi ${tarif.nefes.toFixed(0)} sn.`;
+  tarifYaz();
   $("playButton").disabled = false;
   $("stageNote").textContent = "Çalmak için dokun.";
   setPlaying(false);
   if (calarken) cal();
   if (kaydir) $("calar").scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+// Akor adları: büyük harf majör, küçük harf minör akor (dizinin kendi akorları).
+const MAJOR_AKOR = ["I", "ii", "iii", "IV", "V", "vi", "vii°"];
+const MINOR_AKOR = ["i", "ii°", "III", "iv", "v", "VI", "VII"];
+function tarifYaz() {
+  if (!secili || !tarif) return;
+  const m = tarif.melodi;
+  const yuruyus = (y) => y.map((d) => (m.majör ? MAJOR_AKOR : MINOR_AKOR)[d]).join("–");
+  $("recipe").textContent = ayar.mod === "melodi"
+    ? `${secili.ad}: ${m.adi}, ${m.olcu}/4 ölçü, ${m.bpm} vuruş/dk; akorlar ${yuruyus(m.A)} ve ${yuruyus(m.B)}. Ana ezgi yüzünün oranlarından doğar.`
+    : `${secili.ad}: ${tarif.kokAdi} kökünde ${tarif.makamAdi} makamı, ${tarif.tiniAdi} sesi, çanlar ~${tarif.aralik.toFixed(1)} sn arayla, nefes ritmi ${tarif.nefes.toFixed(0)} sn.`;
+}
+
+$("modeChips").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-mod]");
+  if (!b || b.dataset.mod === ayar.mod) return;
+  ayar.mod = b.dataset.mod;
+  $("modeChips").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  tarifYaz();
+  const calarken = motor?.calisiyor;
+  if (motor) { motor.kapat(); motor = null; }
+  setPlaying(false);
+  if (calarken) cal();
+});
 
 // Bu sayfada yeni yüz tarama (fotoğraf sunucuya gitmez; yalnız ölçümler kaydedilir).
 let taramaFoto = null;
@@ -110,7 +134,8 @@ async function cal() {
   if (!tarif) return;
   try {
     if (!motor) {
-      motor = YuzMuzigi.motor(tarif, { notaOlunca: parilda });
+      if (ayar.mod === "melodi") $("stageNote").textContent = "Piyano hazırlanıyor…";
+      motor = YuzMuzigi.motor(tarif, { notaOlunca: parilda, mod: ayar.mod });
       motor.okyanus(ayar.okyanus);
       motor.binaural(ayar.binaural);
       motor.sesDuzeyi(ayar.ses);

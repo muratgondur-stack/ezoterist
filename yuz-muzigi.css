@@ -30,6 +30,9 @@
 .stage.karanlik .stage-controls { opacity: 0; }
 
 .controls { display: grid; gap: 14px; }
+.modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.chip.mode { display: grid; gap: 2px; padding: 10px 14px; border-radius: 16px; text-align: left; font-size: 0.98rem; }
+.chip.mode small { font-size: 0.74rem; font-weight: 600; opacity: 0.8; }
 .volume { display: flex; align-items: center; gap: 12px; font-weight: 700; }
 .volume input { flex: 1; accent-color: var(--accent); }
 .toggles, .timer .chips { display: flex; flex-wrap: wrap; gap: 8px; }

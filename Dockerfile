@@ -39,6 +39,7 @@ COPY dizim-hesap.js dizim-api.js dizim.html dizim.css dizim-sayfa.js ./
 COPY yuz-muzigi-api.js yuz-muzigi.html yuz-muzigi.css yuz-muzigi-ses.js yuz-muzigi-sayfa.js ./
 COPY dizim ./dizim
 COPY bekleme ./bekleme
+COPY muzik ./muzik
 COPY sembol ./sembol
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi

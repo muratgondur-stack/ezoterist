@@ -1,6 +1,7 @@
 // Yüz Müziği ses motoru (Web Audio, dosyasız). Yüz ölçümlerinden bir "tarif" çıkarılır (ana nota, makam, ses rengi,
 // çan aralığı, nefes ritmi) ve tohumlu rastgelelikle o yüze özgü, hep aynı ana motiften türeyen sonsuz bir ambiyans çalınır.
-// Katmanlar: drone, yavaş pad akorları, çan/kâse melodisi, isteğe bağlı okyanus ve binaural vuruş. Ses <audio> öğesine
+// Katmanlar: drone, yavaş pad akorları, çan/kâse melodisi, isteğe bağlı okyanus ve binaural vuruş.
+// Melodi modu: yüzden çıkan tonalite, ölçü, tempo ve akor yürüyüşleriyle gerçek piyano örnekleriyle çalınan ninni. Ses <audio> öğesine
 // akış olarak verilir; böylece telefon ekranı kilitlenince de çalmayı sürdürme şansı artar.
 window.YuzMuzigi = (() => {
   const MAKAMLAR = {
@@ -18,6 +19,11 @@ window.YuzMuzigi = (() => {
     uzun: { ad: "Rüzgâr flütü", renk: ["#8ff0d0", "#7fc8ff", "#effffa"] },
     elmas: { ad: "Cam çanlar", renk: ["#f3c26b", "#9ff0ff", "#ffffff"] },
   };
+  // Akor yürüyüşleri: dizinin derecesi (0 = kök). Her biri 4 ölçü, A ve B bölümü için ikişer kez çalınır.
+  const MAJOR_YURUYUS = [[0, 4, 5, 3], [0, 5, 3, 4], [5, 3, 0, 4], [0, 3, 5, 4], [0, 2, 3, 4], [3, 4, 2, 5]];
+  const MINOR_YURUYUS = [[0, 5, 2, 6], [0, 3, 5, 4], [0, 6, 5, 6], [0, 3, 4, 0], [5, 6, 0, 0], [0, 2, 3, 4]];
+  const MAJOR = [0, 2, 4, 5, 7, 9, 11];
+  const MINOR = [0, 2, 3, 5, 7, 8, 10];
   const NOTA_ADLARI = ["Do", "Do♯", "Re", "Mi♭", "Mi", "Fa", "Fa♯", "Sol", "La♭", "La", "Si♭", "Si"];
   const KOKLER = [2, 4, 5, 7, 9, 10, 0]; // Re, Mi, Fa, Sol, La, Si♭, Do
   const hz = (midi) => 440 * 2 ** ((midi - 69) / 12);
@@ -55,13 +61,48 @@ window.YuzMuzigi = (() => {
     // Yüzün motifi: makam derecelerinde 6 notalık, adım adım ilerleyen kısa bir ezgi.
     let d = Math.floor(r() * derece);
     const motif = Array.from({ length: 6 }, () => { d = sinirla(d + [-2, -1, 1, 2, 0][Math.floor(r() * 5)], 0, derece * 2 - 1); return d; });
+    // Melodi modu: tonalite, ölçü, tempo ve iki akor yürüyüşü (A ve B bölümü).
+    const r2 = rastgele(tohum ^ 0x51ed27);
+    const majör = makam === "huzur" || makam === "ruya" || (makam === "derin" && r2() < 0.3);
+    const yuruyusler = majör ? MAJOR_YURUYUS : MINOR_YURUYUS;
+    const yA = Math.floor(r2() * yuruyusler.length);
+    let yB = Math.floor(r2() * yuruyusler.length);
+    if (yB === yA) yB = (yB + 1) % yuruyusler.length;
     return {
       tohum, kokSinif, kokAdi: NOTA_ADLARI[kokSinif], makam, makamAdi: MAKAMLAR[makam].ad, tini, tiniAdi: TINILER[tini].ad,
       renk: TINILER[tini].renk, aralik, parlaklik, nefes, motif, tempo: Math.round(60 / (aralik / 2)),
+      melodi: {
+        majör,
+        olcu: o.sekil === "kalp" || o.sekil === "yuvarlak" ? 3 : 4,
+        bpm: Math.round(60 + r2() * 16),
+        A: yuruyusler[yA],
+        B: yuruyusler[yB],
+        adi: `${NOTA_ADLARI[kokSinif]} ${majör ? "majör" : "minör"}`,
+      },
     };
   }
 
-  function motor(t, { notaOlunca } = {}) {
+  // Piyano örnekleri (Salamander Grand Piano, CC-BY 3.0, Alexander Holm): Do2–Do6 arası her 3 yarım seste bir.
+  const PIYANO = [];
+  ["C", "Ds", "Fs", "A"].forEach((n, i) => { for (let o = 2; o <= 5; o += 1) PIYANO.push({ ad: `${n}${o}`, midi: 12 * (o + 1) + i * 3 }); });
+  PIYANO.push({ ad: "C6", midi: 84 });
+  PIYANO.sort((a, b) => a.midi - b.midi);
+  let piyanoYukleniyor = null;
+  const piyanoTamponlari = new Map();
+  function piyanoYukle(ctx) {
+    if (!piyanoYukleniyor) {
+      piyanoYukleniyor = Promise.all(PIYANO.map(async (p) => {
+        const r = await fetch(`/muzik/piyano/${p.ad}.mp3?v=1`);
+        const veri = await r.arrayBuffer();
+        const tampon = await new Promise((ok, red) => ctx.decodeAudioData(veri, ok, red));
+        piyanoTamponlari.set(p.midi, tampon);
+      }));
+      piyanoYukleniyor.catch(() => { piyanoYukleniyor = null; });
+    }
+    return piyanoYukleniyor;
+  }
+
+  function motor(t, { notaOlunca, mod = "meditasyon" } = {}) {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     const ctx = new Ctx();
     const r = rastgele(t.tohum ^ 0x9e3779b9);
@@ -110,7 +151,7 @@ window.YuzMuzigi = (() => {
     droneSuz.frequency.value = 380 + 420 * t.parlaklik;
     droneSuz.Q.value = 0.7;
     const droneSes = ctx.createGain();
-    droneSes.gain.value = 0.11;
+    droneSes.gain.value = mod === "melodi" ? 0.015 : 0.11; // melodide yalnız çok hafif bir zemin
     droneSuz.connect(droneSes);
     gonder(droneSes);
     const kokHz = hz(12 * 3 + t.kokSinif);
@@ -191,11 +232,103 @@ window.YuzMuzigi = (() => {
       }
     }
 
+    // --- Melodi modu: piyano ninnisi ---
+    const m = t.melodi;
+    const dizi = m.majör ? MAJOR : MINOR;
+    const piyanoSes = ctx.createGain();
+    piyanoSes.gain.value = 2.8; // piyano örnekleri kısık kayıtlı; sıkıştırıcı tepeleri tutar
+    gonder(piyanoSes);
+    // Derece → MIDI (dizi içinde, oktav aşımıyla).
+    const dmidi = (derece, oktav) => 12 * (oktav + 1) + t.kokSinif + dizi[((derece % 7) + 7) % 7] + 12 * Math.floor(derece / 7);
+    function piyanoNota(zaman, midiNo, guc, sure) {
+      let en = PIYANO[0];
+      PIYANO.forEach((p) => { if (Math.abs(p.midi - midiNo) < Math.abs(en.midi - midiNo)) en = p; });
+      const tampon = piyanoTamponlari.get(en.midi);
+      if (!tampon) return;
+      const k = ctx.createBufferSource();
+      k.buffer = tampon;
+      k.playbackRate.value = 2 ** ((midiNo - en.midi) / 12);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(guc, zaman);
+      g.gain.setTargetAtTime(0, zaman + sure, 0.35); // pedal bırakılınca sönüm
+      k.connect(g).connect(piyanoSes);
+      k.start(zaman);
+      k.stop(zaman + sure + 2.5);
+      if (notaOlunca && guc > 0.25) {
+        const gecikme = Math.max(0, (zaman - ctx.currentTime) * 1000);
+        setTimeout(() => notaOlunca({ f: hz(midiNo), guc: Math.min(1, guc * 1.6) }), gecikme);
+      }
+    }
+    const vurus = 60 / m.bpm;
+    const RITIM = m.olcu === 3
+      ? [[2, 1], [1, 1, 1], [3], [1.5, 0.5, 1], [1, 2]]
+      : [[2, 1, 1], [1, 1, 2], [1, 1, 1, 1], [3, 1], [1.5, 0.5, 2], [2, 2], [4]];
+    const akorNotalari = (kokDerece) => [kokDerece, kokDerece + 2, kokDerece + 4];
+    let onceki = 2 + 7; // ezgi oktav 5 civarında başlar (derece, 7 = bir oktav)
+    function ezgiOlcusu(zaman, kokDerece, rr, son) {
+      const ritim = son ? (m.olcu === 3 ? [3] : [4]) : RITIM[Math.floor(rr() * RITIM.length)];
+      let z = zaman;
+      ritim.forEach((sure, i) => {
+        let hedef;
+        const akor = akorNotalari(kokDerece).map((d) => d + 7);
+        if (i === 0 || son) {
+          // Kuvvetli vuruş: önceki notaya en yakın akor notası
+          hedef = [...akor, ...akor.map((d) => d + 7), ...akor.map((d) => d - 7)].reduce((a, b) => (Math.abs(b - onceki) < Math.abs(a - onceki) ? b : a));
+          if (son) hedef = kokDerece + 7 + (onceki > kokDerece + 10 ? 7 : 0);
+        } else {
+          // Zayıf vuruş: adım adım (±1, bazen ±2)
+          const adim = [-1, 1, 1, -1, 2, -2][Math.floor(rr() * 6)];
+          hedef = onceki + adim;
+        }
+        hedef = Math.min(13, Math.max(4, hedef)); // ezgi aralığı ~ Do5–La6 arası
+        onceki = hedef;
+        const insan = (rr() - 0.5) * 0.02;
+        piyanoNota(z + insan, dmidi(hedef, 4), (i === 0 ? 0.5 : 0.38) * (0.9 + rr() * 0.2), sure * vurus * 0.95);
+        z += sure * vurus;
+      });
+    }
+    function eslikOlcusu(zaman, kokDerece, rr) {
+      // Sol el: kökte bas, ardından akor arpeji (sekizlikler), yumuşak.
+      piyanoNota(zaman, dmidi(kokDerece, 2), 0.32, m.olcu * vurus);
+      const arpej = [kokDerece, kokDerece + 4, kokDerece + 7, kokDerece + 9, kokDerece + 7, kokDerece + 4];
+      const adet = m.olcu * 2;
+      for (let i = 1; i < adet; i += 1) {
+        const d = arpej[i % arpej.length];
+        piyanoNota(zaman + i * vurus * 0.5 + (rr() - 0.5) * 0.015, dmidi(d, 3), 0.17 + rr() * 0.05, vurus * 0.9);
+      }
+    }
+    // Şarkı: A A′ B A, her döngüde biraz farklı (döngü numarası tohuma katılır).
+    let siradakiOlcu = 0;
+    let olcuNo = 0;
+    function melodiPlanla() {
+      const ufuk = ctx.currentTime + 90;
+      const olcuSure = m.olcu * vurus;
+      while (siradakiOlcu < ufuk) {
+        const dongu = Math.floor(olcuNo / 32);
+        const yerel = olcuNo % 32; // 4 bölüm × 8 ölçü
+        const bolum = Math.floor(yerel / 8); // 0:A 1:A′ 2:B 3:A
+        const ici = yerel % 8;
+        const yuruyus = bolum === 2 ? m.B : m.A;
+        const kok = yuruyus[ici % 4];
+        // Ana motif: A bölümlerinin ilk iki ölçüsü hep aynı tohumla (yüzün imzası); geri kalanı döngüyle değişir.
+        const imza = bolum !== 2 && ici < 2;
+        const rr = rastgele(t.tohum ^ (imza ? ici * 7919 : (dongu * 104729 + yerel * 7919 + 13)));
+        if (imza && ici === 0) onceki = 2 + 7;
+        ezgiOlcusu(siradakiOlcu, kok, rr, ici === 7);
+        eslikOlcusu(siradakiOlcu, kok, rr);
+        siradakiOlcu += olcuSure;
+        olcuNo += 1;
+        // Bölüm sonlarında kısa bir nefes
+        if (ici === 7 && bolum === 3) siradakiOlcu += vurus;
+      }
+    }
+
     let siradakiPad = 0;
     let siradakiCan = 0;
     let motifSira = 0;
     let padDerece = 0;
     function planla() {
+      if (mod === "melodi") { melodiPlanla(); return; }
       const ufuk = ctx.currentTime + 90;
       while (siradakiPad < ufuk) {
         pad(siradakiPad, padDerece);
@@ -280,7 +413,9 @@ window.YuzMuzigi = (() => {
         if (audioEl) {
           try { await audioEl.play(); } catch { sikistir.disconnect(); sikistir.connect(ctx.destination); audioEl = null; }
         }
+        if (mod === "melodi") await piyanoYukle(ctx);
         if (!siradakiPad) { siradakiPad = ctx.currentTime + 0.5; siradakiCan = ctx.currentTime + 2; }
+        if (!siradakiOlcu) siradakiOlcu = ctx.currentTime + 0.8;
         planla();
         clearInterval(planlayici);
         planlayici = setInterval(planla, 5000);
