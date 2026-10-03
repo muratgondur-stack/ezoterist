@@ -60,8 +60,11 @@ const fitLayout = () => {
 
   let best = { cols: 5, size: 0 };
   // Mobil dikey ekranda satırda hep 4 simge (Murat 2026-10-04); sığmayan satırlar aşağı kayar.
+  // Mobil yatay (telefon yan çevrilince) satırda 7 simge (Murat 2026-10-04).
   const mobilDikey = window.matchMedia("(orientation: portrait) and (max-width: 600px)").matches;
+  const mobilYatay = window.matchMedia("(orientation: landscape) and (max-height: 500px)").matches;
   if (mobilDikey) best = { cols: 4, size: Math.min((width - 3 * colGap) / 4 - padX, 220) };
+  else if (mobilYatay) best = { cols: 7, size: Math.min((width - 6 * colGap) / 7 - padX, 220) };
   else for (let cols = 2; cols <= 10; cols += 1) {
     const rows = Math.ceil(count / cols);
     const byWidth = (width - (cols - 1) * colGap) / cols - padX;
