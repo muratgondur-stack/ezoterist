@@ -52,55 +52,16 @@ window.FotoSayfa = function FotoSayfa(ayar) {
   voice.addEventListener("error", () => { if (activeListen) toast("Seslendirme şu an hazır değil."); stopVoice(); });
 
   // --- Fotoğraf ---
-  function kucult(file) {
-    return new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(file);
-      const image = new Image();
-      image.onload = () => {
-        const olcek = Math.min(1, 1280 / Math.max(image.width, image.height));
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(image.width * olcek);
-        canvas.height = Math.round(image.height * olcek);
-        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
-      };
-      image.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Fotoğraf açılamadı.")); };
-      image.src = url;
-    });
-  }
 
   function renderSlot() {
-    const slot = document.createElement("label");
-    slot.className = `photo-slot is-required${foto ? " has-photo" : ""}`;
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    if (ayar.kamera) input.setAttribute("capture", ayar.kamera);
-    input.hidden = true;
-    input.addEventListener("change", async () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      try { foto = await kucult(file); renderSlot(); } catch (error) { toast(error.message); }
-    });
-    slot.append(input);
-    if (foto) {
-      const img = document.createElement("img");
-      img.src = foto;
-      img.alt = ayar.yuva.ad;
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.className = "slot-remove";
-      remove.setAttribute("aria-label", "Fotoğrafı kaldır");
-      remove.textContent = "✕";
-      remove.addEventListener("click", (e) => { e.preventDefault(); foto = null; renderSlot(); });
-      slot.append(img, remove);
-    } else {
-      slot.insertAdjacentHTML("beforeend", `<span class="slot-icon">${ayar.yuva.ikon}</span><b></b><span></span>`);
-      slot.querySelector("b").textContent = ayar.yuva.ad;
-      slot.querySelector("span:last-child").textContent = ayar.yuva.ipucu;
-    }
-    $("photoSlots").replaceChildren(slot);
+    $("photoSlots").replaceChildren(fotoYuvasi({
+      yuva: { ...ayar.yuva, zorunlu: true },
+      foto,
+      kamera: ayar.kamera || "environment",
+      onSec: (veri) => { foto = veri; renderSlot(); },
+      onSil: () => { foto = null; renderSlot(); },
+      onHata: toast,
+    }));
   }
 
   function renderKota() {

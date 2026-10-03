@@ -91,3 +91,28 @@
 .chakra-card { border-color: rgba(160, 120, 255, 0.45); background: linear-gradient(140deg, rgba(140, 90, 230, 0.16), var(--card)); }
 .element-grid.five { grid-template-columns: repeat(5, 1fr); }
 @media (max-width: 960px) { .element-grid.five { grid-template-columns: repeat(2, 1fr); } }
+
+/* Fotoğraf yuvası düğmeleri: kamera ya da galeri (foto-yuva.js) */
+.photo-slot { cursor: default; padding: 8px; }
+.slot-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 6px; }
+.slot-btn {
+  padding: 7px 11px;
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold);
+  background: rgba(243, 194, 107, 0.08);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.slot-btn:hover { background: rgba(243, 194, 107, 0.2); }
+@media (max-width: 680px) { .slot-btn { padding: 6px 8px; font-size: 0.7rem; } .slot-hint { display: none; } }
+/* Mobilde çok yuvalı formlar (kahve, el): yuvalar alt alta, yatay kart */
+@media (max-width: 680px) {
+  .photo-slots:not(.one) { grid-template-columns: 1fr; max-width: none; }
+  .photo-slots:not(.one) .photo-slot { flex-direction: row; flex-wrap: wrap; aspect-ratio: auto; min-height: 96px; padding: 12px; gap: 6px 10px; }
+  .photo-slots:not(.one) .photo-slot .slot-actions { flex-basis: 100%; margin-top: 2px; }
+  .photo-slots:not(.one) .photo-slot.has-photo { aspect-ratio: 4 / 3; }
+  .slot-btn { padding: 8px 12px; font-size: 0.82rem; }
+}
