@@ -173,7 +173,7 @@ let surukleme = null;
 
 // Masada, bırakılan noktaya en yakın boş gedik (taşın kendi gediği boş sayılır).
 function enYakinGedik(nx, ny, t) {
-  const dolu = new Set(taslar.filter((s) => s !== t && s.gedik != null).map((s) => s.gedik));
+  const dolu = new Set(taslar.filter((s) => s !== t && s.x != null && s.gedik != null).map((s) => s.gedik));
   let en = null;
   GEDIKLER.forEach((g, i) => {
     if (dolu.has(i)) return;
@@ -280,6 +280,29 @@ function gedikleriDuzelt() {
   });
 }
 
+// Masanın ortasındaki sedef rozet: tıklanınca bütün taşlar gediklere rastgele dizilir (Murat 2026-10-03).
+function merkezRozet() {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "merkez-rozet";
+  b.title = "Taşları rastgele diz";
+  b.setAttribute("aria-label", "Taşları gediklere rastgele diz");
+  b.addEventListener("click", rastgeleDiz);
+  return b;
+}
+
+function rastgeleDiz() {
+  if (!taslar.length) { toast("Önce yukarıdan taşlarını seç."); return; }
+  const sira = GEDIKLER.map((_, i) => i);
+  for (let i = sira.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [sira[i], sira[j]] = [sira[j], sira[i]];
+  }
+  taslar.forEach((t, i) => { gedigeKoy(t, i < sira.length ? sira[i] : null); t.yeni = true; });
+  renderBench();
+  toast("Taşlar rastgele dizildi. İstediğin taşı sürükleyip yerini değiştirebilirsin.");
+}
+
 function gedikElleri() {
   return GEDIKLER.map((g, i) => {
     const d = document.createElement("span");
@@ -296,7 +319,7 @@ function renderBench() {
   $("tray").replaceChildren(...taslar.filter((t) => t.x == null).map((t) => tasEl(t, { kenarda: true })));
   gedikleriDuzelt();
   const masadakiler = taslar.filter((t) => t.x != null);
-  $("table").replaceChildren(...gedikElleri(), ...masadakiler.map((t) => tasEl(t)));
+  $("table").replaceChildren(...gedikElleri(), merkezRozet(), ...masadakiler.map((t) => tasEl(t)));
   $("tableHint").hidden = masadakiler.length > 0;
   const kenarda = taslar.length - masadakiler.length;
   $("placedCount").textContent = taslar.length
@@ -311,7 +334,7 @@ function renderAll() {
 }
 
 $("clearTable").addEventListener("click", () => {
-  taslar.forEach((t) => { t.x = null; t.y = null; });
+  taslar.forEach((t) => gedigeKoy(t, null));
   renderBench();
 });
 
@@ -339,7 +362,7 @@ async function goruntuCiz(liste) {
   c.width = W;
   c.height = H;
   const ctx = c.getContext("2d");
-  const masa = await resimYukle("/dizim/masa-kare.webp?v=1");
+  const masa = await resimYukle("/dizim/masa-kare.webp?v=2");
   const olcek = Math.max(W / masa.width, H / masa.height);
   ctx.drawImage(masa, (W - masa.width * olcek) / 2, (H - masa.height * olcek) / 2, masa.width * olcek, masa.height * olcek);
   const kenar = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.78);
@@ -564,7 +587,7 @@ function renderJournal() {
     open.type = "button";
     open.className = "open";
     open.innerHTML = "<div class=\"thumb\"></div><div class=\"meta\"><b></b><small></small><p></p></div>";
-    open.querySelector(".thumb").style.backgroundImage = k.gorsel ? `url(/api/dizim/gorsel?id=${k.id})` : "url(/dizim/masa-kare.webp?v=1)";
+    open.querySelector(".thumb").style.backgroundImage = k.gorsel ? `url(/api/dizim/gorsel?id=${k.id})` : "url(/dizim/masa-kare.webp?v=2)";
     open.querySelector("b").textContent = k.yorum.baslik;
     open.querySelector("small").textContent = tarih(k.tarih);
     open.querySelector("p").textContent = k.taslar.map((t) => t.ad).join(", ");
