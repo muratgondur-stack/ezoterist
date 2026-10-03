@@ -129,6 +129,47 @@ form.addEventListener("submit", async (event) => {
 
 // --- Sonuç ---
 
+// Çizgi ölçümü (V100: MediaPipe + U-Net): bulunan çizgiler avucun üzerine koyu kırmızıyla çizilir, ölçüleri yazılır.
+const cizgiAdi = (ad) => ad.toLocaleLowerCase("tr-TR").split(" ")[0];
+const olcumBul = (olcum, ad) => olcum?.cizgiler?.find((c) => cizgiAdi(c.cizgi) === cizgiAdi(ad || ""));
+const SVG = "http://www.w3.org/2000/svg";
+
+function olcumluFoto(img, olcum) {
+  const kutu = document.createElement("figure");
+  kutu.className = "olcum-foto";
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("aria-hidden", "true");
+  const ciz = () => {
+    const W = img.naturalWidth, H = img.naturalHeight;
+    if (!W || !H) return;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    const k = Math.max(W, H) / 1000;
+    svg.replaceChildren(...olcum.cizgiler.flatMap((c, i) => {
+      const p = c.noktalar.map(([x, y]) => [x * W, y * H]);
+      const cizgi = document.createElementNS(SVG, "polyline");
+      cizgi.setAttribute("points", p.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" "));
+      cizgi.setAttribute("class", "olcum-cizgi");
+      cizgi.style.strokeWidth = String(7 * k);
+      // Etiketler çizgi boyunca farklı yerlere konur, üst üste binmesin.
+      const [ox, oy] = p[Math.floor((p.length - 1) * [0.25, 0.8, 0.5, 0.35][i % 4])];
+      const yazi = document.createElementNS(SVG, "text");
+      yazi.setAttribute("x", String(Math.min(W - 10 * k, Math.max(10 * k, ox))));
+      yazi.setAttribute("y", String(Math.max(30 * k, oy - 14 * k)));
+      yazi.setAttribute("class", "olcum-yazi");
+      yazi.style.fontSize = `${24 * k}px`;
+      yazi.style.strokeWidth = String(6 * k);
+      yazi.textContent = `${c.cizgi.split(" ")[0]} · %${Math.round(c.olcu.oran * 100)}`;
+      return [cizgi, yazi];
+    }));
+  };
+  img.addEventListener("load", ciz);
+  if (img.complete) ciz();
+  const alt = document.createElement("figcaption");
+  alt.textContent = "Kırmızı çizgiler ölçüm sistemimizin avucunda bulduğu çizgiler; yüzde, çizginin avuç genişliğine oranı. Işık ve açıya göre yanılabilir.";
+  kutu.append(img, svg, alt);
+  return kutu;
+}
+
 function showKayit(kayit, kaydir = false) {
   stopVoice();
   acikKayit = kayit;
@@ -136,11 +177,12 @@ function showKayit(kayit, kaydir = false) {
   $("sonuc").hidden = false;
   const foto = $("handPhotos");
   foto.classList.toggle("many", kayit.girdi.fotoSayisi > 1);
+  const olcum = kayit.girdi.olcum;
   foto.replaceChildren(...[...Array(kayit.girdi.fotoSayisi).keys()].map((n) => {
     const img = document.createElement("img");
     img.src = `/api/el-fali/foto?id=${kayit.id}&n=${n}`;
     img.alt = n === 0 ? "Baskın el" : "Diğer el";
-    return img;
+    return n === 0 && olcum?.cizgiler?.length ? olcumluFoto(img, olcum) : img;
   }));
   $("resultDate").textContent = `${tarih(kayit.tarih)} · baskın el: ${kayit.girdi.baskinEl}`;
   $("resultTitle").textContent = f.baslik;
@@ -155,6 +197,13 @@ function showKayit(kayit, kaydir = false) {
     li.querySelector("b").textContent = c.cizgi;
     li.querySelector(".gorunum").textContent = c.gorunum || "belirgin değil";
     li.querySelector("p").textContent = c.anlam;
+    const olculen = olcumBul(olcum, c.cizgi);
+    if (olculen) {
+      const olcu = document.createElement("span");
+      olcu.className = "olcu-etiket";
+      olcu.textContent = `📏 Ölçüm: ${olculen.ozet}`;
+      li.querySelector(".gorunum").after(olcu);
+    }
     return li;
   }));
   $("mountsCard").hidden = !f.tepeler.length;

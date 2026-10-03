@@ -40,6 +40,7 @@ function fotoCoz(veri) {
  *   sistem: sistem talimatı, istek(girdi) → fotoğraflarla gönderilecek metin (JSON kalıbı dahil),
  *   kontrolAlani: "fincanMi" gibi; false gelirse redMesaji ile 422,
  *   girdiAl(body, fotoSayisi) → kayda yazılacak girdi, temizle(ham) → yorum nesnesi, okunus(yorum) → sesli metin,
+ *   olcum(fotolar) → isteğe bağlı: Gemma'dan önce fotoğrafı ölçen servis (el falı çizgileri); sonucu girdi.olcum'a yazılır,
  *   mesajlar: { musaitDegil, sinir, okunamadi }
  * }
  */
@@ -100,6 +101,10 @@ function fotoFal(ayar) {
       const fotolar = (Array.isArray(body?.fotolar) ? body.fotolar : []).slice(0, ayar.maxFoto).map(fotoCoz);
       if (!fotolar.length) throw hata("Fotoğraf ekle.");
       const girdi = { ...ayar.girdiAl(body, fotolar.length), fotoSayisi: fotolar.length };
+      if (ayar.olcum) {
+        const olcum = await ayar.olcum(fotolar).catch((error) => { console.error(`${ayar.ad} ölçüm:`, error.message); return null; });
+        if (olcum) girdi.olcum = olcum;
+      }
 
       const icerik = [
         { type: "text", text: ayar.istek(girdi) },

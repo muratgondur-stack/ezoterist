@@ -54,6 +54,7 @@ const SEMA = {
   "sure.oturumGun": { grup: "Süreler", ad: "\"Beni hatırla\" oturum süresi", tur: "tam", min: 1, max: 365, vars: 30, birim: "gün" },
   "sinir.sesleAnlatma": { grup: "Günlük sınırlar", ad: "Sesle anlatma (yazıya çevirme)", tur: "tam", min: 0, max: 500, vars: 20, birim: "/gün", aciklama: "0 = sınırsız" },
   "izin.uzmanlar": { grup: "İzinler", ad: "Uzman e-postaları", tur: "epostalar", vars: listeOrtam("UZMAN_EPOSTA") },
+  "elfali.cizgiOlcum": { grup: "Yapay zekâ", ad: "El falı çizgi ölçümü (V100 MediaPipe + U-Net)", tur: "bool", vars: true, aciklama: "Açıkken çizgiler avuca çizilir ve ölçülür; kapalıysa yalnız Gemma bakar" },
   "genel.muzik": { grup: "Genel", ad: "Ana menü müzik seviyesi", tur: "sayi", min: 0, max: 0.5, adim: 0.01, vars: 0.1 },
 };
 BOLUMLER.forEach((b) => {

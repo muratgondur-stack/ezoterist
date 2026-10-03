@@ -129,3 +129,13 @@
 .camera-shutter:disabled { opacity: 0.4; cursor: progress; }
 .camera-shutter:active { transform: scale(0.94); }
 .slot-btn { font-family: inherit; line-height: 1.2; }
+
+/* El falı çizgi ölçümü: fotoğraf kırpılmadan gösterilir, çizgiler SVG ile üstüne çizilir */
+.olcum-foto { position: relative; margin: 0; }
+.cup-photos.many .olcum-foto { grid-column: span 2; }
+.cup-photos .olcum-foto img { display: block; width: 100%; height: auto; aspect-ratio: auto; object-fit: contain; }
+.olcum-foto svg { position: absolute; top: 2px; left: 2px; width: calc(100% - 4px); height: auto; aspect-ratio: auto; pointer-events: none; }
+.olcum-foto figcaption { margin-top: 6px; color: var(--muted); font-size: 0.74rem; line-height: 1.35; }
+.olcum-cizgi { fill: none; stroke: #8b0000; stroke-linecap: round; stroke-linejoin: round; opacity: 0.92; }
+.olcum-yazi { fill: #fff; stroke: rgba(70, 0, 0, 0.85); paint-order: stroke; font-weight: 800; font-family: system-ui, sans-serif; text-anchor: middle; }
+.symbol-list .olcu-etiket { display: block; margin: 2px 0 6px; color: #ffb4a0; font-size: 0.78rem; font-weight: 700; }
