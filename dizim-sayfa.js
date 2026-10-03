@@ -15,10 +15,24 @@ const HALKALAR = [
   { ad: "ic", adet: 6, rx: 0.168, ry: 0.168, kayma: 0 },
 ];
 const HALKA_TURU = { kisi: "dis", ben: "dis", kavram: "orta", mekan: "ic" };
-const GEDIKLER = HALKALAR.flatMap((h) => Array.from({ length: h.adet }, (_, i) => {
-  const aci = -Math.PI / 2 + ((i + h.kayma) * 2 * Math.PI) / h.adet;
-  return { halka: h.ad, x: 0.5 + (h.rx * Math.cos(aci)) * ORAN, y: 0.5 + h.ry * Math.sin(aci) };
+const halkaAcisi = (h, i) => -Math.PI / 2 + ((i + h.kayma) * 2 * Math.PI) / h.adet;
+const GEDIKLER = HALKALAR.flatMap((h, hi) => Array.from({ length: h.adet }, (_, i) => {
+  const aci = halkaAcisi(h, i);
+  return { halka: h.ad, hi, sira: i, x: 0.5 + (h.rx * Math.cos(aci)) * ORAN, y: 0.5 + h.ry * Math.sin(aci) };
 }));
+const gedikNo = (hi, sira) => GEDIKLER.findIndex((g) => g.hi === hi && g.sira === sira);
+
+// Köşe sembolleri çemberleri döndürür (Murat 2026-10-03): her çember kendi yönüne, sembole göre farklı hızda
+// 4 saniye döner, yavaşlayarak gediklere tam oturur; taşlar çemberleri içinde yer değiştirmiş olur.
+// tur: dış, orta, iç çemberin kaç tur döneceği (hız); yon: +1 saat yönü, -1 ters.
+const KOSELER = [
+  { ad: "Güneş", yer: "sol-ust", tur: [2, 3, 4], yon: [1, -1, 1] },
+  { ad: "Ay", yer: "sag-ust", tur: [0.5, 1, 1.5], yon: [-1, 1, -1] },
+  { ad: "Yıldız", yer: "sol-alt", tur: [1, 2, 3], yon: [1, 1, -1] },
+  { ad: "Göz", yer: "sag-alt", tur: [3, 5, 7], yon: [-1, 1, -1] },
+];
+const DONME_SURESI = 4000;
+let doniyor = false;
 
 const HAZIR = {
   "Kişiler": [["Ben", "ben"], ["Anne", "kisi"], ["Baba", "kisi"], ["Eş", "kisi"], ["Sevgili", "kisi"], ["Çocuk", "kisi"], ["Kardeş", "kisi"], ["Anneanne", "kisi"], ["Babaanne", "kisi"], ["Dede", "kisi"], ["Arkadaş", "kisi"], ["Patron", "kisi"], ["Amca", "kisi"], ["Dayı", "kisi"], ["Teyze", "kisi"], ["Hala", "kisi"]],
@@ -200,6 +214,7 @@ function gediklereBak(e) {
 // elde tutulan kopya sayfada asılı kalmaz.
 function surukleBasla(e, t, el) {
   if (e.button !== undefined && e.button !== 0) return;
+  if (doniyor) { e.preventDefault(); return; }
   e.preventDefault();
   surukleTemizle();
   const hayalet = el.cloneNode(true);
@@ -307,6 +322,53 @@ function merkezRozet() {
   return b;
 }
 
+function koseDugmeleri() {
+  return KOSELER.map((k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = `kose-sembol ${k.yer}`;
+    b.title = `${k.ad}: çemberleri döndür`;
+    b.setAttribute("aria-label", `${k.ad} sembolü: taş çemberlerini döndür`);
+    b.addEventListener("click", () => cemberleriDondur(k));
+    return b;
+  });
+}
+
+function cemberleriDondur(kose) {
+  if (doniyor) return;
+  const masadakiler = taslar.filter((t) => t.x != null && t.gedik != null);
+  if (!masadakiler.length) { toast("Önce masaya taş koy; sonra köşedeki sembole dokun."); return; }
+  doniyor = true;
+  $("table").classList.add("doniyor");
+  // Her çember: toplam adım = tur × gedik sayısı + rastgele 0..n-1 ek adım (taşlar karışsın), yönüyle.
+  const adim = HALKALAR.map((h, hi) => kose.yon[hi] * (Math.round(kose.tur[hi] * h.adet) + Math.floor(Math.random() * h.adet)));
+  const parcalar = masadakiler.map((t) => {
+    const g = GEDIKLER[t.gedik];
+    return { t, g, h: HALKALAR[g.hi], el: $("table").querySelector(`.stone[data-id="${t.id}"]`) };
+  });
+  const yavasla = (u) => 1 - (1 - u) ** 3;
+  const bas = performance.now();
+  const kare = (simdi) => {
+    const u = Math.min(1, (simdi - bas) / DONME_SURESI);
+    const k = yavasla(u);
+    parcalar.forEach(({ g, h, el }) => {
+      if (!el) return;
+      const aci = halkaAcisi(h, g.sira + adim[g.hi] * k);
+      el.style.left = `${(0.5 + h.rx * Math.cos(aci) * ORAN) * 100}%`;
+      el.style.top = `${(0.5 + h.ry * Math.sin(aci)) * 100}%`;
+    });
+    if (u < 1) { requestAnimationFrame(kare); return; }
+    parcalar.forEach(({ t, g, h }) => {
+      const yeniSira = (((g.sira + adim[g.hi]) % h.adet) + h.adet) % h.adet;
+      gedigeKoy(t, gedikNo(g.hi, yeniSira));
+    });
+    doniyor = false;
+    $("table").classList.remove("doniyor");
+    renderBench();
+  };
+  requestAnimationFrame(kare);
+}
+
 function karistir(dizi) {
   for (let i = dizi.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -357,7 +419,7 @@ function renderBench() {
   $("tray").replaceChildren(...taslar.filter((t) => t.x == null).map((t) => tasEl(t, { kenarda: true })));
   gedikleriDuzelt();
   const masadakiler = taslar.filter((t) => t.x != null);
-  $("table").replaceChildren(...gedikElleri(), merkezRozet(), ...masadakiler.map((t) => tasEl(t)));
+  $("table").replaceChildren(...gedikElleri(), merkezRozet(), ...koseDugmeleri(), ...masadakiler.map((t) => tasEl(t)));
   $("tableHint").hidden = masadakiler.length > 0;
   const kenarda = taslar.length - masadakiler.length;
   $("placedCount").textContent = taslar.length

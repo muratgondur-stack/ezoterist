@@ -68,6 +68,15 @@
 /* Ortadaki sedef rozet: tıklanınca taşları rastgele dizer */
 .merkez-rozet { position: absolute; left: 50%; top: 50%; width: 20%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; transform: translate(-50%, -50%); cursor: pointer; transition: box-shadow 0.2s ease; }
 .merkez-rozet:hover, .merkez-rozet:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(243, 194, 107, 0.55), 0 0 28px rgba(243, 194, 107, 0.45); }
+/* Köşe sembolleri: tıklanınca çemberleri döndürür */
+.kose-sembol { position: absolute; width: 15%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; transform: translate(-50%, -50%); cursor: pointer; transition: box-shadow 0.2s ease; }
+.kose-sembol.sol-ust { left: 9%; top: 9%; }
+.kose-sembol.sag-ust { left: 91%; top: 9%; }
+.kose-sembol.sol-alt { left: 9%; top: 91%; }
+.kose-sembol.sag-alt { left: 91%; top: 91%; }
+.kose-sembol:hover, .kose-sembol:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(243, 194, 107, 0.5), 0 0 22px rgba(243, 194, 107, 0.4); }
+.table.doniyor .stone { cursor: progress; }
+.table.doniyor .stone .etiket { opacity: 0.85; }
 .merkez-rozet:active { box-shadow: 0 0 0 3px rgba(243, 194, 107, 0.9), 0 0 36px rgba(243, 194, 107, 0.6); }
 .bench-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; }
 .bench-actions .count { flex: 1; color: var(--muted); font-size: 0.9rem; text-align: center; }
