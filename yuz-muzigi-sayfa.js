@@ -26,7 +26,25 @@ const ANIMASYONLAR = {
   nefes: "🫧 Nefes küresi",
   aurora: "🌠 Kuzey ışıkları",
   su: "🌙 Ay ışığında su",
+  somine1: "🔥 Ateş",
+  somine2: "🏡 Taş şömine",
 };
+// Video animasyonları (Murat 2026-10-04): döngüde, 0,8 hızla, sessiz oynar; tuval yerine sahnede video görünür.
+const VIDEOLAR = { somine1: "/muzik/video/somine1.mp4?v=1", somine2: "/muzik/video/somine2.mp4?v=1" };
+function videoyuAyarla() {
+  const v = $("stageVideo");
+  const kaynak = VIDEOLAR[ayar.anim];
+  $("stage").classList.toggle("video-modu", Boolean(kaynak));
+  if (!kaynak) { v.pause(); return; }
+  if (v.dataset.kaynak !== kaynak) {
+    v.dataset.kaynak = kaynak;
+    v.src = kaynak;
+    v.load();
+  }
+  v.defaultPlaybackRate = 0.8;
+  v.playbackRate = 0.8;
+  v.play().catch(() => { /* ilk dokunuşta yeniden denenir */ });
+}
 
 // --- 1. adım: yüzler ---
 
@@ -102,7 +120,7 @@ function renderSecimler() {
   $("medRow").hidden = ayar.mod !== "meditasyon";
   chipler($("styleChips"), Object.entries(YuzMuzigi.MELODI_STILLERI).map(([id, s]) => [id, s.ad, s.aciklama]), ayar.stil, (id) => { ayar.stil = id; degisti(); });
   chipler($("medChips"), Object.entries(YuzMuzigi.MEDITASYON_TIPLERI).map(([id, s]) => [id, s.ad, tarif && id === YuzMuzigi.yuzunMeditasyonu(tarif) ? "yüzüne göre" : ""]), medTipi(), (id) => { ayar.medTip = id; degisti(); });
-  chipler($("animChips"), Object.entries(ANIMASYONLAR).map(([id, ad]) => [id, ad]), ayar.anim, (id) => { ayar.anim = id; ayarSakla(); renderSecimler(); });
+  chipler($("animChips"), Object.entries(ANIMASYONLAR).map(([id, ad]) => [id, ad]), ayar.anim, (id) => { ayar.anim = id; ayarSakla(); renderSecimler(); videoyuAyarla(); });
 }
 // Müziği etkileyen bir seçim değişince: kaydet, tarifi yaz, çalıyorsa yeni ayarla yeniden başlat.
 function degisti() {
@@ -515,12 +533,16 @@ function ciz(simdi) {
   const nefes = tarif ? 0.5 - 0.5 * Math.cos((t * 2 * Math.PI) / tarif.nefes) : 0.5;
   c2.save();
   c2.clearRect(0, 0, W, H);
-  (CIZIMLER[ayar.anim] || CIZIMLER.mandala)(W, H, t, nefes, renk, motor?.calisiyor, simdi);
+  if (!VIDEOLAR[ayar.anim]) (CIZIMLER[ayar.anim] || CIZIMLER.mandala)(W, H, t, nefes, renk, motor?.calisiyor, simdi);
   c2.restore();
   c2.globalAlpha = 1;
   c2.globalCompositeOperation = "source-over";
 }
 requestAnimationFrame(ciz);
+
+$("stageVideo").addEventListener("loadedmetadata", (e) => { e.target.playbackRate = 0.8; });
+$("stageVideo").addEventListener("play", (e) => { e.target.playbackRate = 0.8; });
+$("stage").addEventListener("pointerdown", () => { if (VIDEOLAR[ayar.anim] && $("stageVideo").paused) videoyuAyarla(); });
 
 // --- Başlangıç ---
 
@@ -532,6 +554,7 @@ async function init() {
   }
   renderTarama();
   renderSecimler();
+  videoyuAyarla();
   const d = await fetch("/api/yuz-muzigi/yuzler", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   yuzler = d?.yuzler || [];
   renderYuzler();
