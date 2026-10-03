@@ -294,28 +294,8 @@ if (kapaliBolum) {
   genelAyarlarHazir.then(() => kisaBildirim("Bu bölüm şu an bakımda, çok yakında yeniden açılacak."));
 }
 
-// --- Alt satırlar: iletişim penceresi ve ziyaretçi sayacı ---
+// --- Alt satırlar: iletişim penceresi ---
 const iletisim = document.getElementById("iletisim");
 document.getElementById("iletisimAc")?.addEventListener("click", () => iletisim?.showModal());
 document.getElementById("iletisimKapat")?.addEventListener("click", () => iletisim?.close());
 iletisim?.addEventListener("click", (e) => { if (e.target === iletisim) iletisim.close(); });
-
-// Sayaç için tarayıcıya özgü rastgele kimlik (kişisel veri değil); depolama kapalıysa her açılış ayrı sayılır.
-let ziyaretKimligi = "";
-try {
-  ziyaretKimligi = localStorage.getItem("ezo-ziyaret") || "";
-  if (!ziyaretKimligi) {
-    ziyaretKimligi = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2);
-    localStorage.setItem("ezo-ziyaret", ziyaretKimligi);
-  }
-} catch {}
-fetch("/api/ziyaret", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kimlik: ziyaretKimligi }) })
-  .then((r) => (r.ok ? r.json() : null))
-  .then((d) => {
-    const yer = document.getElementById("ziyaretSayac");
-    if (!d || !yer) return;
-    const sayi = (n) => Number(n || 0).toLocaleString("tr-TR");
-    yer.textContent = `👁 Bugün ${sayi(d.bugun)} (${sayi(d.acilis)} açılış) · Toplam ${sayi(d.toplam)}`;
-    yer.hidden = false;
-  })
-  .catch(() => {});

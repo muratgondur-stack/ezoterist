@@ -25,7 +25,6 @@ const { createHandler: createRuhsalHandler } = require("./ruhsal-gunluk-api");
 const { createHandler: createSembolHandler } = require("./sembol-api");
 const { createHandler: createAsistanHandler } = require("./asistan-api");
 const { createHandler: createDizimHandler } = require("./dizim-api");
-const { createHandler: createZiyaretHandler } = require("./ziyaret");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -188,7 +187,6 @@ const handleRuhsalRequest = createRuhsalHandler({ dataDir, currentUser, sendFile
 const handleSembolRequest = createSembolHandler({ dataDir, currentUser, sendFile });
 const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser, sendFile });
 const handleDizimRequest = createDizimHandler({ dataDir, currentUser, sendFile });
-const handleZiyaretRequest = createZiyaretHandler({ dataDir });
 const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi });
 
 const server = http.createServer((request, response) => {
@@ -229,7 +227,6 @@ const server = http.createServer((request, response) => {
     return;
   }
 
-  if (handleZiyaretRequest(request, response, url)) return;
   if (handleYonetimRequest(request, response, url)) return;
   if (handleAstrolojiRequest(request, response, url)) return;
   if (handleUzmanRequest(request, response, url)) return;
