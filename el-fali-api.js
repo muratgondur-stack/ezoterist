@@ -34,7 +34,7 @@ async function cizgiOlc(fotolar) {
         cizgi: kisalt(c.cizgi, 30),
         noktalar: (Array.isArray(c.noktalar) ? c.noktalar : []).slice(0, 60).map(([x, y]) => [sayi(x, 0, 1), sayi(y, 0, 1)]),
         olcu,
-        ozet: `avuç genişliğinin %${Math.round(olcu.oran * 100)}'i, ${olcu.uzun ? "uzun" : "kısa"}, ${kavisAdi(olcu.kavis)}, ${netlikAdi(olcu.netlik)}`,
+        ozet: `avuç genişliğine oranla %${Math.round(olcu.oran * 100)}, ${olcu.uzun ? "uzun" : "kısa"}, ${kavisAdi(olcu.kavis)}, ${netlikAdi(olcu.netlik)}`,
       };
     }).filter((c) => c.noktalar.length > 1),
   };
