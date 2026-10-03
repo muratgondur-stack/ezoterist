@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Taşlarla Dizim: hayatındaki kişileri, yerleri ve kavramları taşlarla temsil et, masaya dilediğin gibi yerleştir; yerleşimin üzerine düşünmeni sağlayan nazik bir yansıma al." />
+    <title>Taşlarla Dizim · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/dizim.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Sistemik Dizim</p>
+          <h1>Taşlarla<br />dizim</h1>
+          <p class="lead">Hayatındaki insanları, yerleri ve kavramları birer taşla temsil et; masaya içinden geldiği gibi yerleştir. Yerleşimin, ilişkilerin ve çağrışımların üzerine düşünmen için sana nazik bir ayna tutalım.</p>
+          <p class="safe-note">Bu bir öz-farkındalık çalışmasıdır; psikolojik teşhis ya da kesin bir yorum değildir.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#kur">Dizimime başla</a>
+            <a class="btn btn-ghost" href="#gunluk">Dizimlerim</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="dizim-cover" src="/dizim/kapak.webp?v=1" alt="" width="720" height="720" />
+        </div>
+      </section>
+
+      <section id="kur" aria-labelledby="step1Title">
+        <div class="section-head">
+          <p class="step">1. adım</p>
+          <h2 id="step1Title">Kimler, neler masada olsun?</h2>
+          <p class="section-note">Hayatındaki kişileri, yerleri ya da önemli kavramları seç ya da kendin ekle. Her birine bir taş atanacak; taşa dokunarak görünümünü değiştirebilirsin.</p>
+        </div>
+        <div class="card picker">
+          <div class="preset-groups" id="presets"></div>
+          <form class="add-form" id="addForm">
+            <input name="ad" maxlength="30" placeholder="Kendi adını yaz: ör. Ayşe teyzem, Bodrum, Cesaret…" autocomplete="off" />
+            <select name="tur" aria-label="Tür">
+              <option value="kisi">Kişi</option>
+              <option value="mekan">Mekân</option>
+              <option value="kavram">Kavram</option>
+              <option value="ben">Ben</option>
+            </select>
+            <button type="submit" class="btn btn-ghost">＋ Ekle</button>
+          </form>
+          <label class="niyet"><span>Bu dizimde neye bakmak istiyorsun? <small>(isteğe bağlı)</small></span>
+            <input id="niyet" maxlength="300" placeholder="Örneğin: Ailemdeki yerimi görmek istiyorum." />
+          </label>
+        </div>
+      </section>
+
+      <section id="masa-bolumu" aria-labelledby="step2Title">
+        <div class="section-head">
+          <p class="step">2. adım</p>
+          <h2 id="step2Title">Taşları masaya yerleştir</h2>
+          <p class="section-note">Taşları kenardan sürükleyip masaya bırak. Yerleşim tamamen sana ait: daire, grup, sıra ya da içinden gelen herhangi bir düzen. Acele etme; her taşı koyarken bir an dur ve hisset. Masadan geri almak için taşı kenara sürükle.</p>
+        </div>
+        <div class="workbench">
+          <div class="tray" id="tray" aria-label="Masaya konmamış taşlar"></div>
+          <div class="table-frame">
+            <div class="table" id="table" aria-label="Dizim masası"></div>
+            <p class="table-hint" id="tableHint">Masa boş. Taşları buraya sürükle.</p>
+          </div>
+        </div>
+        <div class="bench-actions">
+          <button type="button" class="btn btn-ghost" id="clearTable">Masayı boşalt</button>
+          <span class="count" id="placedCount"></span>
+          <button type="button" class="btn btn-primary" id="analyzeButton" disabled>Yerleşimim tamam · Yansıt</button>
+        </div>
+        <p class="section-note" id="quota"></p>
+      </section>
+
+      <section id="sonuc" hidden aria-labelledby="resultTitle">
+        <div class="card result">
+          <div class="reading-head">
+            <div>
+              <p class="sky-label" id="resultMeta"></p>
+              <h2 id="resultTitle"></h2>
+            </div>
+            <span class="badge" id="resultBadge"></span>
+          </div>
+          <div class="result-layout">
+            <figure class="snapshot">
+              <div class="frozen" id="frozen"></div>
+              <figcaption>
+                <label class="check"><input type="checkbox" id="showMeasures" /> <span>Ölçümleri göster (gruplar ve sana uzaklıklar)</span></label>
+              </figcaption>
+            </figure>
+            <div class="reading">
+              <p class="overview" id="resultOverview"></p>
+              <div class="observations" id="observations"></div>
+            </div>
+          </div>
+          <div class="result-grid">
+            <div id="benBox"><h3>🫶 Sen ve çevren</h3><p id="benText"></p></div>
+            <div id="groupBox"><h3>🪨 Bir arada ve ayrı duranlar</h3><p id="groupText"></p></div>
+          </div>
+          <div class="questions" id="questionsBox"><h3>Kendine sorabileceğin sorular</h3><ul id="questions"></ul></div>
+          <div class="release" id="releaseBox"><h3>🕯️ Dizimi kapatırken</h3><p id="releaseText"></p><ol id="releaseSteps"></ol></div>
+          <p class="affirmation" id="affirmation"></p>
+          <button type="button" class="listen" id="resultListen" hidden>🔊 Yansımayı sesli dinle</button>
+          <details class="measures">
+            <summary>Matematiksel ölçümler</summary>
+            <p class="section-note">Uzaklıklar 0–100 ölçeğinde; 100 masanın köşeden köşeye uzunluğu. Bu sayılar yalnızca yerleşimi tarif eder, bir şey kanıtlamaz.</p>
+            <div class="table-wrap"><table class="measure-table" id="measureTable"></table></div>
+            <p class="shape" id="shapeText"></p>
+          </details>
+          <div class="result-actions">
+            <button type="button" class="btn btn-ghost" id="reuseButton">Bu taşlarla yeni dizim kur</button>
+          </div>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Dizimin kaydedildi. Dilersen uzmanlarımızdan birini seç; yerleşimini kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">Dizimlerim</h2>
+          <p class="section-note" id="journalNote">Dizimlerin tarih ve saatiyle burada saklanır. İki dizim seçip zaman içindeki değişimi karşılaştırabilirsin.</p>
+        </div>
+        <div class="compare-bar" id="compareBar" hidden>
+          <span id="compareInfo"></span>
+          <button type="button" class="btn btn-primary" id="compareButton">Karşılaştır</button>
+        </div>
+        <ul class="dizim-journal" id="journal"></ul>
+      </section>
+
+      <section id="karsilastirma" hidden aria-labelledby="compareTitle">
+        <div class="card compare">
+          <h2 id="compareTitle">İki dizim arasındaki değişim</h2>
+          <div class="compare-pair" id="comparePair"></div>
+          <p class="overview" id="compareSummary"></p>
+          <ul class="ticks" id="compareChanges"></ul>
+          <div class="table-wrap"><table class="measure-table" id="compareTable"></table></div>
+          <div id="compareQuestionsBox"><h3>Kendine sorabileceğin sorular</h3><ul class="ticks shadow" id="compareQuestions"></ul></div>
+        </div>
+      </section>
+
+      <p class="disclaimer">Taşlarla dizim, kendi ilişkilerin ve çağrışımların üzerine düşünmen için bir araçtır. Taşların konumları bilimsel olarak bir şey kanıtlamaz ve psikolojik teşhis yerine geçmez. Zorlandığın konularda bir uzmandan destek almaktan çekinme.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/dizim-hesap.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/dizim-sayfa.js?v=1"></script>
+  </body>
+</html>

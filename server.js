@@ -24,6 +24,7 @@ const { createHandler: createArsivHandler } = require("./arsiv-api");
 const { createHandler: createRuhsalHandler } = require("./ruhsal-gunluk-api");
 const { createHandler: createSembolHandler } = require("./sembol-api");
 const { createHandler: createAsistanHandler } = require("./asistan-api");
+const { createHandler: createDizimHandler } = require("./dizim-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -159,6 +160,8 @@ const pageRoutes = {
   "/ruhsal-gunluk": "ruhsal-gunluk.html",
   "/semboller": "semboller.html",
   "/asistan": "asistan.html",
+  // Menüde yok; yalnız doğrudan adresle (Murat 2026-10-03).
+  "/tas": "dizim.html",
 };
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
@@ -181,6 +184,7 @@ const handleArsivRequest = createArsivHandler({ dataDir, currentUser });
 const handleRuhsalRequest = createRuhsalHandler({ dataDir, currentUser, sendFile });
 const handleSembolRequest = createSembolHandler({ dataDir, currentUser, sendFile });
 const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser, sendFile });
+const handleDizimRequest = createDizimHandler({ dataDir, currentUser, sendFile });
 const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi });
 
 const server = http.createServer((request, response) => {
@@ -242,6 +246,7 @@ const server = http.createServer((request, response) => {
   if (handleRuhsalRequest(request, response, url)) return;
   if (handleSembolRequest(request, response, url)) return;
   if (handleAsistanRequest(request, response, url)) return;
+  if (handleDizimRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {

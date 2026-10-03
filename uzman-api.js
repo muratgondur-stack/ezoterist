@@ -26,10 +26,11 @@ const { cakraKaydiOku, kristalKaydiOku } = require("./cakra-kristal-api");
 const CakraVeri = require("./cakra-veri");
 const KristalVeri = require("./kristal-veri");
 const { sembolKaydiOku } = require("./sembol-api");
+const { dizimKaydiOku, gorselYolu: dizimGorselYolu } = require("./dizim-api");
 const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
-const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu, "yuz-okuma": yuzFotoYolu, "fotograf-analizi": analizFotoYolu };
+const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu, "yuz-okuma": yuzFotoYolu, "fotograf-analizi": analizFotoYolu, dizim: (dataDir, userId, kayitId) => dizimGorselYolu(dataDir, userId, kayitId) };
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } = yardimci;
 
@@ -262,6 +263,22 @@ const BOLUMLER = {
       girdiMetni: `Sorduğu sembol: ${k.soru}${k.nerede ? ` — ${k.nerede}` : ""}`,
       ozet: k.yorum.anlam,
       kayitId: k.id,
+    }),
+  },
+  dizim: {
+    ad: "taşlarla dizim",
+    link: "/tas#gunluk",
+    yukle: (dataDir, userId, body) => dizimKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: `Dizim · ${k.taslar.map((t) => t.ad).join(", ")}`,
+      girdiMetni: k.niyet ? `Niyeti: ${k.niyet}` : "Niyet yazmamış",
+      ozet: [
+        `Şekil: ${k.analiz.sekil.ad}`,
+        k.analiz.ben ? `Ben'e göre (yakından uzağa): ${k.analiz.ben.siralama.map((s) => `${s.ad} ${s.mesafe}`).join(", ")}` : "",
+        `Gruplar: ${k.analiz.kumeler.map((g) => g.uyeler.map((id) => k.analiz.taslar.find((t) => t.id === id)?.ad).join("+")).join(" / ")}`,
+      ].filter(Boolean).join(" — "),
+      kayitId: k.id,
+      fotoSayisi: k.gorsel ? 1 : 0,
     }),
   },
 };
