@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Kişisel Arşiv: profilin, kontör bakiyen ve hareketlerin, bütün analizlerin ve uzman yorumların, şifre ayarların." />
+    <title>Kişisel Arşiv · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/arsiv.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="card account" aria-labelledby="accountName">
+        <div class="avatar" id="avatar" aria-hidden="true"></div>
+        <div class="account-info">
+          <p class="eyebrow">Ezoter.ist · Kişisel Arşiv</p>
+          <h1 id="accountName"></h1>
+          <p class="account-meta" id="accountMeta"></p>
+        </div>
+        <button type="button" class="balance-chip" id="balanceChip">
+          <span>Kontör bakiyen</span>
+          <b id="balanceTop">0</b>
+        </button>
+      </section>
+
+      <nav class="tabs" role="tablist" aria-label="Arşiv bölümleri">
+        <button type="button" role="tab" data-tab="profil" aria-selected="true">👤 Profilim</button>
+        <button type="button" role="tab" data-tab="kontor" aria-selected="false">🪙 Kontörüm</button>
+        <button type="button" role="tab" data-tab="analizler" aria-selected="false">📜 Analizlerim</button>
+        <button type="button" role="tab" data-tab="guvenlik" aria-selected="false">🔒 Güvenlik</button>
+      </nav>
+
+      <section class="tab-panel" id="tab-profil" role="tabpanel">
+        <form class="card profile-form" id="profileForm">
+          <h2>Profil bilgilerim</h2>
+          <p class="section-note">Bu bilgiler astroloji, numeroloji ve aşk uyumu gibi bölümlerde formları senin için doldurur.</p>
+          <div class="grid">
+            <label class="wide"><span>Adın ve soyadın</span><input name="name" maxlength="80" autocomplete="name" required /></label>
+            <label><span>Doğum tarihin</span><input type="date" name="dogumTarihi" min="1900-01-01" /></label>
+            <label><span>Doğum saatin <small>(biliyorsan)</small></span><input type="time" name="dogumSaati" /></label>
+            <label><span>Doğum yerin</span><select name="dogumYeri"></select></label>
+            <div class="field">
+              <span>Cinsiyetin</span>
+              <div class="chips" id="genderChips"></div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="profileSave">Kaydet</button>
+            <span class="saved" id="profileSaved" hidden>✓ Kaydedildi</span>
+          </div>
+        </form>
+      </section>
+
+      <section class="tab-panel" id="tab-kontor" role="tabpanel" hidden>
+        <div class="card wallet">
+          <div class="wallet-balance">
+            <span class="coin" aria-hidden="true">🪙</span>
+            <div>
+              <p class="sky-label">Kontör bakiyen</p>
+              <b id="balanceBig">0</b>
+            </div>
+          </div>
+          <div class="wallet-load">
+            <button type="button" class="btn btn-primary" id="loadButton" disabled>Kontör yükle</button>
+            <span class="badge soon">Yakında</span>
+            <p class="section-note">Kontör paketleri ve güvenli ödeme çok yakında burada olacak. Şu an bütün bölümler günlük ücretsiz haklarla kullanılabiliyor.</p>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Kontör hareketlerim</h2>
+          <div class="table-wrap">
+            <table class="moves" id="moves">
+              <thead><tr><th>Tarih</th><th>Açıklama</th><th>Tür</th><th class="num">Miktar</th><th class="num">Bakiye</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="empty" id="movesEmpty" hidden>Henüz bir kontör hareketin yok.</p>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-analizler" role="tabpanel" hidden>
+        <div class="card">
+          <div class="panel-head">
+            <h2>Uzman yorumlarım</h2>
+            <p class="section-note">Uzmanlarımızdan istediğin yorumlar ve durumları.</p>
+          </div>
+          <ul class="orders" id="orders"></ul>
+        </div>
+        <div class="card">
+          <div class="panel-head">
+            <h2>Bütün analizlerim</h2>
+            <p class="section-note" id="analysisNote"></p>
+          </div>
+          <div class="chips filter" id="analysisFilter"></div>
+          <ul class="analyses" id="analyses"></ul>
+          <button type="button" class="btn btn-ghost more" id="moreButton" hidden>Daha fazla göster</button>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-guvenlik" role="tabpanel" hidden>
+        <form class="card password-form" id="passwordForm">
+          <h2 id="passwordTitle">Şifremi değiştir</h2>
+          <p class="section-note" id="passwordNote">Şifreni değiştirdiğinde diğer cihazlardaki oturumların kapanır ve sana bilgi e-postası gönderilir.</p>
+          <label id="currentWrap"><span>Mevcut şifren</span><input type="password" name="mevcut" autocomplete="current-password" /></label>
+          <label><span>Yeni şifren <small>(en az 8 karakter)</small></span><input type="password" name="yeni" minlength="8" autocomplete="new-password" required /></label>
+          <label><span>Yeni şifren (tekrar)</span><input type="password" name="tekrar" minlength="8" autocomplete="new-password" required /></label>
+          <label class="check"><input type="checkbox" id="showPass" /> <span>Şifreleri göster</span></label>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="passwordSave">Şifremi değiştir</button>
+            <span class="saved" id="passwordSaved" hidden>✓ Şifren değiştirildi</span>
+          </div>
+        </form>
+        <div class="card logout-card">
+          <div>
+            <h2>Oturum</h2>
+            <p class="section-note">Bu cihazdaki oturumunu kapat.</p>
+          </div>
+          <button type="button" class="btn btn-ghost" id="logoutButton">Çıkış yap</button>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/arsiv-sayfa.js?v=1"></script>
+  </body>
+</html>

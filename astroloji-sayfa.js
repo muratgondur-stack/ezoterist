@@ -375,6 +375,11 @@ async function init() {
   await uzmanKarti.yukle();
   const kayit = await fetch("/api/astroloji/harita", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (kayit?.id) showSaved(kayit);
+  else if (me.user.profil?.dogumTarihi) {
+    // Kişisel arşivdeki profil bilgisiyle form önceden doldurulur.
+    const p = me.user.profil;
+    fillForm({ tarih: p.dogumTarihi, saat: p.dogumSaati, saatYok: !p.dogumSaati, sehir: p.dogumYeri });
+  }
 }
 
 renderSky();

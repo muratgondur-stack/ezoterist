@@ -376,7 +376,7 @@ async function init() {
     durum = { ...durum, ses: data.ses, kalan: data.kalan, sinir: data.sinir };
     kayitlar = data.kayitlar;
   }
-  const dogum = harita?.girdi?.tarih;
+  const dogum = harita?.girdi?.tarih || me.user.profil?.dogumTarihi;
   if (dogum) {
     $("birthForm").elements.tarih.value = dogum;
     kisiselGoster(dogum);

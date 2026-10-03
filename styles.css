@@ -207,6 +207,8 @@ body.banner-below { padding-top: 68px; }
 }
 
 .auth-bar-user {
+  color: inherit;
+  text-decoration: none;
   max-width: 40vw;
   overflow: hidden;
   padding: 8px 14px;

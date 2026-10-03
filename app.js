@@ -75,7 +75,7 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
   .catch(() => null);
 
 // Hazır olan bölümlerin kendi sayfaları var; diğerleri "çok yakında" der.
-const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji", "#ruya-yorumu": "/ruya", "#kahve-fali": "/kahve-fali", "#el-fali": "/el-fali", "#tarot": "/tarot", "#yuz-okuma": "/yuz-okuma", "#fotograf-analizi": "/fotograf-analizi", "#ask-uyumu": "/ask-uyumu", "#dogum-haritasi": "/dogum-haritasi", "#melek-sayilari": "/melek-sayilari", "#i-ching": "/iching", "#run-taslari": "/run-taslari", "#ay-takvimi": "/ay-takvimi", "#cakralar": "/cakralar", "#kristaller": "/kristaller" };
+const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji", "#ruya-yorumu": "/ruya", "#kahve-fali": "/kahve-fali", "#el-fali": "/el-fali", "#tarot": "/tarot", "#yuz-okuma": "/yuz-okuma", "#fotograf-analizi": "/fotograf-analizi", "#ask-uyumu": "/ask-uyumu", "#dogum-haritasi": "/dogum-haritasi", "#melek-sayilari": "/melek-sayilari", "#i-ching": "/iching", "#run-taslari": "/run-taslari", "#ay-takvimi": "/ay-takvimi", "#cakralar": "/cakralar", "#kristaller": "/kristaller", "#kisisel-arsiv": "/arsiv" };
 
 const openSection = (button) => {
   const page = SECTION_PAGES[button.getAttribute("href")];
@@ -134,9 +134,12 @@ if (returnedTo) {
 currentUser.then((user) => {
   if (!user || !authBar) return;
 
-  const name = document.createElement("span");
+  // Ad, kişisel arşive (profil, kontör, analizler) götürür.
+  const name = document.createElement("a");
   name.className = "auth-bar-user";
-  name.textContent = user.name || user.email;
+  name.href = "/arsiv";
+  name.title = "Kişisel arşivim";
+  name.textContent = `👤 ${user.name || user.email}`;
 
   const logout = document.createElement("button");
   logout.type = "button";

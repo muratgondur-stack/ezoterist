@@ -260,7 +260,10 @@ async function init() {
   await uzmanKarti.yukle();
   const kayit = await fetch("/api/numeroloji/profil", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (kayit?.id) renderProfile(kayit);
-  else if (me.user.name && me.user.name.trim().split(/\s+/).length > 1) form.elements.adSoyad.value = me.user.name;
+  else {
+    if (me.user.name && me.user.name.trim().split(/\s+/).length > 1) form.elements.adSoyad.value = me.user.name;
+    if (me.user.profil?.dogumTarihi) form.elements.tarih.value = me.user.profil.dogumTarihi;
+  }
 }
 
 renderToday();

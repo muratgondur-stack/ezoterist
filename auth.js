@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { promisify } = require("node:util");
 const { epostaYolla, epostaSablon, htmlKacis } = require("./eposta");
+const { sehirler } = require("./astroloji-veri");
 
 const scrypt = promisify(crypto.scrypt);
 
@@ -66,7 +67,15 @@ function saveUsers() {
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
 const findUserByEmail = (email) => users.find((user) => user.email === email);
 const findUserById = (id) => users.find((user) => user.id === id);
-const publicUser = (user) => ({ id: user.id, email: user.email, name: user.name || "" });
+const publicUser = (user) => ({
+  id: user.id,
+  email: user.email,
+  name: user.name || "",
+  profil: user.profil || {},
+  sifreVar: Boolean(user.passwordHash),
+  google: Boolean(user.googleId),
+  createdAt: user.createdAt || null,
+});
 
 async function createUser({ email, name, passwordHash = null, googleId = null }) {
   const user = {
@@ -461,6 +470,95 @@ async function handleResetPassword(request, response) {
   sendJson(response, 200, { user: publicUser(user) }, { "Set-Cookie": sessionCookie(request, user) });
 }
 
+// --- Kişisel arşiv: profil ve şifre değiştirme (oturum açık kullanıcı) ---
+
+const CINSIYETLER = new Set(["", "kadin", "erkek", "belirtmek-istemiyorum"]);
+
+async function handleProfil(request, response) {
+  const user = currentUser(request);
+  if (!user) {
+    sendJson(response, 401, { error: "Giriş yapmalısınız." });
+    return;
+  }
+  const body = await readJsonBody(request);
+  const name = String(body.name || "").replace(/\s+/g, " ").trim();
+  const dogumTarihi = String(body.dogumTarihi || "");
+  const dogumSaati = String(body.dogumSaati || "");
+  const dogumYeri = String(body.dogumYeri || "");
+  const cinsiyet = String(body.cinsiyet || "");
+  if (name.length < 2 || name.length > 80 || !/^[\p{L}' .-]+$/u.test(name)) {
+    sendJson(response, 400, { error: "Adını ve soyadını harflerle yaz." });
+    return;
+  }
+  if (dogumTarihi) {
+    const yil = Number(dogumTarihi.slice(0, 4));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dogumTarihi) || yil < 1900 || Number.isNaN(Date.parse(dogumTarihi)) || Date.parse(dogumTarihi) > Date.now()) {
+      sendJson(response, 400, { error: "Geçerli bir doğum tarihi gir." });
+      return;
+    }
+  }
+  if (dogumSaati && !/^([01]\d|2[0-3]):[0-5]\d$/.test(dogumSaati)) {
+    sendJson(response, 400, { error: "Doğum saatini SS:DD biçiminde gir." });
+    return;
+  }
+  if (dogumYeri && !sehirler.some((c) => c.ad === dogumYeri)) {
+    sendJson(response, 400, { error: "Doğum yerini listeden seç." });
+    return;
+  }
+  if (!CINSIYETLER.has(cinsiyet)) {
+    sendJson(response, 400, { error: "Geçersiz seçim." });
+    return;
+  }
+  user.name = name;
+  user.profil = { dogumTarihi, dogumSaati, dogumYeri, cinsiyet };
+  await saveUsers();
+  sendJson(response, 200, { user: publicUser(user) });
+}
+
+async function handleSifreDegistir(request, response) {
+  const user = currentUser(request);
+  if (!user) {
+    sendJson(response, 401, { error: "Giriş yapmalısınız." });
+    return;
+  }
+  if (isRateLimited(request)) {
+    sendJson(response, 429, { error: "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin." });
+    return;
+  }
+  const body = await readJsonBody(request);
+  const mevcut = String(body.mevcut || "");
+  const yeni = String(body.yeni || "");
+  // Google ile açılmış, şifresi olmayan hesap ilk şifresini mevcut şifre sormadan belirleyebilir.
+  if (user.passwordHash && !(await verifyPassword(mevcut, user.passwordHash))) {
+    sendJson(response, 400, { error: "Mevcut şifren hatalı." });
+    return;
+  }
+  if (yeni.length < MIN_PASSWORD_LENGTH || yeni.length > 200) {
+    sendJson(response, 400, { error: `Yeni şifre en az ${MIN_PASSWORD_LENGTH} karakter olmalı.` });
+    return;
+  }
+  if (user.passwordHash && (await verifyPassword(yeni, user.passwordHash))) {
+    sendJson(response, 400, { error: "Yeni şifre eskisiyle aynı olamaz." });
+    return;
+  }
+  const ilkSifre = !user.passwordHash;
+  user.passwordHash = await hashPassword(yeni);
+  // Diğer cihazlardaki oturumlar kapanır; bu cihaza yeni oturum çerezi verilir.
+  user.sessionVersion = (user.sessionVersion || 0) + 1;
+  await saveUsers();
+  const firstName = String(user.name || "").split(" ")[0] || "Merhaba";
+  epostaYolla({
+    kime: user.email,
+    konu: "Ezoter.ist şifren değiştirildi",
+    metin: `${firstName}, Ezoter.ist hesabının şifresi ${ilkSifre ? "belirlendi" : "değiştirildi"}. Bunu sen yapmadıysan hemen "Şifremi unuttum" ile yeni şifre belirle.`,
+    html: epostaSablon(
+      `${htmlKacis(firstName)}, şifren ${ilkSifre ? "belirlendi" : "değiştirildi"}`,
+      `<p>Ezoter.ist hesabının şifresi az önce ${ilkSifre ? "belirlendi" : "değiştirildi"}; diğer cihazlardaki oturumların kapatıldı.</p><p style="color:#666">Bunu sen yapmadıysan hemen giriş sayfasındaki "Şifremi unuttum" ile yeni şifre belirle.</p>`,
+    ),
+  }).catch(() => {});
+  sendJson(response, 200, { user: publicUser(user) }, { "Set-Cookie": sessionCookie(request, user) });
+}
+
 function handleLogout(request, response) {
   sendJson(response, 200, { ok: true }, { "Set-Cookie": cookie(request, SESSION_COOKIE, "", { maxAge: 0 }) });
 }
@@ -571,6 +669,8 @@ const routes = {
   "POST /api/logout": handleLogout,
   "POST /api/forgot-password": handleForgotPassword,
   "POST /api/reset-password": handleResetPassword,
+  "POST /api/profil": handleProfil,
+  "POST /api/sifre": handleSifreDegistir,
   "GET /auth/google": handleGoogleStart,
   "GET /auth/google/callback": handleGoogleCallback,
 };

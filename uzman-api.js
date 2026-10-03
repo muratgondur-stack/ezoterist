@@ -418,4 +418,13 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   };
 }
 
-module.exports = { createHandler };
+// Kişisel arşiv için: kullanıcının bütün uzman talepleri (kullanıcıya gösterilen hâliyle) ve bölüm adları.
+async function kullaniciTalepleri(dataDir, userId) {
+  const talepler = (await tumTalepler(talepDizini(dataDir))).filter((t) => t.userId === userId).sort((a, b) => b.olusturma - a.olusturma);
+  return talepler.map((t) => {
+    const bolum = BOLUMLER[t.bolum || "astroloji-harita"] || BOLUMLER["astroloji-harita"];
+    return { ...kullaniciGorunumu(t), bolumAdi: bolum.ad, link: bolum.link, baslik: talepKaynagi(t).baslik || "" };
+  });
+}
+
+module.exports = { createHandler, kullaniciTalepleri };

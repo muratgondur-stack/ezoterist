@@ -296,7 +296,8 @@ async function init() {
   }
   // "Sen" alanı: son uyumdan, yoksa doğum haritasından ve hesap adından doldurulur.
   const son = kayitlar[0]?.sen;
-  const girdi = harita?.girdi || {};
+  const p = me.user.profil || {};
+  const girdi = harita?.girdi || { tarih: p.dogumTarihi, saat: p.dogumSaati, sehir: p.dogumYeri };
   alan("sen", "ad").value = son?.ad || me.user.name || "";
   alan("sen", "tarih").value = son?.tarih || girdi.tarih || "";
   alan("sen", "saat").value = son?.saat || (girdi.saatYok ? "" : girdi.saat || "");

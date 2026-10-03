@@ -5,6 +5,7 @@ const TEXT = "︎"; // sembollerin emoji yerine yazı olarak çizilmesi için
 const SVG = "http://www.w3.org/2000/svg";
 
 let durum = { ses: false, ai: false };
+let profil = {};
 let girdi = null;
 let harita = null;
 let toastTimer;
@@ -481,6 +482,7 @@ async function yukle(kaydir = false) {
   durum = { ses: data.ses, ai: data.ai };
   girdi = data.girdi;
   if (!girdi) {
+    if (profil.dogumTarihi) fillForm({ tarih: profil.dogumTarihi, saat: profil.dogumSaati, saatYok: !profil.dogumSaati, sehir: profil.dogumYeri });
     showSummary(false);
     $("harita").hidden = true;
     $("yorum").hidden = true;
@@ -506,6 +508,7 @@ async function init() {
     return;
   }
   $("topbarUser").textContent = me.user.name || me.user.email;
+  profil = me.user.profil || {};
   await uzmanKarti.yukle();
   await yukle();
   $("heroStart").setAttribute("href", girdi ? "#harita" : "#bilgiler");

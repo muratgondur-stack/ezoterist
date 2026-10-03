@@ -30,6 +30,7 @@ COPY ay-takvimi-veri.js ay-takvimi-api.js ay-takvimi.html ay-takvimi.css ay-takv
 COPY ay ./ay
 COPY cakra-veri.js kristal-veri.js cakra-kristal-api.js cakralar.html cakralar.css cakralar-sayfa.js kristaller.html kristaller.css kristaller-sayfa.js ./
 COPY kristal ./kristal
+COPY kontor.js arsiv-api.js arsiv.html arsiv.css arsiv-sayfa.js ./
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi
 COPY fal ./fal

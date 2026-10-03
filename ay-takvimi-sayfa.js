@@ -473,9 +473,11 @@ async function init() {
     dongu = data.dongu;
     niyetler = data.niyetler;
     renderCycle();
-    if (data.dogum) {
-      $("birthForm").elements.tarih.value = data.dogum.tarih;
-      dogumAyi(data.dogum);
+    const p = me.user.profil || {};
+    const dogum = data.dogum || (p.dogumTarihi ? { tarih: p.dogumTarihi, saat: p.dogumSaati, sehir: p.dogumYeri } : null);
+    if (dogum) {
+      $("birthForm").elements.tarih.value = dogum.tarih;
+      dogumAyi(dogum);
     }
   }
   await uzmanKarti.yukle();
