@@ -26,6 +26,8 @@ COPY iching-veri.js iching-api.js iching.html iching.css iching-sayfa.js ./
 COPY iching ./iching
 COPY run-veri.js run-api.js run-taslari.html run-taslari.css run-sayfa.js ./
 COPY run ./run
+COPY ay-takvimi-veri.js ay-takvimi-api.js ay-takvimi.html ay-takvimi.css ay-takvimi-sayfa.js ./
+COPY ay ./ay
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi
 COPY fal ./fal

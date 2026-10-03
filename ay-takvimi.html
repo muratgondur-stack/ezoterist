@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Ay Takvimi: Ay'ın şu anki evresi ve burcu, aylık Ay takvimi, Yeni Ay ve Dolunay tarihleri, sana özel Ay döngüsü rehberi ve niyet defteri." />
+    <title>Ay Takvimi · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/ay-takvimi.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Ay Takvimi</p>
+          <h1>Ay'ın ritmiyle<br />yaşa</h1>
+          <p class="lead">Ay her gün biraz değişir, her iki buçuk günde bir burç değiştirir. Gerçek gök hesabıyla bugünün Ay'ını, aylık takvimi ve Yeni Ay–Dolunay tarihlerini gör; sana özel Ay rehberinle niyetlerini yaz.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#rehber">Ay rehberim</a>
+            <a class="btn btn-ghost" href="#takvim">Aylık takvim</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="moon-cover" src="/ay/kapak.webp?v=1" alt="" width="720" height="720" />
+        </div>
+      </section>
+
+      <section id="simdi" aria-labelledby="nowTitle">
+        <div class="section-head">
+          <h2 id="nowTitle">Şu an gökyüzünde Ay</h2>
+          <p class="section-note" id="nowDate"></p>
+        </div>
+        <div class="card now-moon">
+          <div class="moon-stage" id="nowMoon"></div>
+          <div class="now-info">
+            <p class="sky-label" id="nowPhaseLabel"></p>
+            <h3 id="nowPhase"></h3>
+            <ul class="moon-facts" id="nowFacts"></ul>
+            <p class="now-advice" id="nowAdvice"></p>
+          </div>
+          <div class="now-sign" id="nowSign"></div>
+        </div>
+        <div class="next-phases" id="nextPhases"></div>
+      </section>
+
+      <section id="rehber" aria-labelledby="guideTitle">
+        <div class="section-head">
+          <h2 id="guideTitle">Ay döngüsü rehberin</h2>
+          <p class="section-note" id="guideNote">Her Yeni Ay'dan bir sonrakine, doğum haritana göre sana özel bir niyet ve bırakma rehberi.</p>
+        </div>
+        <div class="cycle" id="cycle"></div>
+        <div class="card guide-start" id="guideStart" hidden>
+          <p>Bu döngünün rehberi henüz hazır değil. Doğum haritan varsa ona göre yazılır.</p>
+          <button type="button" class="btn btn-primary" id="guideButton">Bana özel Ay rehberimi hazırla</button>
+        </div>
+        <div class="card guide" id="guide" hidden>
+          <div class="reading-head">
+            <h3 id="guideHeadline"></h3>
+            <span class="badge" id="guideBadge"></span>
+          </div>
+          <div class="guide-grid">
+            <div>
+              <h4>🌑 Yeni Ay niyetin</h4>
+              <p id="guideNew"></p>
+              <ul class="ticks" id="guideIntentions"></ul>
+            </div>
+            <div>
+              <h4>🌕 Dolunay farkındalığın</h4>
+              <p id="guideFull"></p>
+              <ul class="ticks shadow" id="guideRelease"></ul>
+            </div>
+          </div>
+          <div id="guideRitualBox"><h4>🕯️ Küçük ritüelin</h4><ol class="ritual" id="guideRitual"></ol></div>
+          <p class="affirmation" id="guideAffirmation"></p>
+          <button type="button" class="listen" id="guideListen" hidden>🔊 Rehberimi sesli dinle</button>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Ay rehberin hazır. Dilersen uzmanlarımızdan birini seç; bu döngüyü ve niyetlerini kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="niyetler" aria-labelledby="intentTitle">
+        <div class="section-head">
+          <h2 id="intentTitle">Niyet defterim</h2>
+          <p class="section-note">Yeni Ay'da niyetini yaz, Dolunay'da dönüp bak: gerçekleşenleri işaretle, bırakmak istediklerini serbest bırak.</p>
+        </div>
+        <form class="card intent-form" id="intentForm">
+          <input name="metin" maxlength="300" placeholder="Şimdiki zamanla yaz: Her gün kendime yarım saat ayırıyorum." autocomplete="off" />
+          <button type="submit" class="btn btn-primary">Niyetimi yaz</button>
+        </form>
+        <div id="intentList"></div>
+      </section>
+
+      <section id="takvim" aria-labelledby="calTitle">
+        <div class="section-head cal-head">
+          <div>
+            <h2 id="calTitle">Ay takvimi</h2>
+            <p class="section-note">Günlerin evresi ve Ay'ın burcu (öğle saatine göre). Bir güne dokun.</p>
+          </div>
+          <div class="cal-nav">
+            <button type="button" class="btn btn-ghost" id="prevMonth" aria-label="Önceki ay">‹</button>
+            <b id="monthName"></b>
+            <button type="button" class="btn btn-ghost" id="nextMonth" aria-label="Sonraki ay">›</button>
+          </div>
+        </div>
+        <div class="card calendar">
+          <div class="cal-grid cal-days"><span>Pzt</span><span>Sal</span><span>Çar</span><span>Per</span><span>Cum</span><span>Cmt</span><span>Paz</span></div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <div class="card day-detail" id="dayDetail" hidden></div>
+      </section>
+
+      <section id="yil" aria-labelledby="yearTitle">
+        <div class="section-head">
+          <h2 id="yearTitle">Yeni Ay ve Dolunay tarihleri</h2>
+          <p class="section-note">Önümüzdeki on iki ay; saatler Türkiye saatiyle.</p>
+        </div>
+        <ul class="lunations" id="lunations"></ul>
+      </section>
+
+      <section id="dogum" aria-labelledby="birthTitle">
+        <div class="section-head">
+          <h2 id="birthTitle">Doğduğun gecenin Ay'ı</h2>
+          <p class="section-note">Doğduğun gün Ay hangi evredeydi? Bu evre, hayata yaklaşımın hakkında ipucu verir.</p>
+        </div>
+        <div class="card birth-moon">
+          <form id="birthForm" class="birth-row">
+            <label><span>Doğum tarihin</span><input type="date" name="tarih" min="1900-01-01" max="2049-12-31" required /></label>
+            <button type="submit" class="btn btn-ghost">Ay'ımı göster</button>
+          </form>
+          <div class="birth-result" id="birthResult" hidden></div>
+        </div>
+      </section>
+
+      <p class="disclaimer">Ay takvimi geleneksel bilgilere dayanan, ilham veren bir rehberdir; sağlık ve önemli kararlarında uzman görüşüne başvur.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/astro.js?v=1"></script>
+    <script src="/astroloji-veri.js?v=1"></script>
+    <script src="/ay-takvimi-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/ay-takvimi-sayfa.js?v=1"></script>
+  </body>
+</html>

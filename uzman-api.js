@@ -20,6 +20,7 @@ const { melekKaydiOku, ALANLAR: MELEK_ALANLARI } = require("./melek-sayilari-api
 const { ichingKaydiOku, ALANLAR: ICHING_ALANLARI } = require("./iching-api");
 const { runKaydiOku } = require("./run-api");
 const RunVeri = require("./run-veri");
+const { ayKaydiOku } = require("./ay-takvimi-api");
 const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
@@ -213,6 +214,16 @@ const BOLUMLER = {
         kayitId: k.id,
       };
     },
+  },
+  "ay-takvimi": {
+    ad: "Ay döngüsü",
+    link: "/ay-takvimi#rehber",
+    yukle: (dataDir, userId) => ayKaydiOku(dataDir, userId),
+    kaynak: (k) => ({
+      baslik: `${k.rehber.baslik} · ${Veri.burclar[k.yeniAyBurcu].ad} Yeni Ayı`,
+      girdiMetni: `Döngü: ${k.kod} Yeni Ayı (${Veri.burclar[k.yeniAyBurcu].ad}), Dolunay ${Veri.burclar[k.dolunayBurcu].ad}`,
+      ozet: k.niyetler.length ? `Bu döngüdeki niyetleri: ${k.niyetler.map((n) => n.metin).join(" · ")}` : "Bu döngüde henüz niyet yazmamış.",
+    }),
   },
 };
 

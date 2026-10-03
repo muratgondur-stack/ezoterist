@@ -1,0 +1,134 @@
+/* Ay takvimi sayfası: astroloji.css'in üzerine. */
+
+:root { --ay: #e9eefc; --ay-golge: #1a1f3a; }
+
+.moon-cover { position: relative; width: min(100%, 440px); height: auto; border-radius: 28px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba(180, 200, 255, 0.22); }
+
+/* --- Ay çizimi --- */
+.moon-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.moon-svg .dark { fill: var(--ay-golge); }
+.moon-svg .lit { fill: url(#ayDoku); }
+.moon-svg .rim { fill: none; stroke: rgba(233, 238, 252, 0.18); stroke-width: 1; }
+
+/* --- Şu an --- */
+.now-moon { display: grid; grid-template-columns: 230px 1fr 200px; gap: 26px; align-items: center; }
+.moon-stage { position: relative; width: 230px; filter: drop-shadow(0 0 30px rgba(200, 215, 255, 0.35)); animation: moonIn 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes moonIn { from { opacity: 0; transform: scale(0.85) rotate(-12deg); filter: blur(6px); } to { opacity: 1; transform: none; } }
+.now-info h3 { font-size: 2.2rem; margin-bottom: 8px; }
+.moon-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin: 0 0 12px; padding: 0; list-style: none; }
+.moon-facts li { font-size: 0.9rem; color: var(--muted); }
+.moon-facts b { display: block; color: var(--foreground); font-size: 1.05rem; }
+.now-advice { color: #e3dff0; }
+.now-sign { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.now-sign img { width: 120px; height: 120px; object-fit: contain; }
+.now-sign b { display: block; font-family: var(--serif); font-size: 1.5rem; }
+.now-sign small { display: block; margin: 2px 0 6px; color: var(--muted); font-size: 0.82rem; }
+.now-sign p { color: #d8d3e8; font-size: 0.86rem; }
+
+.next-phases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.next-phases .card { display: grid; grid-template-columns: 48px 1fr; gap: 12px; align-items: center; padding: 14px 16px; }
+.next-phases .moon-svg { width: 48px; }
+.next-phases b { display: block; font-size: 0.98rem; }
+.next-phases small { color: var(--muted); font-size: 0.8rem; }
+.next-phases .count { color: var(--gold); font-weight: 800; font-size: 0.82rem; }
+
+/* --- Döngü ve rehber --- */
+.cycle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+.cycle .card { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center; padding: 14px; }
+.cycle img { width: 120px; height: 120px; border-radius: 16px; object-fit: cover; }
+.cycle .sky-label { margin-bottom: 4px; }
+.cycle b { display: block; font-family: var(--serif); font-size: 1.4rem; }
+.cycle p { color: #d8d3e8; font-size: 0.88rem; }
+.guide-start { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+.guide { animation: rise 0.6s ease both; }
+.guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 12px 0; }
+.guide h4 { margin-bottom: 6px; color: var(--gold); font-size: 1.05rem; }
+.guide p { color: #e3dff0; }
+.guide .ticks { margin-top: 10px; }
+.ritual { margin: 6px 0 0; padding-left: 22px; color: #e3dff0; }
+.ritual li { margin: 4px 0; }
+.ritual li::marker { color: var(--gold); font-weight: 800; }
+.affirmation { margin-top: 14px; padding: 14px 16px; border: 1px solid rgba(200, 215, 255, 0.3); border-radius: 16px; color: var(--ay); background: rgba(200, 215, 255, 0.06); font-family: var(--serif); font-size: 1.3rem; font-style: italic; text-align: center; }
+.affirmation:empty { display: none; }
+#rehber .expert { margin-top: 16px; }
+
+/* --- Niyet defteri --- */
+.intent-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.intent-form input { box-sizing: border-box; width: 100%; min-height: 46px; padding: 11px 14px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 12px; color: var(--foreground); background: rgba(255, 255, 255, 0.06); font: inherit; }
+.intent-form input:focus { outline: none; border-color: var(--gold); }
+.intent-group { margin-top: 14px; }
+.intent-group h4 { margin-bottom: 8px; color: var(--muted); font-size: 0.82rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.intents { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.intents li { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 14px; background: var(--card); }
+.intents li.gerceklesti { border-color: rgba(107, 227, 164, 0.5); }
+.intents li.gerceklesti span { color: #b8f5d4; }
+.intents li.birakildi span { color: var(--muted); text-decoration: line-through; }
+.intents .acts { display: flex; gap: 6px; }
+.intents .acts button { width: 34px; height: 34px; border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 50%; color: var(--foreground); background: rgba(255, 255, 255, 0.04); cursor: pointer; }
+.intents .acts button[aria-pressed="true"] { border-color: var(--gold); background: rgba(243, 194, 107, 0.22); }
+.intent-empty { margin-top: 12px; color: var(--muted); }
+
+/* --- Takvim --- */
+.cal-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.cal-nav { display: flex; align-items: center; gap: 10px; }
+.cal-nav b { min-width: 130px; font-family: var(--serif); font-size: 1.4rem; text-align: center; }
+.cal-nav .btn { padding: 6px 14px; font-size: 1.2rem; }
+.calendar { padding: 14px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.cal-days span { padding: 4px 0 8px; color: var(--muted); font-size: 0.78rem; font-weight: 800; text-align: center; }
+.cal-grid button { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 86px; padding: 8px 4px; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; color: var(--foreground); background: rgba(255, 255, 255, 0.025); font: inherit; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.cal-grid button:hover { border-color: rgba(243, 194, 107, 0.45); }
+.cal-grid button.bugun { border-color: var(--gold); background: rgba(243, 194, 107, 0.08); }
+.cal-grid button.secili { background: rgba(200, 215, 255, 0.1); border-color: var(--ay); }
+.cal-grid button .no { align-self: flex-start; font-size: 0.8rem; font-weight: 800; }
+.cal-grid button .moon-svg { width: 30px; }
+.cal-grid button .burc { color: var(--gold); font-size: 0.95rem; }
+.cal-grid button .ozel { position: absolute; top: 6px; right: 6px; font-size: 0.62rem; font-weight: 800; color: #070914; background: var(--ay); padding: 1px 5px; border-radius: 999px; }
+.cal-grid .bos { visibility: hidden; }
+.day-detail { margin-top: 12px; display: grid; grid-template-columns: 110px 1fr; gap: 20px; align-items: center; animation: rise 0.4s ease both; }
+.day-detail .moon-svg { width: 110px; }
+.day-detail h3 { font-size: 1.5rem; }
+.day-detail p { color: #e3dff0; margin: 4px 0; }
+.day-detail .uygun { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding: 0; list-style: none; }
+.day-detail .uygun li { padding: 4px 10px; border: 1px solid rgba(243, 194, 107, 0.35); border-radius: 999px; color: var(--gold); font-size: 0.82rem; }
+
+/* --- Yıllık liste --- */
+.lunations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.lunations li { display: grid; grid-template-columns: 46px 1fr; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--card-border); border-radius: 14px; background: var(--card); }
+.lunations .moon-svg { width: 46px; }
+.lunations b { display: block; font-size: 0.98rem; }
+.lunations small { color: var(--muted); font-size: 0.8rem; }
+.lunations p { margin-top: 2px; color: #d8d3e8; font-size: 0.84rem; }
+
+/* --- Doğum Ay'ı --- */
+.birth-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.birth-row label { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; }
+.birth-row input { box-sizing: border-box; min-height: 46px; padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 12px; color: var(--foreground); background: rgba(255, 255, 255, 0.06); font: inherit; -webkit-appearance: none; appearance: none; }
+.birth-result { display: grid; grid-template-columns: 150px 1fr; gap: 22px; align-items: center; margin-top: 18px; animation: rise 0.6s ease both; }
+.birth-result .moon-svg { width: 150px; filter: drop-shadow(0 0 20px rgba(200, 215, 255, 0.3)); }
+.birth-result h3 { font-size: 1.7rem; }
+.birth-result p { color: #e3dff0; margin-top: 6px; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 920px) {
+  .now-moon { grid-template-columns: 200px 1fr; }
+  .now-sign { grid-column: 1 / -1; flex-direction: row; text-align: left; }
+  .next-phases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 680px) {
+  .now-moon, .day-detail, .birth-result { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .moon-stage { width: 190px; }
+  .now-sign { flex-direction: column; text-align: center; }
+  .moon-facts { text-align: left; }
+  .next-phases, .cycle, .guide-grid, .lunations { grid-template-columns: 1fr; }
+  .cycle .card { grid-template-columns: 90px 1fr; }
+  .cycle img { width: 90px; height: 90px; }
+  .intent-form { grid-template-columns: 1fr; }
+  .cal-grid { gap: 3px; }
+  .cal-grid button { min-height: 66px; padding: 5px 2px; border-radius: 8px; }
+  .cal-grid button .moon-svg { width: 22px; }
+  .cal-grid button .ozel { display: none; }
+  .cal-grid button.ozel-gun { border-color: rgba(233, 238, 252, 0.55); }
+}
