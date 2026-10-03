@@ -30,6 +30,21 @@ Fotoğrafta tek bir insanın yüzü önden ya da yarı profilden görünüyorsa 
 
 const ELEMENTLER = ["ağaç", "ateş", "toprak", "metal", "su"];
 const SEKILLER = ["oval", "yuvarlak", "kare", "kalp", "uzun", "elmas"];
+// Tarayıcıdaki yüz haritasından gelen ölçümler (yalnız sayılar ve şekil tahmini) denetlenip saklanır.
+function olcumAl(o) {
+  if (!o || typeof o !== "object") return null;
+  const sayi = (v, min, max) => (Number.isFinite(Number(v)) && Number(v) >= min && Number(v) <= max ? Math.round(Number(v) * 100) / 100 : null);
+  const olcum = {
+    oran: sayi(o.oran, 0.8, 2.2),
+    altinUyum: sayi(o.altinUyum, 0, 100),
+    sekil: SEKILLER.includes(o.sekil) ? o.sekil : "",
+    alinCene: sayi(o.alinCene, 0.5, 2),
+    elmacikCene: sayi(o.elmacikCene, 0.5, 2),
+    gozAraligi: sayi(o.gozAraligi, 0.4, 2),
+  };
+  return olcum.oran && olcum.sekil ? olcum : null;
+}
+
 const bul = (liste, v) => liste.find((x) => String(v || "").toLocaleLowerCase("tr-TR").includes(x)) || "";
 
 function temizle(f) {
@@ -73,9 +88,12 @@ const yuz = fotoFal({
     sinir: "Bugün 3 yüz okuma hakkını kullandın. Yarın yeniden bekleriz.",
     okunamadi: "Yüzünü okuyamadık, lütfen biraz sonra tekrar dene.",
   },
-  girdiAl: (body) => ({ soru: kisalt(body?.soru, 300) }),
+  girdiAl: (body) => ({ soru: kisalt(body?.soru, 300), olcumler: olcumAl(body?.olcumler) }),
   istek: (g) =>
     `Bir fotoğraf var: kişinin yüzü. ${g.soru ? `Sorusu: <soru>${g.soru}</soru>. ` : "Soru belirtilmedi. "}` +
+    `${g.olcumler ? `Yüz haritasından ölçümler: yüz oranı (yükseklik/genişlik) ${g.olcumler.oran}, altın orana uyum %${g.olcumler.altinUyum}, ` +
+      `ölçüme göre yüz şekli ${g.olcumler.sekil}, alın/çene oranı ${g.olcumler.alinCene}, elmacık/çene oranı ${g.olcumler.elmacikCene}. ` +
+      "Yüz şeklini bu ölçümle uyumlu seç ve okumada bu oranlara değin. " : ""}` +
     `Bu yüzü (sen diliyle) oku ve şu JSON kalıbıyla cevap ver:\n${JSON_KALIBI}`,
   temizle,
   okunus,

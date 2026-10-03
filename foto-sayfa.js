@@ -79,15 +79,19 @@ window.FotoSayfa = function FotoSayfa(ayar) {
     const yazi = button.textContent;
     button.disabled = true;
     button.textContent = ayar.metinler.bekleniyor;
+    let hazirlik = null;
     try {
+      // Bölüme özel hazırlık (yüz okumada yüz haritası): ek bilgi döndürür, gösterisi bitene kadar sonuç bekletilir.
+      if (ayar.hazirla) hazirlik = await ayar.hazirla(foto);
       const response = await fetch(`${ayar.api}bak`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ fotolar: [foto], soru: form.elements.soru.value }),
+        body: JSON.stringify({ fotolar: [foto], soru: form.elements.soru.value, ...(hazirlik?.ek || {}) }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Okuma yapılamadı.");
+      if (hazirlik?.bekle) await hazirlik.bekle;
       durum.kalan = data.kalan;
       kayitlar.unshift(data.kayit);
       foto = null;
@@ -96,6 +100,7 @@ window.FotoSayfa = function FotoSayfa(ayar) {
       goster(data.kayit, true);
       renderJournal();
     } catch (error) {
+      ayar.hazirlikIptal?.();
       toast(error.message);
     } finally {
       button.textContent = yazi;

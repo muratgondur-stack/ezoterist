@@ -1,0 +1,60 @@
+/* Yüz okuma: fotoğraf + biyometrik yüz haritası, tarama adımları ve ölçümler. */
+
+.bio-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+.bio-fig { position: relative; margin: 0; }
+.bio-fig img,
+.bio-fig canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 560px;
+  object-fit: contain;
+  border: 2px solid rgba(243, 194, 107, 0.4);
+  border-radius: 20px;
+  background: #05060f;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+}
+.bio-map canvas { border-color: rgba(127, 227, 255, 0.45); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), 0 0 40px rgba(90, 200, 255, 0.18); }
+.bio-fig figcaption { margin-top: 8px; color: var(--muted); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.12em; text-align: center; text-transform: uppercase; }
+.bio-map figcaption { color: #7fe3ff; }
+.bio-map.is-hidden { display: none; }
+.bio-row:has(.bio-map.is-hidden) { grid-template-columns: minmax(0, 420px); justify-content: center; }
+
+.scan-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
+.scan-steps li {
+  padding: 6px 12px;
+  border: 1px solid rgba(127, 227, 255, 0.3);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
+}
+.scan-steps li.is-active { color: #7fe3ff; border-color: #7fe3ff; background: rgba(90, 200, 255, 0.1); animation: pulse 1.2s ease-in-out infinite; }
+.scan-steps li.is-done { color: #9be3b8; border-color: rgba(90, 210, 140, 0.5); }
+.scan-steps li.is-done::before { content: "✓ "; }
+
+.bio-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 16px; padding: 0; list-style: none; }
+.bio-metrics:empty { display: none; }
+.bio-metrics li {
+  padding: 12px 14px;
+  border: 1px solid rgba(127, 227, 255, 0.28);
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(90, 200, 255, 0.08), var(--card));
+  animation: metric-in 0.5s ease both;
+  animation-delay: var(--gecikme, 0ms);
+}
+.bio-metrics small { display: block; color: var(--muted); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.bio-metrics b { font-family: var(--serif); font-size: 1.7rem; color: #f6dca0; font-variant-numeric: lining-nums; }
+.bio-metrics span { display: block; color: var(--muted); font-size: 0.78rem; }
+@keyframes metric-in { from { opacity: 0; transform: translateY(10px); } }
+
+.reading-body { transition: opacity 0.6s ease; }
+.reading-body.is-waiting { opacity: 0; height: 0; overflow: hidden; }
+.result-body.solo { margin-bottom: 14px; }
+
+@media (max-width: 680px) {
+  .bio-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .bio-fig figcaption { font-size: 0.66rem; }
+  .bio-metrics b { font-size: 1.4rem; }
+}

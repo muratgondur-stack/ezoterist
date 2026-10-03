@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="/astroloji.css?v=5" />
     <link rel="stylesheet" href="/ruya.css?v=1" />
     <link rel="stylesheet" href="/fal.css?v=6" />
+    <link rel="stylesheet" href="/yuz-okuma.css?v=1" />
   </head>
   <body>
     <header class="topbar">
@@ -57,15 +58,22 @@
       </section>
 
       <section class="dream-result" id="sonuc" hidden aria-labelledby="resultTitle">
-        <div class="result-layout">
-          <div class="cup-photos"><img id="resultPhoto" alt="Yüklediğin fotoğraf" /></div>
-          <div class="result-body">
-            <p class="eyebrow" id="resultDate"></p>
-            <h2 id="resultTitle"></h2>
-            <div class="chips result-badges" id="resultBadges"></div>
-            <p class="reading-text result-theme" id="resultElement"></p>
-            <button type="button" class="listen" id="resultListen" hidden>🔊 Sesli dinle</button>
-          </div>
+        <div class="bio-row">
+          <figure class="bio-fig"><img id="resultPhoto" alt="Yüklediğin fotoğraf" /><figcaption>Fotoğrafın</figcaption></figure>
+          <figure class="bio-fig bio-map" id="bioMap">
+            <canvas id="bioCanvas" aria-label="Biyometrik yüz haritası"></canvas>
+            <figcaption>Biyometrik yüz haritan</figcaption>
+          </figure>
+        </div>
+        <ol class="scan-steps" id="scanSteps" hidden></ol>
+        <ul class="bio-metrics" id="bioMetrics"></ul>
+        <div class="reading-body" id="readingBody">
+        <div class="result-body solo">
+          <p class="eyebrow" id="resultDate"></p>
+          <h2 id="resultTitle"></h2>
+          <div class="chips result-badges" id="resultBadges"></div>
+          <p class="reading-text result-theme" id="resultElement"></p>
+          <button type="button" class="listen" id="resultListen" hidden>🔊 Sesli dinle</button>
         </div>
         <div class="card">
           <h3>Yüzünün bölgeleri</h3>
@@ -79,6 +87,7 @@
         <div class="card" id="strongCard"><h3>Güçlü yanların</h3><ul class="ticks" id="resultStrong"></ul></div>
         <div class="card wish" id="wishCard"><h3>🕯️ Sorunun cevabı</h3><p id="resultWish"></p></div>
         <p class="advice" id="resultAdvice"></p>
+        </div>
         <div class="card expert" id="expertCard" hidden>
           <div class="reading-head">
             <h3>İstersen uzmanımıza da okut</h3>
@@ -126,7 +135,8 @@
     <script src="/uzmanlar.js?v=3"></script>
     <script src="/uzman-kart.js?v=3"></script>
     <script src="/foto-yuva.js?v=2"></script>
-    <script src="/foto-sayfa.js?v=2"></script>
-    <script src="/yuz-okuma-sayfa.js?v=1"></script>
+    <script src="/foto-sayfa.js?v=3"></script>
+    <script src="/yuz-harita.js?v=2"></script>
+    <script src="/yuz-okuma-sayfa.js?v=2"></script>
   </body>
 </html>

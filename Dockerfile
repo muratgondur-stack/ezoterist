@@ -17,7 +17,7 @@ COPY el-fali ./el-fali
 COPY tarot-veri.js tarot-api.js tarot.html tarot.css tarot-sayfa.js ./
 COPY tarot ./tarot
 COPY foto-yuva.js foto-sayfa.js yuz-okuma-veri.js yuz-okuma-api.js fotograf-analiz-veri.js fotograf-analiz-api.js ./
-COPY yuz-okuma.html yuz-okuma-sayfa.js fotograf-analizi.html fotograf-analizi-sayfa.js ./
+COPY yuz-okuma.html yuz-okuma-sayfa.js yuz-okuma.css yuz-harita.js fotograf-analizi.html fotograf-analizi-sayfa.js ./
 COPY yuz-okuma ./yuz-okuma
 COPY fotograf-analizi ./fotograf-analizi
 COPY fal ./fal
