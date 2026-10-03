@@ -16,6 +16,7 @@ const { tarotKaydiOku } = require("./tarot-api");
 const { yuzKaydiOku, fotoYolu: yuzFotoYolu } = require("./yuz-okuma-api");
 const { analizKaydiOku, fotoYolu: analizFotoYolu } = require("./fotograf-analiz-api");
 const { askKaydiOku } = require("./ask-uyumu-api");
+const { melekKaydiOku, ALANLAR: MELEK_ALANLARI } = require("./melek-sayilari-api");
 const TarotVeri = require("./tarot-veri");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
@@ -172,6 +173,17 @@ const BOLUMLER = {
         kayitId: k.id,
       };
     },
+  },
+  "melek-sayilari": {
+    ad: "melek sayısı",
+    link: "/melek-sayilari#gunluk",
+    yukle: (dataDir, userId, body) => melekKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: `${k.sayi} · ${k.yorum.baslik}`,
+      girdiMetni: `Gördüğü sayı: ${k.sayi}${k.nerede ? ` (${k.nerede})` : ""}`,
+      ozet: [`Merak ettiği alan: ${MELEK_ALANLARI[k.alan] || "genel yaşam"}`, k.an ? `O an aklından geçen: ${k.an}` : ""].filter(Boolean).join(" — "),
+      kayitId: k.id,
+    }),
   },
 };
 

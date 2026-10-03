@@ -13,6 +13,7 @@ const { createHandler: createYuzHandler } = require("./yuz-okuma-api");
 const { createHandler: createAnalizHandler } = require("./fotograf-analiz-api");
 const { createHandler: createAskHandler } = require("./ask-uyumu-api");
 const { createHandler: createDogumHandler } = require("./dogum-haritasi-api");
+const { createHandler: createMelekHandler } = require("./melek-sayilari-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -138,6 +139,7 @@ const pageRoutes = {
   "/fotograf-analizi": "fotograf-analizi.html",
   "/ask-uyumu": "ask-uyumu.html",
   "/dogum-haritasi": "dogum-haritasi.html",
+  "/melek-sayilari": "melek-sayilari.html",
 };
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
@@ -151,6 +153,7 @@ const handleYuzRequest = createYuzHandler({ dataDir, currentUser, sendFile });
 const handleAnalizRequest = createAnalizHandler({ dataDir, currentUser, sendFile });
 const handleAskRequest = createAskHandler({ dataDir, currentUser, sendFile });
 const handleDogumRequest = createDogumHandler({ dataDir, currentUser, sendFile });
+const handleMelekRequest = createMelekHandler({ dataDir, currentUser, sendFile });
 
 const server = http.createServer((request, response) => {
   let url;
@@ -175,6 +178,7 @@ const server = http.createServer((request, response) => {
   if (handleAnalizRequest(request, response, url)) return;
   if (handleAskRequest(request, response, url)) return;
   if (handleDogumRequest(request, response, url)) return;
+  if (handleMelekRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {

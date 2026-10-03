@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Melek Sayıları: 111, 222, 1111 gibi tekrar eden sayıların anlamı, sana özel melek mesajı, kişisel melek sayın ve melek günlüğün." />
+    <title>Melek Sayıları · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=6" />
+    <link rel="stylesheet" href="/melek-sayilari.css?v=1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/">← Ana Menü</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><img src="/logo/ezo_E.png?v=1" alt="Ezoter.ist" width="1247" height="216" /></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Melek Sayıları</p>
+          <h1>Sayılar sana<br />bir şey fısıldıyor</h1>
+          <p class="lead">Saate baktığında 11:11, plakada 444, fişte 777… Tekrar eden sayılar meleklerin dilidir. Gördüğün sayıyı yaz, anlamını öğren; o an ne düşündüğünü de anlat, sana özel mesajını sesli dinle.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#sorgula">Sayımı sorgula</a>
+            <a class="btn btn-ghost" href="#kisisel">Kişisel melek sayım</a>
+          </div>
+        </div>
+        <div class="hero-art angel-art" aria-hidden="true">
+          <div class="hero-glow"></div>
+          <img class="angel-image" src="/melek/melek.webp?v=1" alt="" width="720" height="720" />
+          <div class="floating-numbers" id="floatingNumbers"></div>
+        </div>
+      </section>
+
+      <section id="bugun" aria-labelledby="todayTitle">
+        <div class="section-head">
+          <h2 id="todayTitle">Günün melek sayısı</h2>
+          <p class="section-note" id="todayDate"></p>
+        </div>
+        <div class="card today-angel" id="todayCard"></div>
+      </section>
+
+      <section id="sorgula" aria-labelledby="queryTitle">
+        <div class="section-head">
+          <h2 id="queryTitle">Hangi sayıyı görüyorsun?</h2>
+          <p class="section-note">2 ile 6 basamaklı bir sayı yaz ya da aşağıdan seç.</p>
+        </div>
+        <form class="card number-form" id="numberForm">
+          <label class="number-input">
+            <span class="sr-only">Gördüğün sayı</span>
+            <input name="sayi" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="1111" required />
+          </label>
+          <button type="submit" class="btn btn-primary">Anlamını göster</button>
+          <div class="chips number-chips" id="numberChips"></div>
+        </form>
+
+        <div class="meaning" id="meaning" hidden>
+          <div class="card meaning-card">
+            <div class="meaning-visual">
+              <img id="meaningImage" src="" alt="" width="480" height="480" />
+              <div class="big-number" id="meaningNumber"></div>
+            </div>
+            <div class="meaning-text">
+              <p class="sky-label" id="meaningRoot"></p>
+              <h3 id="meaningTitle"></h3>
+              <p id="meaningMessage"></p>
+              <ul class="meaning-areas" id="meaningAreas"></ul>
+              <ul class="digit-list" id="digitList"></ul>
+              <p class="affirmation" id="meaningAffirmation"></p>
+            </div>
+          </div>
+
+          <form class="card personal-form" id="personalForm">
+            <h3>Sana özel mesajını al</h3>
+            <p class="form-hint">Sayıyı nerede gördüğünü ve o an aklından geçeni anlat; meleklerin mesajını anına göre yorumlayalım.</p>
+            <div class="field">
+              <span>Nerede gördün?</span>
+              <div class="chips" id="whereChips"></div>
+              <input name="nerede" maxlength="120" placeholder="Ya da kendin yaz: ör. otobüs biletinde" />
+            </div>
+            <label class="field">
+              <span>O an aklından ne geçiyordu? (isteğe bağlı)</span>
+              <textarea name="an" rows="3" maxlength="400" placeholder="Örneğin: Yeni işe başvurup başvurmamayı düşünüyordum…"></textarea>
+            </label>
+            <div class="field">
+              <span>En çok neyi merak ediyorsun?</span>
+              <div class="chips" id="areaChips"></div>
+            </div>
+            <button type="submit" class="btn btn-primary" id="personalSubmit">Mesajımı al</button>
+            <p class="section-note" id="quota"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="angel-result" id="sonuc" hidden aria-labelledby="resultTitle">
+        <div class="card result-card">
+          <div class="result-glow" aria-hidden="true"></div>
+          <div class="result-top">
+            <div class="result-number" id="resultNumber"></div>
+            <div>
+              <p class="sky-label" id="resultMeta"></p>
+              <h2 id="resultTitle"></h2>
+              <span class="badge" id="resultBadge"></span>
+            </div>
+          </div>
+          <p class="result-message" id="resultMessage"></p>
+          <div class="dlg-grid two">
+            <div class="card inner" id="areaCard"><h3 id="areaTitle"></h3><p id="areaText"></p></div>
+            <div class="card inner" id="whyCard"><h3>✧ Neden şimdi?</h3><p id="whyText"></p></div>
+          </div>
+          <div class="card inner" id="stepsCard"><h3>Bugün atabileceğin adımlar</h3><ol class="steps" id="stepsList"></ol></div>
+          <p class="affirmation big" id="resultAffirmation"></p>
+          <button type="button" class="listen" id="resultListen" hidden>🔊 Mesajımı sesli dinle</button>
+        </div>
+
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">Ücretsiz · 48 saat</span>
+          </div>
+          <p class="expert-lead">Mesajın hazır. Dilersen uzmanlarımızdan birini seç; gördüğün sayıyı kendi gözüyle de yorumlasın, yanıtını sesli dinleyebilirsin.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="kisisel" aria-labelledby="personalTitle">
+        <div class="section-head">
+          <h2 id="personalTitle">Kişisel melek sayın</h2>
+          <p class="section-note">Doğum tarihinden gelen yaşam yolu sayın, hayatın boyunca sana eşlik eden melek sayısını gösterir.</p>
+        </div>
+        <div class="card personal-number">
+          <form id="birthForm" class="birth-row">
+            <label><span>Doğum tarihin</span><input type="date" name="tarih" min="1900-01-01" max="2049-12-31" required /></label>
+            <button type="submit" class="btn btn-ghost">Melek sayımı bul</button>
+          </form>
+          <div class="personal-result" id="personalResult" hidden></div>
+        </div>
+      </section>
+
+      <section id="sozluk" aria-labelledby="dictTitle">
+        <div class="section-head">
+          <h2 id="dictTitle">Melek sayıları sözlüğü</h2>
+          <p class="section-note">Bir sayıya dokun, anlamını aç.</p>
+        </div>
+        <ul class="angel-grid" id="angelGrid"></ul>
+      </section>
+
+      <section id="gunluk" aria-labelledby="journalTitle">
+        <div class="section-head">
+          <h2 id="journalTitle">Melek günlüğüm</h2>
+          <p class="section-note" id="journalNote">Aldığın kişisel mesajlar burada saklanır.</p>
+        </div>
+        <p class="frequent" id="frequent" hidden></p>
+        <ul class="angel-journal" id="journal"></ul>
+      </section>
+
+      <p class="disclaimer">Melek sayıları seni kendinle buluşturan, ilham veren bir rehberdir; kararlarını her zaman kendi aklın ve kalbinle ver.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/numeroloji-hesap.js?v=1"></script>
+    <script src="/melek-sayilari-veri.js?v=1"></script>
+    <script src="/uzmanlar.js?v=3"></script>
+    <script src="/uzman-kart.js?v=3"></script>
+    <script src="/melek-sayilari-sayfa.js?v=1"></script>
+  </body>
+</html>
