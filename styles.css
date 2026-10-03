@@ -196,8 +196,9 @@ body.banner-below { padding-top: 68px; }
   white-space: nowrap;
 }
 
+/* Hoparlör ve hesap düğmeleri sayfayla birlikte kayar (ekrana sabit değil; Murat 2026-10-04) */
 .auth-bar {
-  position: fixed;
+  position: absolute;
   z-index: 4;
   top: 16px;
   right: 16px;
@@ -223,7 +224,7 @@ button.auth-bar-user { border: 2px solid var(--border); font: inherit; font-size
 button.auth-bar-user:hover, button.auth-bar-user[aria-expanded="true"] { background: rgba(255, 122, 0, 0.3); }
 
 /* Kullanıcı menüsü (👤) */
-.auth-bar { position: fixed; }
+.auth-bar { position: absolute; }
 .user-menu {
   position: absolute;
   top: calc(100% + 8px);
@@ -262,7 +263,7 @@ button.auth-bar-user:hover, button.auth-bar-user[aria-expanded="true"] { backgro
 .auth-bar-link:hover { background: rgba(255, 122, 0, 0.3); }
 
 .music-toggle {
-  position: fixed;
+  position: absolute;
   z-index: 4;
   top: 16px;
   left: 16px;
