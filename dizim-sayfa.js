@@ -247,10 +247,12 @@ function surukleBitir(e) {
   const { t, hareket } = surukleme;
   surukleTemizle();
   if (!hareket) {
-    // Dokunup bırakma: kenardaki taşın görünümünü değiştir.
+    // Dokunup bırakma: kenardaki taşın görünümünü değiştir; masadaki taşın kısaltılmış adını tam göster.
     if (t.x == null) {
       t.gorunum = GORUNUMLER[(GORUNUMLER.indexOf(t.gorunum) + 1) % GORUNUMLER.length];
       renderAll();
+    } else {
+      adiGoster(t.id);
     }
     return;
   }
@@ -267,6 +269,17 @@ function surukleBitir(e) {
     gedigeKoy(t, null);
   }
   renderBench();
+}
+
+// Masadaki taşa dokununca adı birkaç saniye tam görünür (telefonda uzun adlar kısaltılmış durur).
+let adTimer;
+function adiGoster(id) {
+  clearTimeout(adTimer);
+  $("table").querySelectorAll(".stone.adi-acik").forEach((e) => e.classList.remove("adi-acik"));
+  const el = $("table").querySelector(`.stone[data-id="${id}"]`);
+  if (!el) return;
+  el.classList.add("adi-acik");
+  adTimer = setTimeout(() => el.classList.remove("adi-acik"), 2600);
 }
 
 function gedigeKoy(t, i) {
