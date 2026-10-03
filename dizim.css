@@ -48,7 +48,14 @@
 .table-frame { position: relative; padding: 14px; border-radius: 26px; background: linear-gradient(160deg, #3a2414, #1d120a); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.55), inset 0 2px 0 rgba(255, 220, 170, 0.12); }
 .table { position: relative; aspect-ratio: 3 / 2; border-radius: 16px; background: url(/dizim/masa.webp?v=1) center / cover; box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.4); overflow: hidden; }
 .table.uzerinde { box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.45), inset 0 0 0 3px rgba(243, 194, 107, 0.6); }
-.table .stone { position: absolute; transform: translate(-50%, -38%); }
+.table .stone { position: absolute; z-index: 1; transform: translate(-50%, -38%); }
+/* Gedikler: iç ve dış çemberde masaya oyulmuş çukurlar; taşlar yalnız bunlara oturur */
+.table, .frozen { container-type: inline-size; }
+.table { --tas: clamp(30px, 8cqw, 80px); }
+.gedik { position: absolute; width: calc(var(--tas) * 0.92); aspect-ratio: 1.45; border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(ellipse at 50% 40%, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.32) 70%, rgba(255, 220, 170, 0.1) 100%); box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255, 225, 180, 0.18); pointer-events: none; transition: box-shadow 0.15s ease; }
+.gedik.ic { background: radial-gradient(ellipse at 50% 40%, rgba(20, 8, 0, 0.66), rgba(0, 0, 0, 0.36) 70%, rgba(243, 194, 107, 0.16) 100%); }
+.gedik.hedef { box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.65), 0 0 0 3px rgba(243, 194, 107, 0.85), 0 0 18px rgba(243, 194, 107, 0.6); }
+.stone.kaynak { opacity: 0.25; }
 .table-hint { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: rgba(255, 240, 220, 0.6); font-family: var(--serif); font-size: 1.4rem; font-style: italic; pointer-events: none; }
 .bench-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; }
 .bench-actions .count { flex: 1; color: var(--muted); font-size: 0.9rem; text-align: center; }
@@ -59,7 +66,7 @@
 .result-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 14px; }
 .snapshot { margin: 0; }
 .frozen { position: relative; aspect-ratio: 3 / 2; border: 10px solid #2a1a0e; border-radius: 18px; background: url(/dizim/masa.webp?v=1) center / cover; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); overflow: hidden; --tas: clamp(34px, 5vw, 60px); }
-.frozen .stone { position: absolute; transform: translate(-50%, -38%); cursor: default; }
+.frozen .stone { position: absolute; z-index: 1; transform: translate(-50%, -38%); cursor: default; }
 .frozen svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity 0.4s; }
 .frozen.olcum svg { opacity: 1; }
 .frozen img.foto { width: 100%; height: 100%; object-fit: cover; display: block; }

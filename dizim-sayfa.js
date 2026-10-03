@@ -5,6 +5,17 @@ const GORUNUMLER = Array.from({ length: 12 }, (_, i) => `tas-${String(i + 1).pad
 const tasResmi = (g) => `/dizim/${g}.webp?v=1`;
 const MAX_TAS = 24;
 
+// Masadaki gedikler (Murat 2026-10-03): taşlar serbest durmaz, iç ve dış iki çemberdeki gediklere oturur.
+// Masa 3:2 olduğu için çemberler hafif yatık elips; yarıçaplar masa yüksekliği cinsinden.
+const HALKALAR = [
+  { ad: "ic", adet: 8, rx: 0.3, ry: 0.21, kayma: 0 },
+  { ad: "dis", adet: 16, rx: 0.56, ry: 0.4, kayma: 0.5 },
+];
+const GEDIKLER = HALKALAR.flatMap((h) => Array.from({ length: h.adet }, (_, i) => {
+  const aci = -Math.PI / 2 + ((i + h.kayma) * 2 * Math.PI) / h.adet;
+  return { halka: h.ad, x: 0.5 + (h.rx * Math.cos(aci)) * ORAN, y: 0.5 + h.ry * Math.sin(aci) };
+}));
+
 const HAZIR = {
   "Kişiler": [["Ben", "ben"], ["Anne", "kisi"], ["Baba", "kisi"], ["Eş", "kisi"], ["Sevgili", "kisi"], ["Çocuk", "kisi"], ["Kardeş", "kisi"], ["Anneanne", "kisi"], ["Babaanne", "kisi"], ["Dede", "kisi"], ["Arkadaş", "kisi"], ["Patron", "kisi"]],
   "Mekânlar": [["Ev", "mekan"], ["İş", "mekan"], ["Okul", "mekan"], ["İstanbul", "mekan"], ["Memleket", "mekan"]],
@@ -12,7 +23,7 @@ const HAZIR = {
 };
 
 let durum = { ses: false, ai: false, kalan: 5, sinir: 5 };
-let taslar = []; // { id, ad, tur, gorunum, x, y } — x null ise kenarda
+let taslar = []; // { id, ad, tur, gorunum, x, y, gedik } — x null ise kenarda; gedik: GEDIKLER sırası
 let kayitlar = [];
 let acikKayit = null;
 let secilenler = [];
@@ -159,21 +170,59 @@ function tasEl(t, { kenarda = false, sabit = false } = {}) {
 
 let surukleme = null;
 
+// Masada, bırakılan noktaya en yakın boş gedik (taşın kendi gediği boş sayılır).
+function enYakinGedik(nx, ny, t) {
+  const dolu = new Set(taslar.filter((s) => s !== t && s.gedik != null).map((s) => s.gedik));
+  let en = null;
+  GEDIKLER.forEach((g, i) => {
+    if (dolu.has(i)) return;
+    const d = Math.hypot((g.x - nx) / ORAN, g.y - ny);
+    if (!en || d < en.d) en = { i, d };
+  });
+  return en?.i ?? null;
+}
+
+function gediklereBak(e) {
+  const tablo = $("table");
+  const ustunde = icinde(tablo, e.clientX, e.clientY);
+  tablo.classList.toggle("uzerinde", ustunde);
+  $("tray").classList.toggle("uzerinde", icinde($("tray"), e.clientX, e.clientY));
+  const r = tablo.getBoundingClientRect();
+  const hedef = ustunde ? enYakinGedik((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, surukleme.t) : null;
+  tablo.querySelectorAll(".gedik").forEach((g) => g.classList.toggle("hedef", Number(g.dataset.i) === hedef));
+}
+
+// Sürüklemede olaylar pencereye bağlanır: taş elemanı gizlenince ya da yeniden çizilince imleç takibi kaybolmaz,
+// elde tutulan kopya sayfada asılı kalmaz.
 function surukleBasla(e, t, el) {
   if (e.button !== undefined && e.button !== 0) return;
   e.preventDefault();
+  surukleTemizle();
   const hayalet = el.cloneNode(true);
   hayalet.classList.add("tasiniyor");
   hayalet.style.left = `${e.clientX}px`;
   hayalet.style.top = `${e.clientY}px`;
   hayalet.querySelector(".sil")?.remove();
   document.body.append(hayalet);
-  el.style.visibility = "hidden";
-  surukleme = { t, el, hayalet, x0: e.clientX, y0: e.clientY, hareket: false };
-  try { el.setPointerCapture(e.pointerId); } catch { /* sentetik olaylarda yakalama olmayabilir */ }
-  el.addEventListener("pointermove", surukleHareket);
-  el.addEventListener("pointerup", surukleBitir, { once: true });
-  el.addEventListener("pointercancel", surukleBitir, { once: true });
+  el.classList.add("kaynak");
+  surukleme = { t, el, hayalet, x0: e.clientX, y0: e.clientY, hareket: false, pointerId: e.pointerId };
+  window.addEventListener("pointermove", surukleHareket);
+  window.addEventListener("pointerup", surukleBitir);
+  window.addEventListener("pointercancel", surukleBitir);
+  window.addEventListener("blur", surukleTemizle);
+}
+
+function surukleTemizle() {
+  window.removeEventListener("pointermove", surukleHareket);
+  window.removeEventListener("pointerup", surukleBitir);
+  window.removeEventListener("pointercancel", surukleBitir);
+  window.removeEventListener("blur", surukleTemizle);
+  document.querySelectorAll(".stone.tasiniyor").forEach((h) => h.remove());
+  document.querySelectorAll(".stone.kaynak").forEach((k) => k.classList.remove("kaynak"));
+  $("table").classList.remove("uzerinde");
+  $("tray").classList.remove("uzerinde");
+  $("table").querySelectorAll(".gedik.hedef").forEach((g) => g.classList.remove("hedef"));
+  surukleme = null;
 }
 
 function icinde(el, x, y) {
@@ -182,23 +231,17 @@ function icinde(el, x, y) {
 }
 
 function surukleHareket(e) {
-  if (!surukleme) return;
+  if (!surukleme || (surukleme.pointerId != null && e.pointerId !== surukleme.pointerId)) return;
   if (Math.hypot(e.clientX - surukleme.x0, e.clientY - surukleme.y0) > 5) surukleme.hareket = true;
   surukleme.hayalet.style.left = `${e.clientX}px`;
   surukleme.hayalet.style.top = `${e.clientY}px`;
-  $("table").classList.toggle("uzerinde", icinde($("table"), e.clientX, e.clientY));
-  $("tray").classList.toggle("uzerinde", icinde($("tray"), e.clientX, e.clientY));
+  gediklereBak(e);
 }
 
 function surukleBitir(e) {
-  if (!surukleme) return;
-  const { t, el, hayalet, hareket } = surukleme;
-  el.removeEventListener("pointermove", surukleHareket);
-  hayalet.remove();
-  el.style.visibility = "";
-  $("table").classList.remove("uzerinde");
-  $("tray").classList.remove("uzerinde");
-  surukleme = null;
+  if (!surukleme || (surukleme.pointerId != null && e.pointerId !== surukleme.pointerId)) return;
+  const { t, hareket } = surukleme;
+  surukleTemizle();
   if (!hareket) {
     // Dokunup bırakma: kenardaki taşın görünümünü değiştir.
     if (t.x == null) {
@@ -209,22 +252,50 @@ function surukleBitir(e) {
   }
   const masa = $("table").getBoundingClientRect();
   if (e.type !== "pointercancel" && icinde($("table"), e.clientX, e.clientY)) {
-    t.x = Math.min(0.97, Math.max(0.03, (e.clientX - masa.left) / masa.width));
-    t.y = Math.min(0.94, Math.max(0.05, (e.clientY - masa.top) / masa.height));
-  } else if (icinde($("tray"), e.clientX, e.clientY) || e.type === "pointercancel" || t.x == null) {
-    if (e.type !== "pointercancel") { t.x = null; t.y = null; }
-  } else {
-    // Masanın dışına bırakılan masa taşı kenara döner.
-    t.x = null;
-    t.y = null;
+    const i = enYakinGedik((e.clientX - masa.left) / masa.width, (e.clientY - masa.top) / masa.height, t);
+    if (i == null) {
+      toast("Masadaki bütün gedikler dolu. Önce bir taşı kenara al.");
+    } else {
+      gedigeKoy(t, i);
+    }
+  } else if (e.type !== "pointercancel") {
+    // Masanın dışına bırakılan taş kenara döner.
+    gedigeKoy(t, null);
   }
   renderBench();
 }
 
+function gedigeKoy(t, i) {
+  t.gedik = i;
+  t.x = i == null ? null : GEDIKLER[i].x;
+  t.y = i == null ? null : GEDIKLER[i].y;
+}
+
+// Gediğe oturmamış masa taşı (eski serbest yerleşim) en yakın boş gediğe alınır.
+function gedikleriDuzelt() {
+  taslar.filter((t) => t.x != null && (t.gedik == null || GEDIKLER[t.gedik].x !== t.x)).forEach((t) => {
+    const i = enYakinGedik(t.x, t.y, t);
+    gedigeKoy(t, i);
+  });
+}
+
+function gedikElleri() {
+  return GEDIKLER.map((g, i) => {
+    const d = document.createElement("span");
+    d.className = `gedik ${g.halka}`;
+    d.dataset.i = String(i);
+    d.style.left = `${g.x * 100}%`;
+    d.style.top = `${g.y * 100}%`;
+    d.setAttribute("aria-hidden", "true");
+    return d;
+  });
+}
+
 function renderBench() {
   $("tray").replaceChildren(...taslar.filter((t) => t.x == null).map((t) => tasEl(t, { kenarda: true })));
+  gedikleriDuzelt();
   const masadakiler = taslar.filter((t) => t.x != null);
-  $("table").replaceChildren(...masadakiler.map((t) => tasEl(t)));
+  $("table").replaceChildren(...gedikElleri(), ...masadakiler.map((t) => tasEl(t)));
   $("tableHint").hidden = masadakiler.length > 0;
   const kenarda = taslar.length - masadakiler.length;
   $("placedCount").textContent = taslar.length
@@ -275,7 +346,20 @@ async function goruntuCiz(liste) {
   kenar.addColorStop(1, "rgba(0,0,0,0.45)");
   ctx.fillStyle = kenar;
   ctx.fillRect(0, 0, W, H);
-  const TAS = W * 0.075;
+  // Gedikler: masaya oyulmuş çukurlar
+  for (const g of GEDIKLER) {
+    const gx = g.x * W;
+    const gy = g.y * H;
+    const oyuk = ctx.createRadialGradient(gx, gy - 4, 4, gx, gy, W * 0.034);
+    oyuk.addColorStop(0, "rgba(0,0,0,0.55)");
+    oyuk.addColorStop(0.8, "rgba(0,0,0,0.35)");
+    oyuk.addColorStop(1, "rgba(255,220,170,0.12)");
+    ctx.fillStyle = oyuk;
+    ctx.beginPath();
+    ctx.ellipse(gx, gy, W * 0.034, W * 0.024, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const TAS = W * 0.085;
   for (const t of liste) {
     const img = await resimYukle(tasResmi(t.gorunum));
     const s = Math.min(TAS / img.width, (TAS * 0.82) / img.height);
@@ -347,7 +431,9 @@ $("analyzeButton").addEventListener("click", async () => {
 
 // Kayıttaki koordinatlardan masanın donmuş hâli + ölçüm katmanı (gruplar ve Ben'den çizgiler).
 function donmusMasa(kayit, hedef, { olcum = true } = {}) {
-  hedef.replaceChildren(...kayit.taslar.map((t) => tasEl(t, { sabit: true })));
+  // Gedikli yerleşimse (bütün taşlar gediklerde) gedikler de çizilir.
+  const gedikli = kayit.taslar.every((t) => GEDIKLER.some((g) => Math.abs(g.x - t.x) < 0.003 && Math.abs(g.y - t.y) < 0.003));
+  hedef.replaceChildren(...(gedikli ? gedikElleri() : []), ...kayit.taslar.map((t) => tasEl(t, { sabit: true })));
   if (!olcum) return;
   const SVGNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(SVGNS, "svg");
@@ -443,7 +529,7 @@ $("showMeasures").addEventListener("change", (e) => $("frozen").classList.toggle
 
 $("reuseButton").addEventListener("click", () => {
   if (!acikKayit) return;
-  taslar = acikKayit.taslar.map((t) => ({ ...t, x: null, y: null, yeni: true }));
+  taslar = acikKayit.taslar.map((t) => ({ ...t, x: null, y: null, gedik: null, yeni: true }));
   sayac = taslar.length + 1;
   taslar.forEach((t, i) => { t.id = `t${i + 1}`; });
   $("niyet").value = acikKayit.niyet || "";

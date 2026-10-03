@@ -36,6 +36,25 @@ function jsonAyikla(metin) {
   return JSON.parse(metin.slice(bas, son + 1).replace(/[\u00a0\u2000-\u200b\u202f\u3000\ufeff]/g, " ").replace(/,\s*([}\]])/g, "$1"));
 }
 
+// Masada iç ve dış çemberde gedikler var (dizim-sayfa.js GEDIKLER ile aynı ölçüler). Bütün taşlar gediklerdeyse
+// kimin iç çemberde (merkeze yakın), kimin dış çemberde olduğu yapay zekâya ayrıca söylenir.
+function halkaSatiri(kayit) {
+  const halka = (t) => {
+    const dx = (t.x - 0.5) * 1.5;
+    const dy = t.y - 0.5;
+    const ic = Math.hypot(dx / 0.3, dy / 0.21);
+    const dis = Math.hypot(dx / 0.56, dy / 0.4);
+    if (Math.abs(ic - 1) < 0.12) return "ic";
+    if (Math.abs(dis - 1) < 0.12) return "dis";
+    return null;
+  };
+  const h = kayit.taslar.map((t) => [t.ad, halka(t)]);
+  if (h.some(([, x]) => !x)) return "";
+  const ic = h.filter(([, x]) => x === "ic").map(([ad]) => ad);
+  const dis = h.filter(([, x]) => x === "dis").map(([ad]) => ad);
+  return `Masada iki çember gedik var; kişi taşları bunlara yerleştirdi. İç çember (merkeze yakın): ${ic.join(", ") || "boş"}. Dış çember (çevrede): ${dis.join(", ") || "boş"}.`;
+}
+
 // Yapay zekâya giden özet: ham koordinat yerine yorumlanmış ölçümler (0-100 ölçeği).
 function yapayZekaVerisi(kayit) {
   const a = kayit.analiz;
@@ -54,7 +73,8 @@ function yapayZekaVerisi(kayit) {
     `En yakın çiftler: ${a.mesafeler.slice(0, 6).map((p) => `${ad(p.a)}–${ad(p.b)} ${p.mesafe}`).join("; ")}`,
     `En uzak çiftler: ${a.mesafeler.slice(-4).reverse().map((p) => `${ad(p.a)}–${ad(p.b)} ${p.mesafe}`).join("; ")}`,
     `Genel şekil: ${a.sekil.ad}${a.sekil.yayilim != null ? `, ortalama yayılım ${a.sekil.yayilim}` : ""}.`,
-  ].join("\n");
+    halkaSatiri(kayit),
+  ].filter(Boolean).join("\n");
 }
 
 // Yapay zekâ yokken: ölçümlerden kurulan sade gözlemler.
