@@ -615,7 +615,7 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
   .sign-dialog { padding: 16px; }
   .topbar { gap: 8px; padding: 8px 10px; }
   .topbar-back, .ust-hesap-dugme { padding: 6px 10px; font-size: 0.82rem; }
-  .ust-hesap-dugme:not(.ust-giris) { font-size: 1rem; }
+  .topbar-back, .ust-hesap-dugme:not(.ust-giris) { font-size: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
