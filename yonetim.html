@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=11" />
-    <link rel="stylesheet" href="/yonetim.css?v=3" />
+    <link rel="stylesheet" href="/yonetim.css?v=4" />
   </head>
   <body>
     <header class="topbar">
@@ -33,6 +33,7 @@
         <button type="button" data-tab="ozet" aria-selected="true">📊 Özet</button>
         <button type="button" data-tab="ayarlar" aria-selected="false">⚙️ Ayarlar</button>
         <button type="button" data-tab="kullanicilar" aria-selected="false">👥 Kullanıcılar</button>
+        <button type="button" data-tab="fiyatlar" aria-selected="false">💰 Fiyatlar</button>
         <button type="button" data-tab="anahtarlar" aria-selected="false">🔑 API anahtarları</button>
         <button type="button" data-tab="gecmis" aria-selected="false">🕓 Değişiklik geçmişi</button>
       </nav>
@@ -74,6 +75,23 @@
         </div>
       </section>
 
+      <section class="panel" id="tab-fiyatlar" hidden>
+        <div class="card">
+          <h2>Fiyatlar ve maliyet</h2>
+          <p class="section-note">Hizmeti kendi sunucumuzdaki Gemma, Piper ve resim motoruyla veriyoruz; aşağıdaki maliyet, aynı işi dışarıdan (OpenAI gpt-4.1-mini, Google standart TTS, OpenAI görsel) alsaydık bir işlemin kaça mal olacağıdır. Ortalamalar her bölümün gerçek kullanımından ölçülür; henüz ölçüm yoksa "tahmin" yazar. Kontör fiyatları kontör sistemi açılınca uygulanacak.</p>
+          <div class="cost-inputs" id="costInputs"></div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="grid-table cost-table" id="costTable">
+              <thead><tr><th>Bölüm</th><th>Ölçüm</th><th class="num">Ort. token (girdi / çıktı)</th><th class="num">Metin</th><th class="num">Ses*</th><th class="num">Görsel</th><th class="num">Maliyet</th><th class="num">Kontör</th><th class="num">Satış</th><th class="num">Kâr</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="section-note small">* Ses maliyeti yalnız kullanıcı "Sesli dinle"ye basarsa oluşur; maliyete ve kâra dahil edilmiştir (en kötü durum). Tutarlar TL, bir işlem için.</p>
+        </div>
+      </section>
+
       <section class="panel" id="tab-anahtarlar" hidden>
         <div class="card">
           <h2>API anahtarları</h2>
@@ -103,7 +121,7 @@
 
     <audio id="sample" preload="none"></audio>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="/yonetim-sayfa.js?v=2"></script>
+    <script src="/yonetim-sayfa.js?v=3"></script>
     <script src="/ust-cubuk.js?v=4" defer></script>
 </body>
 </html>

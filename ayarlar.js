@@ -57,11 +57,20 @@ const SEMA = {
   "izin.uzmanlar": { grup: "İzinler", ad: "Uzman e-postaları", tur: "epostalar", vars: listeOrtam("UZMAN_EPOSTA") },
   "elfali.cizgiOlcum": { grup: "Yapay zekâ", ad: "El falı çizgi ölçümü (V100 MediaPipe + U-Net)", tur: "bool", vars: true, aciklama: "Açıkken çizgiler avuca çizilir ve ölçülür; kapalıysa yalnız Gemma bakar" },
   "genel.muzik": { grup: "Genel", ad: "Ana menü müzik seviyesi", tur: "sayi", min: 0, max: 0.5, adim: 0.01, vars: 0.1 },
+  // Fiyatlar ve maliyet varsayımları ("Fiyatlar" sekmesi; Murat 2026-10-04). Hizmet kendi Gemma/TTS/resim
+  // motorumuzla verilir; maliyet ise dış API'lerden alınıyormuş gibi hesaplanır (birim fiyatlar USD).
+  "fiyat.kontorTL": { grup: "Fiyatlar", ad: "1 kontörün TL değeri", tur: "sayi", min: 0, max: 1000, adim: 0.01, vars: 1, birim: "₺" },
+  "maliyet.usdTry": { grup: "Maliyet", ad: "Dolar kuru (USD/TRY)", tur: "sayi", min: 0, max: 1000, adim: 0.01, vars: 0, aciklama: "0 = TCMB'den otomatik" },
+  "maliyet.metinGiris": { grup: "Maliyet", ad: "OpenAI gpt-4.1-mini girdi", tur: "sayi", min: 0, max: 100, adim: 0.01, vars: 0.4, birim: "$ / 1M token" },
+  "maliyet.metinCikis": { grup: "Maliyet", ad: "OpenAI gpt-4.1-mini çıktı", tur: "sayi", min: 0, max: 100, adim: 0.01, vars: 1.6, birim: "$ / 1M token" },
+  "maliyet.ses": { grup: "Maliyet", ad: "Google Cloud TTS (standart ses)", tur: "sayi", min: 0, max: 100, adim: 0.01, vars: 4, birim: "$ / 1M karakter" },
+  "maliyet.gorsel": { grup: "Maliyet", ad: "OpenAI görsel (gpt-image, 1024×1024)", tur: "sayi", min: 0, max: 5, adim: 0.001, vars: 0.011, birim: "$ / görsel" },
 };
 BOLUMLER.forEach((b) => {
   SEMA[`bolum.${b.id}.acik`] = { grup: "Bölümler", ad: b.ad, tur: "bool", vars: true };
   SEMA[`bolum.${b.id}.ses`] = { grup: "Bölüm sesleri", ad: b.ad, tur: "secim", secenekler: ["", ...SESLER], vars: "", aciklama: "boş = varsayılan ses" };
   if (b.sinir !== null) SEMA[`sinir.${b.id}`] = { grup: "Günlük sınırlar", ad: b.ad, tur: "tam", min: 0, max: 1000, vars: b.sinir, birim: "/gün", aciklama: "0 = sınırsız" };
+  SEMA[`fiyat.${b.id}`] = { grup: "Fiyatlar", ad: b.ad, tur: "tam", min: 0, max: 10000, vars: 0, birim: "kontör", aciklama: "bir işlem için; 0 = ücretsiz" };
 });
 
 let kayitli = {};

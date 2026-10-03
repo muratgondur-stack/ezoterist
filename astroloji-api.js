@@ -7,6 +7,7 @@ const path = require("node:path");
 const Astro = require("./astro");
 const Veri = require("./astroloji-veri");
 const Ayarlar = require("./ayarlar");
+const Olcum = require("./olcum");
 
 const llm = {
   url: (process.env.LLM_URL || "").trim(),
@@ -93,6 +94,9 @@ async function askLlm(system, user, { maxTokens = 700, temperature = 0.85 } = {}
   if (!result.ok) throw new Error(`LLM ${result.status}: ${String(data?.error?.message || data?.error || "").slice(0, 160)}`);
   const text = String(data?.choices?.[0]?.message?.content || "").trim();
   if (!text) throw new Error("LLM boş cevap döndü");
+  // Maliyet ölçümü: model token sayısını vermezse metin uzunluğundan kabaca (≈3 karakter/token) tahmin edilir.
+  const metinUzunlugu = typeof user === "string" ? user.length : JSON.stringify(user).length;
+  Olcum.llm(data?.usage?.prompt_tokens ?? Math.round((system.length + metinUzunlugu) / 3), data?.usage?.completion_tokens ?? Math.round(text.length / 3));
   return text.replace(/\*\*/g, "").replace(/^#+\s*/gm, "");
 }
 
@@ -280,6 +284,8 @@ async function sesDosyasi(text, dir, name) {
     const tmp = `${mp3}.${process.pid}.tmp`;
     await fs.promises.writeFile(tmp, audio);
     await fs.promises.rename(tmp, mp3);
+    const dizin = Ayarlar.bolumDizini(dir);
+    Olcum.tts(Ayarlar.BOLUMLER.find((b) => b.dizin === dizin)?.id || dizin, clean.length);
     return mp3;
   });
 }

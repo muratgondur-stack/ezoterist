@@ -33,6 +33,7 @@ function sekme(ad) {
   history.replaceState(null, "", `#${ad}`);
   if (ad === "kullanicilar" && !kullanicilar.length) kullanicilariYukle();
   if (ad === "anahtarlar") anahtarlariYukle();
+  if (ad === "fiyatlar") maliyetYukle();
 }
 document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => sekme(b.dataset.tab)));
 
@@ -138,7 +139,8 @@ const GRUP_IKON = { Genel: "🏠", Ses: "🔊", "Yapay zekâ": "🧠", Süreler:
 
 function renderAyarlar() {
   const gruplar = new Map();
-  veri.sema.forEach((s) => { if (!gruplar.has(s.grup)) gruplar.set(s.grup, []); gruplar.get(s.grup).push(s); });
+  // Fiyat ve maliyet ayarları kendi sekmesinde ("Fiyatlar").
+  veri.sema.filter((s) => s.grup !== "Fiyatlar" && s.grup !== "Maliyet").forEach((s) => { if (!gruplar.has(s.grup)) gruplar.set(s.grup, []); gruplar.get(s.grup).push(s); });
   const sira = ["Genel", "Ses", "Bölüm sesleri", "Yapay zekâ", "Günlük sınırlar", "Süreler", "Bölümler", "İzinler"];
   $("settings").replaceChildren(...[...gruplar].sort((a, b) => sira.indexOf(a[0]) - sira.indexOf(b[0])).map(([grup, liste]) => {
     const kart = el("div", { className: "card group" }, el("h2", { textContent: `${GRUP_IKON[grup] || "•"} ${grup}` }));
@@ -266,6 +268,61 @@ function renderGecmis() {
   }));
 }
 
+// --- Fiyatlar ve maliyet ---
+
+const tl = (n, b = 2) => (n == null ? "—" : `${new Intl.NumberFormat("tr-TR", { minimumFractionDigits: b, maximumFractionDigits: b }).format(n)} ₺`);
+let fiyatZamanlayici = null;
+async function tekAyarKaydet(anahtar, deger) {
+  try {
+    await api("/api/yonetim/ayarlar", { degisiklikler: { [anahtar]: deger } });
+    veri.degerler[anahtar] = deger;
+    clearTimeout(fiyatZamanlayici);
+    fiyatZamanlayici = setTimeout(maliyetYukle, 250);
+  } catch (error) {
+    toast(error.message);
+  }
+}
+function sayiGirdisi(anahtar, deger, { adim = 0.01, min = 0 } = {}) {
+  const i = el("input", { type: "number", step: String(adim), min: String(min), value: String(deger) });
+  i.addEventListener("change", () => {
+    const v = Number(i.value);
+    if (!Number.isFinite(v) || v < min) { toast("Geçerli bir sayı gir."); return; }
+    tekAyarKaydet(anahtar, v);
+  });
+  return i;
+}
+
+async function maliyetYukle() {
+  let m;
+  try { m = await api("/api/yonetim/maliyet"); } catch (error) { toast(error.message); return; }
+  const kutu = (etiket, girdi, not) => el("label", { className: "cost-input" }, el("span", { textContent: etiket }), girdi, not ? el("small", { textContent: not }) : "");
+  $("costInputs").replaceChildren(
+    kutu("Dolar kuru (USD/TRY)", sayiGirdisi("maliyet.usdTry", veri.degerler["maliyet.usdTry"]), `Kullanılan: ${m.kur ? m.kur.toFixed(4) : "—"} (${m.kurKaynagi})${m.tcmb ? ` · TCMB: ${m.tcmb}` : ""} · 0 = otomatik`),
+    kutu("1 kontör =", sayiGirdisi("fiyat.kontorTL", m.kontorTL), "TL"),
+    kutu("gpt-4.1-mini girdi", sayiGirdisi("maliyet.metinGiris", m.birim.giris), "$ / 1M token"),
+    kutu("gpt-4.1-mini çıktı", sayiGirdisi("maliyet.metinCikis", m.birim.cikis), "$ / 1M token"),
+    kutu("Google TTS standart", sayiGirdisi("maliyet.ses", m.birim.ses), "$ / 1M karakter"),
+    kutu("OpenAI görsel", sayiGirdisi("maliyet.gorsel", m.birim.gorsel, { adim: 0.001 }), "$ / görsel"),
+  );
+  $("costTable").querySelector("tbody").replaceChildren(...m.bolumler.map((b) => {
+    const kontor = b.kontor == null ? el("span", { textContent: "—" }) : sayiGirdisi(`fiyat.${b.id}`, b.kontor, { adim: 1 });
+    const kar = el("td", { className: `num ${b.kar == null ? "" : b.kar >= 0 ? "kar-arti" : "kar-eksi"}`, textContent: b.kar == null ? "—" : tl(b.kar) });
+    const olcum = b.olculen ? `${sayi(b.islem)} işlem` : "tahmin";
+    return el("tr", {},
+      el("td", { textContent: b.ad }),
+      el("td", { className: b.olculen ? "" : "tahmin", textContent: olcum }),
+      el("td", { className: "num", textContent: `${sayi(b.ortalama.giris)} / ${sayi(b.ortalama.cikis)}${b.ortalama.gorsel ? ` · ${b.ortalama.gorsel} görsel` : ""}` }),
+      el("td", { className: "num", textContent: tl(b.tl.metin, 4) }),
+      el("td", { className: "num", textContent: tl(b.tl.ses, 4) }),
+      el("td", { className: "num", textContent: tl(b.tl.gorsel, 4) }),
+      el("td", { className: "num", textContent: tl(b.maliyet, 4) }),
+      el("td", { className: "num" }, kontor),
+      el("td", { className: "num", textContent: b.satis == null ? "—" : tl(b.satis) }),
+      kar,
+    );
+  }));
+}
+
 // --- API anahtarları ---
 
 async function anahtarlariYukle() {
@@ -354,5 +411,5 @@ window.addEventListener("beforeunload", (e) => { if (Object.keys(taslak).length)
     return;
   }
   const hedef = location.hash.slice(1);
-  if (["ozet", "ayarlar", "kullanicilar", "anahtarlar", "gecmis"].includes(hedef)) sekme(hedef);
+  if (["ozet", "ayarlar", "kullanicilar", "fiyatlar", "anahtarlar", "gecmis"].includes(hedef)) sekme(hedef);
 })();

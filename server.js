@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { handleAuthRequest, dataDir, currentUser, kullaniciListesi } = require("./auth");
 const Ayarlar = require("./ayarlar");
+const Olcum = require("./olcum");
 const { createHandler: createYonetimHandler } = require("./yonetim-api");
 const { createHandler: createAstrolojiHandler } = require("./astroloji-api");
 const { createHandler: createUzmanHandler } = require("./uzman-api");
@@ -191,7 +192,16 @@ const handleDizimRequest = createDizimHandler({ dataDir, currentUser, sendFile }
 const handleYuzMuzigiRequest = createYuzMuzigiHandler({ dataDir, currentUser });
 const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi });
 
-const server = http.createServer((request, response) => {
+// Her istek ait olduğu bölümün etiketiyle çalışır; yapay zekâ/ses kullanımı o bölüme yazılır (olcum.js).
+function istekBolumu(adres) {
+  const yol = String(adres || "").split("?")[0];
+  if (yol.startsWith("/api/uzman/")) return "uzman";
+  return Ayarlar.BOLUMLER.find((b) => yol.startsWith(b.api))?.id || null;
+}
+
+const server = http.createServer((request, response) => Olcum.calistir(istekBolumu(request.url), () => anaIsleyici(request, response)));
+
+function anaIsleyici(request, response) {
   let url;
   let requestPath;
   try {
@@ -288,7 +298,7 @@ const server = http.createServer((request, response) => {
     const filePath = !error && stats.isFile() ? requestedFile : path.join(root, "index.html");
     sendFile(request, response, filePath);
   });
-});
+}
 
 server.listen(port, "0.0.0.0", () => {
   console.log(`Ezoterist server listening on port ${port}`);

@@ -7,6 +7,75 @@ const Ayarlar = require("./ayarlar");
 const { yardimci } = require("./astroloji-api");
 const { kontorDefteri } = require("./kontor");
 const Anahtarlar = require("./anahtarlar");
+const Olcum = require("./olcum");
+
+// --- Maliyet hesabı (Murat 2026-10-04): hizmet kendi Gemma/TTS/resim motorumuzla verilir; burada dış API'lerden
+// (OpenAI gpt-4.1-mini, Google standart TTS, OpenAI görsel) alınsaydı bir işlemin kaça mal olacağı hesaplanır.
+
+// Dolar kuru: TCMB günlük kurundan (efektif değil döviz satış), 6 saatte bir tazelenir.
+let kurOnbellek = null;
+async function tcmbKuru() {
+  if (kurOnbellek && Date.now() - kurOnbellek.zaman < 6 * 3600 * 1000) return kurOnbellek;
+  try {
+    const r = await fetch("https://www.tcmb.gov.tr/kurlar/today.xml", { signal: AbortSignal.timeout(8000) });
+    const xml = await r.text();
+    const usd = /<Currency[^>]*CurrencyCode="USD"[^>]*>([\s\S]*?)<\/Currency>/.exec(xml)?.[1] || "";
+    const satis = Number(/<ForexSelling>([\d.]+)<\/ForexSelling>/.exec(usd)?.[1]);
+    const tarih = /Tarih="([^"]+)"/.exec(xml)?.[1] || "";
+    if (satis > 0) kurOnbellek = { deger: satis, tarih, zaman: Date.now() };
+  } catch (error) {
+    console.error("TCMB kuru alınamadı:", error.message);
+  }
+  return kurOnbellek;
+}
+
+// Henüz ölçüm yoksa kullanılan kaba varsayımlar (bir işlem için).
+const FOTOLU = ["kahve-fali", "el-fali", "yuz-okuma", "fotograf-analizi"];
+const varsayim = (id) => ({ giris: FOTOLU.includes(id) ? 2400 : 1800, cikis: 900, karakter: 2600, gorsel: id === "ruya" ? 1 : 0 });
+
+async function maliyetTablosu() {
+  const otomatik = await tcmbKuru();
+  const elle = Ayarlar.get("maliyet.usdTry");
+  const kur = elle > 0 ? elle : otomatik?.deger || 0;
+  const birim = {
+    giris: Ayarlar.get("maliyet.metinGiris"),
+    cikis: Ayarlar.get("maliyet.metinCikis"),
+    ses: Ayarlar.get("maliyet.ses"),
+    gorsel: Ayarlar.get("maliyet.gorsel"),
+  };
+  const kontorTL = Ayarlar.get("fiyat.kontorTL");
+  const olcum = Olcum.ozet();
+  const yuvarla = (n, b = 4) => Math.round(n * 10 ** b) / 10 ** b;
+  const satir = (id, ad, fiyatli) => {
+    const o = olcum.bolumler[id];
+    const v = varsayim(id);
+    const islem = o?.islem || 0;
+    const giris = islem ? o.llm.giris / islem : v.giris;
+    const cikis = islem ? o.llm.cikis / islem : v.cikis;
+    const karakter = o?.tts?.n ? o.tts.karakter / o.tts.n : v.karakter;
+    const gorsel = islem ? (o.gorsel?.n || 0) / islem : v.gorsel;
+    const usd = {
+      metin: (giris * birim.giris + cikis * birim.cikis) / 1e6,
+      ses: (karakter * birim.ses) / 1e6,
+      gorsel: gorsel * birim.gorsel,
+    };
+    const tl = Object.fromEntries(Object.entries(usd).map(([k, x]) => [k, yuvarla(x * kur)]));
+    const maliyet = yuvarla(tl.metin + tl.ses + tl.gorsel);
+    const kontor = fiyatli ? Ayarlar.get(`fiyat.${id}`) : null;
+    const satis = fiyatli ? yuvarla(kontor * kontorTL, 2) : null;
+    return {
+      id, ad, kontor, satis, maliyet, tl,
+      olculen: Boolean(islem), islem, llmCagri: o?.llm?.n || 0, sesUretim: o?.tts?.n || 0,
+      ortalama: { giris: Math.round(giris), cikis: Math.round(cikis), karakter: Math.round(karakter), gorsel: yuvarla(gorsel, 2) },
+      kar: fiyatli ? yuvarla(satis - maliyet, 2) : null,
+    };
+  };
+  return {
+    kur, kurKaynagi: elle > 0 ? "elle" : otomatik ? `TCMB ${otomatik.tarih}` : "alınamadı",
+    tcmb: otomatik?.deger || null, birim, kontorTL, olcumBaslangic: olcum.baslangic,
+    bolumler: [...Ayarlar.BOLUMLER.map((b) => satir(b.id, b.ad, true)), satir("uzman", "Uzman yorumu taslağı", false)],
+  };
+}
 
 const { sendJson, readJson, readCache, writeCache, sesOrnek, sesSaglik, bugun, llmEnabled } = yardimci;
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
@@ -137,6 +206,7 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
         const hareket = await kontor.hareketEkle(hedef.id, { miktar, tur: miktar > 0 ? "hediye" : "harcama", aciklama, ref: `yonetim:${user.email}` });
         sendJson(response, 200, { hareket });
       },
+      "GET /api/yonetim/maliyet": async () => sendJson(response, 200, await maliyetTablosu()),
       // Dış servis API anahtarları: panele yalnız özet (son 4 karakter) gider; geçmişe değer yazılmaz.
       "GET /api/yonetim/anahtarlar": async () => sendJson(response, 200, { anahtarlar: Anahtarlar.ozet() }),
       "POST /api/yonetim/anahtar": async () => {

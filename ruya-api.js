@@ -7,6 +7,7 @@ const path = require("node:path");
 const RuyaVeri = require("./ruya-veri");
 const { yardimci } = require("./astroloji-api");
 const Ayarlar = require("./ayarlar");
+const Olcum = require("./olcum");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
@@ -141,6 +142,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       if (!result.ok || !data.imageBase64) throw new Error(`resim ${result.status}: ${String(data.error || "").slice(0, 160)}`);
       await fs.promises.mkdir(dizin(userId), { recursive: true });
       await fs.promises.writeFile(path.join(dizin(userId), `${kayit.id}.jpg`), Buffer.from(data.imageBase64, "base64"));
+      Olcum.gorsel("ruya");
       await kayitGuncelle(userId, (g) => { const k = g.find((x) => x.id === kayit.id); if (k) k.resim = "hazir"; });
     } catch (error) {
       console.error("Rüya resmi üretilemedi:", error.message);
