@@ -45,7 +45,7 @@ COPY uzman ./uzman
 COPY astroloji ./astroloji
 COPY menu ./menu
 COPY audio/anamenu.m4a ./audio/
-COPY logo/ezo_D.png logo/ezo_E.png ./logo/
+COPY logo/ezo_D.png logo/ezo_E.png logo/razece.webp ./logo/
 
 ENV NODE_ENV=production
 EXPOSE 3000
