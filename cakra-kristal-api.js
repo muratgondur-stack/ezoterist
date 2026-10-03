@@ -70,12 +70,27 @@ const cakraOkunus = (k) => {
 
 // --- Kristal ---
 
+// Öneri her zaman tam 3 kristaldir (Murat 2026-10-03). Eksik kalırsa niyete uyanlardan, o da yetmezse
+// listenin geri kalanından tamamlanır.
+const KRISTAL_SAYISI = 3;
+function tamamla(secimler, niyet) {
+  const sonuc = [...secimler];
+  const adaylar = [
+    ...Kristal.kristaller.filter((k) => niyet && k.niyet.includes(niyet)),
+    ...Kristal.kristaller,
+  ];
+  for (const k of adaylar) {
+    if (sonuc.length >= KRISTAL_SAYISI) break;
+    if (!sonuc.some((s) => s.id === k.id)) sonuc.push({ id: k.id, neden: k.anlam, kullanim: k.kullanim });
+  }
+  return sonuc.slice(0, KRISTAL_SAYISI);
+}
+
 function sabitOneri(niyet) {
-  const uygun = Kristal.kristaller.filter((k) => !niyet || k.niyet.includes(niyet)).slice(0, 3);
   return {
     baslik: niyet ? `${Kristal.niyetler[niyet]} için kristallerin` : "Kristallerin",
     ozet: "Seçtiğin niyete geleneksel olarak eşlik eden kristaller bunlar.",
-    secimler: uygun.map((k) => ({ id: k.id, neden: k.anlam, kullanim: k.kullanim })),
+    secimler: tamamla([], niyet),
     rituel: [Kristal.temizleme[0], "Kristalini avucuna al, niyetini içinden üç kez söyle."],
     olumlama: "Niyetimi berrak bir kalple taşıyorum.",
   };
@@ -85,13 +100,13 @@ function oneriTemizle(y, niyet) {
   const gecerli = (Array.isArray(y.secimler) ? y.secimler : [])
     .filter((s) => Kristal.kristalBul(s?.id))
     .filter((s, i, a) => a.findIndex((x) => x.id === s.id) === i)
-    .slice(0, 3)
-    .map((s) => ({ id: s.id, neden: kisalt(s.neden, 500), kullanim: kisalt(s.kullanim, 400) || Kristal.kristalBul(s.id).kullanim }));
+    .slice(0, KRISTAL_SAYISI)
+    .map((s) => ({ id: s.id, neden: kisalt(s.neden, 500) || Kristal.kristalBul(s.id).anlam, kullanim: kisalt(s.kullanim, 400) || Kristal.kristalBul(s.id).kullanim }));
   if (!gecerli.length) return sabitOneri(niyet);
   return {
     baslik: kisalt(y.baslik, 80) || "Kristallerin",
     ozet: kisalt(y.ozet, 800),
-    secimler: gecerli,
+    secimler: tamamla(gecerli, niyet),
     rituel: dizi(y.rituel, 4, 240),
     olumlama: kisalt(y.olumlama, 200),
   };
@@ -156,6 +171,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       const satir = Cakra.cakralar.map((c) => `${c.ad} (${c.id}): %${puanlar[c.id]} — ${Cakra.durumu(puanlar[c.id])}; tema: ${c.tema}`).join("\n");
       const kullanici =
         `Çakra testi sonuçları (0-100):\n${satir}\n${not ? `<metin>Kişinin notu: ${not}</metin>\n` : ""}` +
+        `TAM OLARAK 3 farklı kristal seç; "secimler" dizisinde 3 öğe olmalı, ne eksik ne fazla.\n` +
         `Şu JSON kalıbıyla cevap ver:\n{\n  "baslik": "sonucu özetleyen 3-6 kelimelik başlık",\n  "ozet": "genel enerji tablosu, 3-4 cümle",\n` +
         `  "odak": "en çok desteğe ihtiyaç duyan çakranın kimliği (kok, sakral, solar, kalp, bogaz, ucuncu-goz, tac)",\n` +
         `  "cakralar": {"kok": "1-2 cümle", "sakral": "...", "solar": "...", "kalp": "...", "bogaz": "...", "ucuncu-goz": "...", "tac": "..."},\n` +

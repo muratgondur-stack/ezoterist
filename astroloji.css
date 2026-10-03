@@ -720,3 +720,20 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
 .expert-slot:disabled { opacity: 0.8; }
 
 .chart-more { margin-top: 14px; }
+
+/* Sayfa altı satırlar (ust-cubuk.js ekler; ana sayfadakiyle aynı) */
+.alt-satir { display: grid; gap: 8px; justify-items: center; margin: 28px auto 12px; padding: 10px 16px; color: rgba(255, 255, 255, 0.62); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-align: center; text-transform: uppercase; }
+.alt-satir p { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; margin: 0; }
+.alt-satir a, .alt-satir button { padding: 0; border: 0; color: rgba(255, 255, 255, 0.82); background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.alt-satir a:hover, .alt-satir button:hover { color: #ffb066; }
+.alt-ai { padding: 4px 12px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 10px; background: rgba(0, 0, 0, 0.35); font-size: 0.62rem; }
+.alt-ai span + span::before { content: ""; display: inline-block; width: 1px; height: 10px; margin-right: 14px; vertical-align: -1px; background: rgba(255, 255, 255, 0.25); }
+.alt-iletisim { width: min(420px, calc(100vw - 32px)); padding: 26px 24px 20px; border: 1px solid rgba(243, 194, 107, 0.45); border-radius: 20px; color: #fff; background: rgba(10, 10, 22, 0.97); text-align: center; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6); }
+.alt-iletisim::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+.alt-iletisim h2 { margin: 0 0 12px; font-size: 1.3rem; }
+.alt-iletisim p { margin: 0 0 10px; color: rgba(255, 255, 255, 0.85); font-size: 0.88rem; line-height: 1.5; }
+.alt-iletisim .alt-iletisim-marka { color: var(--gold); font-weight: 800; letter-spacing: 0.12em; }
+.alt-iletisim a { color: var(--gold); }
+.alt-iletisim-kapat { position: absolute; top: 10px; right: 12px; padding: 4px 8px; border: 0; color: #fff; background: none; font-size: 1rem; cursor: pointer; }
+.alt-iletisim-razece { display: block; margin-top: 14px; }
+.alt-iletisim-razece img { display: block; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }

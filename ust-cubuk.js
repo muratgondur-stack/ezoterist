@@ -77,4 +77,27 @@
       document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { ac(false); dugme.focus(); } });
       kutu.replaceChildren(dugme, menu);
     });
+
+  // Alt satırlar (ana sayfadakiyle aynı): telif, Gizlilik Politikası, Kullanım Koşulları, İletişim, yapay zekâlar.
+  const alt = document.createElement("footer");
+  alt.className = "alt-satir";
+  alt.innerHTML = `
+    <p class="alt-baglantilar"><span>Tüm hakları saklıdır © 2026</span><a href="/gizlilik">Gizlilik Politikası</a><a href="/kullanim-kosullari">Kullanım Koşulları</a><button type="button" aria-haspopup="dialog">İletişim</button></p>
+    <p class="alt-ai" aria-label="Kullandığımız yapay zekâlar"><span>GEMMA4</span><span>OpenAI</span><span>Claude</span><span>Grok</span><span>RAZECE.AI</span></p>`;
+  const pencere = document.createElement("dialog");
+  pencere.className = "alt-iletisim";
+  pencere.setAttribute("aria-label", "İletişim");
+  pencere.innerHTML = `
+    <button type="button" class="alt-iletisim-kapat" aria-label="Kapat">✕</button>
+    <h2>İletişim</h2>
+    <p class="alt-iletisim-marka">EZOTER.IST</p>
+    <p>VÜCUT DESTEK SİSTEM MEDİKAL TİCARET LİMİTED ŞİRKETİ</p>
+    <p>Merkez Mah. Abide-i Hürriyet Cad. No: 211 İç Kapı No: 64 Şişli / İstanbul</p>
+    <p>Şişli V.D. 9261011879</p>
+    <p><a href="https://wa.me/905323300293" target="_blank" rel="noopener">WhatsApp 532 330 02 93</a><br /><a href="mailto:bilgi@ezoter.ist">bilgi@ezoter.ist</a></p>
+    <a class="alt-iletisim-razece" href="https://razece.ai" target="_blank" rel="noopener" aria-label="RAZECE.AI"><img src="/logo/razece.webp?v=2" alt="RAZECE.AI — Artificial Intelligence for People" width="1000" height="153" loading="lazy" /></a>`;
+  alt.querySelector("button").addEventListener("click", () => pencere.showModal());
+  pencere.querySelector(".alt-iletisim-kapat").addEventListener("click", () => pencere.close());
+  pencere.addEventListener("click", (e) => { if (e.target === pencere) pencere.close(); });
+  document.body.append(alt, pencere);
 })();
