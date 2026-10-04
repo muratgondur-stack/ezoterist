@@ -33,6 +33,9 @@ html.bilgi-acik { overflow: hidden; }
 .bilgi-cikis { color: #4b4f72; background: transparent; text-decoration: underline; }
 .bilgi-kabul { color: #1a1406; background: linear-gradient(180deg, #f5d38a, #d6a24b); box-shadow: 0 6px 18px rgba(214, 162, 75, 0.35); }
 .bilgi-kabul:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.bilgi-ipucu { margin: 0; color: #8a5f1c; font-size: 0.84rem; font-weight: 800; text-align: center; }
+.bilgi-ipucu:empty { display: none; }
+.bilgi-onay label:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
 .bilgi-hata { margin: 0; color: #b0412b; font-size: 0.85rem; font-weight: 700; }
 
 /* /bilgilendirme sayfası */

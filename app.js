@@ -106,7 +106,7 @@ const bilgilendirmeKontrol = (user) => {
   const ac = () => window.Bilgilendirme?.onayIste();
   if (window.Bilgilendirme) return ac();
   const s = document.createElement("script");
-  s.src = "/bilgilendirme-metin.js?v=1";
+  s.src = "/bilgilendirme-metin.js?v=2";
   s.onload = ac;
   document.head.append(s);
 };

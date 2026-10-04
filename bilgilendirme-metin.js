@@ -59,7 +59,7 @@
     stilEklendi = true;
     const l = document.createElement("link");
     l.rel = "stylesheet";
-    l.href = "/bilgilendirme.css?v=1";
+    l.href = "/bilgilendirme.css?v=2";
     // Ana sayfa Cormorant'ı yüklemiyor; pencere her sayfada aynı görünsün.
     const f = document.createElement("link");
     f.rel = "stylesheet";
@@ -78,7 +78,8 @@
     const alt = document.createElement("form");
     alt.className = "bilgi-onay";
     alt.innerHTML = `
-      <label><input type="checkbox" required /> <span>Bu bilgilendirmeyi okudum ve anladım; içeriklerin eğlence ve kişisel farkındalık amaçlı olduğunu, danışmanlık yerine geçmediğini ve kararlarımın sorumluluğunun bana ait olduğunu kabul ediyorum. Ayrıca <a href="/kullanim-kosullari" target="_blank">Kullanım Koşulları</a>'nı ve <a href="/gizlilik" target="_blank">Gizlilik Politikası</a>'nı okudum.</span></label>
+      <p class="bilgi-ipucu" aria-live="polite"></p>
+      <label><input type="checkbox" required disabled /> <span>Bu bilgilendirmeyi okudum ve anladım; içeriklerin eğlence ve kişisel farkındalık amaçlı olduğunu, danışmanlık yerine geçmediğini ve kararlarımın sorumluluğunun bana ait olduğunu kabul ediyorum. Ayrıca <a href="/kullanim-kosullari" target="_blank">Kullanım Koşulları</a>'nı ve <a href="/gizlilik" target="_blank">Gizlilik Politikası</a>'nı okudum.</span></label>
       <div class="bilgi-dugmeler">
         <button type="button" class="bilgi-cikis">Çıkış yap</button>
         <button type="submit" class="bilgi-kabul" disabled>Kabul ediyorum, devam et</button>
@@ -87,6 +88,22 @@
     const kutucuk = alt.querySelector("input");
     const kabul = alt.querySelector(".bilgi-kabul");
     kutucuk.addEventListener("change", () => { kabul.disabled = !kutucuk.checked; });
+    // Onay ancak metnin sonuna kadar kaydırılıp en az 10 sn geçince açılır (Murat 2026-10-04).
+    const ipucu = alt.querySelector(".bilgi-ipucu");
+    const acilis = Date.now();
+    let sonaGelindi = false;
+    const durumYaz = () => {
+      const kalan = Math.max(0, 10 - Math.floor((Date.now() - acilis) / 1000));
+      const hazir = sonaGelindi && kalan === 0;
+      kutucuk.disabled = !hazir;
+      alt.classList.toggle("hazir", hazir);
+      ipucu.textContent = hazir ? "" : !sonaGelindi ? `↓ Onaylayabilmek için metni sonuna kadar oku${kalan ? ` · ${kalan} sn` : ""}` : `Onay ${kalan} sn sonra açılacak…`;
+      if (hazir) clearInterval(sayac);
+    };
+    const sayac = setInterval(durumYaz, 250);
+    new IntersectionObserver((girdiler, gozcu) => {
+      if (girdiler.some((g) => g.isIntersecting)) { sonaGelindi = true; gozcu.disconnect(); durumYaz(); }
+    }, { root: null, threshold: 1 }).observe(govde.querySelector(".bilgi-alt"));
     alt.querySelector(".bilgi-cikis").addEventListener("click", () => {
       fetch("/api/logout", { method: "POST", credentials: "same-origin" }).finally(() => window.location.assign("/"));
     });
