@@ -126,6 +126,7 @@
       const li = document.createElement("li");
       li.innerHTML = '<b></b><span class="gorunum"></span><p></p>';
       li.querySelector("b").textContent = b.bolge;
+      if (b.netlik === "belirsiz") li.querySelector("b").append(Object.assign(document.createElement("span"), { className: "belirsiz-etiket", textContent: "belli belirsiz" }));
       li.querySelector(".gorunum").textContent = b.gozlem || "";
       li.querySelector(".gorunum").hidden = !b.gozlem;
       li.querySelector("p").textContent = b.anlam;

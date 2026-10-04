@@ -6,6 +6,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { yardimci } = require("./astroloji-api");
 const Ayarlar = require("./ayarlar");
+const Olcum = require("./olcum");
+
+// Resim üretimi quiz.ist üzerinden (rüya ile aynı uç; OpenAI anahtarı ezoter.ist'e taşınmaz).
+const RESIM = { url: (process.env.RESIM_URL || "").trim(), token: (process.env.RESIM_TOKEN || "").trim() };
+const resimVar = Boolean(RESIM.url && RESIM.token);
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
@@ -41,13 +46,16 @@ function fotoCoz(veri) {
  *   kontrolAlani: "fincanMi" gibi; false gelirse redMesaji ile 422,
  *   girdiAl(body, fotoSayisi) → kayda yazılacak girdi, temizle(ham) → yorum nesnesi, okunus(yorum) → sesli metin,
  *   olcum(fotolar) → isteğe bağlı: Gemma'dan önce fotoğrafı ölçen servis (el falı çizgileri); sonucu girdi.olcum'a yazılır,
- *   mesajlar: { musaitDegil, sinir, okunamadi }
+ *   mesajlar: { musaitDegil, sinir, okunamadi },
+ *   sicaklik: modelin yaratıcılığı (varsayılan 0.5; düşük = gördüğüne sadık, Murat 2026-10-04),
+ *   resimTarifi(fal) → isteğe bağlı: falı anlatan resmin İngilizce tarifi; varsa arka planda resim üretilir (kahve falı)
  * }
  */
 function fotoFal(ayar) {
   const kullaniciDizini = (dataDir, userId) => path.join(dataDir, ayar.dizinAdi, String(userId).replace(/[^a-zA-Z0-9-]/g, ""));
   const gunlukOku = async (dataDir, userId) => (await readCache(path.join(kullaniciDizini(dataDir, userId), "gunluk.json"))) || [];
   const fotoYolu = (dataDir, userId, kayitId, n) => path.join(kullaniciDizini(dataDir, userId), `${kayitId}-${n}.jpg`);
+  const resimYolu = (dataDir, userId, kayitId) => path.join(kullaniciDizini(dataDir, userId), `${kayitId}-resim.jpg`);
 
   // Uzman yorumu için: kullanıcının seçtiği kayıt, okunuş metniyle (uzman-api.js kullanır).
   async function kayitOku(dataDir, userId, kayitId) {
@@ -112,7 +120,7 @@ function fotoFal(ayar) {
       ];
       let ham;
       try {
-        ham = jsonAyikla(await askLlm(ayar.sistem, icerik, { maxTokens: 1600, temperature: 0.8 }));
+        ham = jsonAyikla(await askLlm(ayar.sistem, icerik, { maxTokens: 1600, temperature: ayar.sicaklik ?? 0.5 }));
       } catch (error) {
         console.error(`${ayar.ad} bakılamadı:`, error.message);
         throw hata(ayar.mesajlar.okunamadi, 502);
@@ -120,11 +128,34 @@ function fotoFal(ayar) {
       if (ham[ayar.kontrolAlani] === false) throw hata(ayar.redMesaji, 422);
 
       const kayit = { id: crypto.randomBytes(8).toString("hex"), tarih: Date.now(), girdi, fal: ayar.temizle(ham) };
+      const tarif = resimVar && ayar.resimTarifi ? ayar.resimTarifi(kayit.fal) : "";
+      if (tarif) kayit.resim = "bekliyor";
       await fs.promises.mkdir(dizin(user.id), { recursive: true });
       await Promise.all(fotolar.map((b, n) => fs.promises.writeFile(fotoYolu(dataDir, user.id, kayit.id, n), b)));
       await kayitGuncelle(user.id, (g) => { g.unshift(kayit); });
       await sayacArttir(user.id);
+      if (tarif) void resimUret(user.id, kayit.id, tarif);
       return { kayit, kalan: Math.max(0, sinir() - (await bugunkuSayi(user.id))) };
+    }
+
+    // Falı anlatan resim arka planda üretilir; sayfa kaydı yoklayıp hazır olunca gösterir.
+    async function resimUret(userId, kayitId, tarif) {
+      try {
+        const r = await fetch(RESIM.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Ezoterist-Token": RESIM.token },
+          body: JSON.stringify({ prompt: tarif }),
+          signal: AbortSignal.timeout(200_000),
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok || !d.imageBase64) throw new Error(`resim ${r.status}: ${String(d.error || "").slice(0, 160)}`);
+        await fs.promises.writeFile(resimYolu(dataDir, userId, kayitId), Buffer.from(d.imageBase64, "base64"));
+        if (bolumId) Olcum.gorsel(bolumId);
+        await kayitGuncelle(userId, (g) => { const k = g.find((x) => x.id === kayitId); if (k) k.resim = "hazir"; });
+      } catch (error) {
+        console.error(`${ayar.ad} resmi üretilemedi:`, error.message);
+        await kayitGuncelle(userId, (g) => { const k = g.find((x) => x.id === kayitId); if (k) k.resim = "yok"; }).catch(() => {});
+      }
     }
 
     return function handleFotoFalRequest(request, response, url) {
@@ -155,7 +186,10 @@ function fotoFal(ayar) {
             const i = g.findIndex((k) => k.id === id);
             return i === -1 ? null : g.splice(i, 1)[0];
           });
-          if (silinen) await Promise.all([...Array(silinen.girdi.fotoSayisi).keys()].map((n) => fs.promises.rm(fotoYolu(dataDir, user.id, id, n), { force: true })));
+          if (silinen) {
+            await Promise.all([...Array(silinen.girdi.fotoSayisi).keys()].map((n) => fs.promises.rm(fotoYolu(dataDir, user.id, id, n), { force: true })));
+            await fs.promises.rm(resimYolu(dataDir, user.id, id), { force: true });
+          }
           sendJson(response, 200, { ok: true });
         },
         [`GET ${yol("foto")}`]: async () => {
@@ -163,6 +197,13 @@ function fotoFal(ayar) {
           const n = Number(url.searchParams.get("n") || 0);
           if (!Number.isInteger(n) || n < 0 || n >= kayit.girdi.fotoSayisi) throw hata("Fotoğraf bulunamadı.", 404);
           sendFile(request, response, fotoYolu(dataDir, user.id, kayit.id, n));
+        },
+        // Tek kaydın güncel hâli (resim durumunu yoklamak için).
+        [`GET ${yol("kayit")}`]: async () => sendJson(response, 200, { kayit: await kayitBul() }),
+        [`GET ${yol("resim")}`]: async () => {
+          const kayit = await kayitBul();
+          if (kayit.resim !== "hazir") throw hata("Resim henüz hazır değil.", 404);
+          sendFile(request, response, resimYolu(dataDir, user.id, kayit.id));
         },
         [`GET ${yol("ses")}`]: async () => {
           if (!sesVar()) throw hata("Seslendirme henüz hazır değil.", 503);

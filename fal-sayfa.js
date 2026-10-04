@@ -118,6 +118,36 @@ form.addEventListener("submit", async (event) => {
 
 // --- Sonuç ---
 
+const belirsizEtiketi = () => Object.assign(document.createElement("span"), { className: "belirsiz-etiket", textContent: "belli belirsiz", title: "Bu şekil fincanda net değil, ihtiyatla yorumlandı." });
+
+// Fincanda görülen şekilleri anlatan kahve temalı resim: arka planda üretilir, hazır olana kadar yoklanır.
+let resimYoklama = null;
+function falResmi(kayit) {
+  clearTimeout(resimYoklama);
+  const kart = $("cupArtCard");
+  kart.hidden = !kayit.resim || kayit.resim === "yok";
+  if (kart.hidden) return;
+  const sekiller = kayit.fal.semboller.map((s) => s.sembol.toLocaleLowerCase("tr-TR")).join(", ");
+  if (kayit.resim === "hazir") {
+    const img = Object.assign(document.createElement("img"), { src: `/api/fal/resim?id=${kayit.id}`, alt: `Telveden şekiller: ${sekiller}` });
+    $("cupArt").replaceChildren(img);
+    $("cupArt").classList.remove("bekliyor");
+    $("cupArtNote").textContent = `Fincanında seçilen şekiller (${sekiller}) telveden çizildi. Resim temsilidir.`;
+    return;
+  }
+  $("cupArt").replaceChildren(Object.assign(document.createElement("span"), { textContent: "☕ Telveden şekillerin çiziliyor…" }));
+  $("cupArt").classList.add("bekliyor");
+  $("cupArtNote").textContent = "Bu bir dakika kadar sürebilir; sayfadan ayrılabilirsin, resim falınla birlikte saklanır.";
+  resimYoklama = setTimeout(async () => {
+    const d = await fetch(`/api/fal/kayit?id=${kayit.id}`, { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    if (!d || acikKayit?.id !== kayit.id) return;
+    const i = kayitlar.findIndex((k) => k.id === kayit.id);
+    if (i !== -1) kayitlar[i] = d.kayit;
+    acikKayit = d.kayit;
+    falResmi(d.kayit);
+  }, 6000);
+}
+
 function showKayit(kayit, kaydir = false) {
   stopVoice();
   acikKayit = kayit;
@@ -138,10 +168,12 @@ function showKayit(kayit, kaydir = false) {
     const li = document.createElement("li");
     li.innerHTML = "<b></b><span class=\"yer\"></span><p></p>";
     li.querySelector("b").textContent = s.sembol;
+    if (s.netlik === "belirsiz") li.querySelector("b").append(belirsizEtiketi());
     li.querySelector(".yer").textContent = s.yer || "fincanda";
     li.querySelector("p").textContent = s.anlam;
     return li;
   }));
+  falResmi(kayit);
   $("resultLove").textContent = f.ask || "—";
   $("resultWork").textContent = f.is || "—";
   $("resultFuture").textContent = f.yakinGelecek || "—";

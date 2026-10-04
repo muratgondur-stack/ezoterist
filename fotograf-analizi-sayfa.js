@@ -9,7 +9,7 @@
       const li = document.createElement("li");
       li.innerHTML = "<b></b><p></p>";
       if (oncesi) li.querySelector("b").prepend(oncesi(x));
-      li.querySelector("b").append(ad(x));
+      li.querySelector("b").append(...[].concat(ad(x)));
       li.querySelector("p").textContent = anlam(x);
       return li;
     }));
@@ -28,7 +28,7 @@
     $("resultMood").textContent = f.ruhHali;
     kalemler($("resultColors"), f.renkler, (r) => r.renk, (r) => r.anlam, (r) => nokta(renkKodu(r)));
     $("symbolsCard").hidden = !f.semboller.length;
-    kalemler($("resultSymbols"), f.semboller, (s) => s.sembol, (s) => s.anlam);
+    kalemler($("resultSymbols"), f.semboller, (s) => (s.netlik === "belirsiz" ? [s.sembol, Object.assign(document.createElement("span"), { className: "belirsiz-etiket", textContent: "belli belirsiz" })] : s.sembol), (s) => s.anlam);
     const cakra = cakralar.find(([ad]) => ad.toLocaleLowerCase("tr-TR").includes(f.cakra));
     $("resultChakraTitle").textContent = f.cakra ? `🪷 ${buyuk(f.cakra)} çakrası` : "🪷 Çakra";
     $("resultChakra").textContent = f.cakraYorum || (cakra ? cakra[2] : "—");

@@ -195,6 +195,7 @@ function showKayit(kayit, kaydir = false) {
     const li = document.createElement("li");
     li.innerHTML = '<b></b><span class="gorunum"></span><p></p>';
     li.querySelector("b").textContent = c.cizgi;
+    if (c.netlik === "belirsiz") li.querySelector("b").append(Object.assign(document.createElement("span"), { className: "belirsiz-etiket", textContent: "belli belirsiz", title: "Bu çizgi fotoğrafta net seçilmiyor; ihtiyatla yorumlandı." }));
     li.querySelector(".gorunum").textContent = c.gorunum || "belirgin değil";
     li.querySelector("p").textContent = c.anlam;
     const olculen = olcumBul(olcum, c.cizgi);
