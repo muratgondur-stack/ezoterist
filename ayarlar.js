@@ -53,7 +53,7 @@ const SEMA = {
   "sure.haritaGun": { grup: "Süreler", ad: "Doğum haritası yenileme aralığı", tur: "tam", min: 0, max: 60, vars: 3, birim: "gün" },
   "sure.numerolojiGun": { grup: "Süreler", ad: "Numeroloji profili yenileme aralığı", tur: "tam", min: 0, max: 60, vars: 3, birim: "gün" },
   "sure.enAzBekleme": { grup: "Süreler", ad: "Yapay zekâ cevabı en az bekleme", tur: "tam", min: 0, max: 30, vars: 8, birim: "sn", aciklama: "fal, yorum, harita vb. sonuç en erken bu sürede gelir; 0 = bekletme" },
-  "sure.asistanBekleme": { grup: "Süreler", ad: "Ezoterik Asistan en az bekleme", tur: "tam", min: 0, max: 30, vars: 3, birim: "sn", aciklama: "her soru + cevap için; 0 = bekletme" },
+  "sure.asistanBekleme": { grup: "Süreler", ad: "Ezoterik Asistan en az bekleme", tur: "tam", min: 0, max: 30, vars: 2, birim: "sn", aciklama: "her soru + cevap için; 0 = bekletme" },
   "sure.oturumGun": { grup: "Süreler", ad: "\"Beni hatırla\" oturum süresi", tur: "tam", min: 1, max: 365, vars: 30, birim: "gün" },
   "sinir.sesleAnlatma": { grup: "Günlük sınırlar", ad: "Sesle anlatma (yazıya çevirme)", tur: "tam", min: 0, max: 500, vars: 20, birim: "/gün", aciklama: "0 = sınırsız" },
   "izin.uzmanlar": { grup: "İzinler", ad: "Uzman e-postaları", tur: "epostalar", vars: listeOrtam("UZMAN_EPOSTA") },

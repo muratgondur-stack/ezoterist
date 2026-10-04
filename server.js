@@ -201,7 +201,7 @@ function istekBolumu(adres) {
 
 const server = http.createServer((request, response) => Olcum.calistir(istekBolumu(request.url), () => anaIsleyici(request, response)));
 
-// Yapay zekâ işlemleri en az belli bir sürede cevaplanır (Murat 2026-10-04; varsayılan 8 sn, asistan 3 sn): yorum
+// Yapay zekâ işlemleri en az belli bir sürede cevaplanır (Murat 2026-10-04; varsayılan 8 sn, asistan 2 sn): yorum
 // önbellekten hemen hazır olsa da başarılı cevap bu süre dolmadan gönderilmez. Hata cevapları (eksik bilgi, günlük hak vb.) bekletilmez.
 const YAPAY_ZEKA_ISLEMI = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|tarot\/cek|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|melek\/yorum|iching\/yorum|run\/cek|ay\/rehber|cakra\/test|kristal\/oner|sembol\/sor|ruhsal\/(yansima|ozet)|asistan\/mesaj|dizim\/(analiz|karsilastir))$/;
 // Süreler yönetim panelinden (Süreler → "en az bekleme"); asistanın kendi süresi var.
