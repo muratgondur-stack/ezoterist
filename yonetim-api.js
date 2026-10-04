@@ -141,6 +141,11 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
       sendJson(response, 200, {
         muzik: Ayarlar.get("genel.muzik"),
         kapali: Ayarlar.BOLUMLER.filter((b) => !Ayarlar.bolumAcik(b.id)).map((b) => b.sayfa),
+        // Düğmelerdeki kontör rozetleri için (sayfa yolu → işlem ve uzman değerlendirmesi fiyatı). Yalnız gösterim.
+        fiyatlar: Object.fromEntries(Ayarlar.BOLUMLER.map((b) => [b.sayfa, {
+          islem: Ayarlar.get(`fiyat.${b.id}`) || 0,
+          uzman: Ayarlar.SEMA[`fiyat.${b.id}.uzman`] ? Ayarlar.get(`fiyat.${b.id}.uzman`) || 0 : 0,
+        }])),
       });
       return true;
     }

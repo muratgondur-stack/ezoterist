@@ -165,4 +165,56 @@
     istek.then(bitti, bitti);
     return istek;
   };
+
+  // Kontör rozetleri (Murat 2026-10-04): ücretli işlemi başlatan düğmenin ve "Uzman yorumu iste" düğmesinin sağ üst
+  // köşesinde, yönetim panelinde girilen kontör sayısı. 0 ise rozet yok. Yalnız gösterim; kontör düşülmez.
+  const ISLEM_DUGMESI = {
+    "/astroloji": 'form button.btn-primary[type="submit"]',
+    "/dogum-haritasi": "#readingButton",
+    "/numeroloji": 'form button.btn-primary[type="submit"]',
+    "/ruya": "#dreamSubmit",
+    "/tarot": "#revealButton",
+    "/kahve-fali": "#falSubmit",
+    "/el-fali": "#falSubmit",
+    "/yuz-okuma": "#falSubmit",
+    "/fotograf-analizi": "#falSubmit",
+    "/ask-uyumu": "#loveSubmit",
+    "/melek-sayilari": "#personalSubmit",
+    "/iching": "#askSubmit",
+    "/run-taslari": "#revealButton",
+    "/ay-takvimi": "#guideButton",
+    "/cakralar": "#quizSubmit",
+    "/kristaller": "#suggestSubmit",
+    "/semboller": "#askSubmit",
+    "/ruhsal-gunluk": "#reflectButton, #weekButton",
+    "/asistan": "#sendButton",
+    "/taslarla-dizim": "#analyzeButton",
+    "/yuz-muzigi": "#playButton",
+  };
+  const UZMAN_DUGMESI = '#expertForm button[type="submit"]';
+  fetch("/api/ayarlar/genel", { credentials: "same-origin" })
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null)
+    .then((d) => {
+      const f = d?.fiyatlar?.[location.pathname];
+      if (!f) return;
+      const kurallar = [];
+      const rozet = (secici, sayi) => {
+        if (!secici || !(sayi > 0)) return;
+        const tek = secici.split(",").map((x) => x.trim());
+        kurallar.push(`${tek.join(", ")} { position: relative; overflow: visible; }`);
+        kurallar.push(`${tek.map((x) => `${x}::after`).join(", ")} { content: "${Number(sayi)}"; }`);
+      };
+      rozet(ISLEM_DUGMESI[location.pathname], f.islem);
+      rozet(UZMAN_DUGMESI, f.uzman);
+      if (!kurallar.length) return;
+      const stil = document.createElement("style");
+      stil.textContent = `${kurallar.join("\n")}
+        ${[ISLEM_DUGMESI[location.pathname], UZMAN_DUGMESI].filter(Boolean).join(",").split(",").map((x) => `${x.trim()}::after`).join(", ")} {
+          position: absolute; top: -9px; right: -9px; z-index: 2; min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box;
+          display: grid; place-items: center; border: 2px solid #1a1205; border-radius: 999px; color: #1a1205; background: #f3c26b;
+          font: 800 0.72rem/1 Manrope, system-ui, sans-serif; letter-spacing: 0; text-transform: none; box-shadow: 0 2px 8px rgba(0,0,0,0.5); pointer-events: none;
+        }`;
+      document.head.append(stil);
+    });
 })();
