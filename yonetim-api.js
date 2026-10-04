@@ -218,7 +218,9 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
         const body = await readJson(request);
         const ses = Ayarlar.SESLER.includes(body?.ses) ? body.ses : Ayarlar.get("ses.ses");
         const hiz = Math.min(1.6, Math.max(0.6, Number(body?.hiz) || 1));
-        const mp3 = await sesOrnek("Merhaba, ben Ezoter.ist'in sesiyim. Yıldızlar bugün senin için güzel şeyler fısıldıyor.", ses, hiz);
+        // Uzman karakteri sesi denenirken kendi adıyla konuşur.
+        const metin = String(body?.metin || "").replace(/[<>]/g, "").trim().slice(0, 200) || "Merhaba, ben Ezoter.ist'in sesiyim. Yıldızlar bugün senin için güzel şeyler fısıldıyor.";
+        const mp3 = await sesOrnek(metin, ses, hiz);
         response.writeHead(200, { "Content-Type": "audio/mpeg", "Content-Length": mp3.length, "Cache-Control": "no-store" });
         response.end(mp3);
       },
@@ -279,10 +281,11 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
         sendJson(response, 200, {
           uzmanlar: UzmanKayit.hepsi().map((u) => ({
             ...UzmanKayit.herkeseAcik(u), userId: u.userId || null, email: u.email || null, oran: u.oran ?? null, vitrinde: Boolean(u.vitrinde),
-            sabitUzman: u.sabitUzman || null, sira: u.sira || null, olusturma: u.olusturma, gorunuyor: UzmanKayit.vitrindeMi(u),
+            sabitUzman: u.sabitUzman || null, sira: u.sira || null, ses: u.ses || "", olusturma: u.olusturma, gorunuyor: UzmanKayit.vitrindeMi(u),
             hakedis: ozet.find((o) => o.uzmanId === u.id) || null,
           })),
           bolumListesi: BOLUM_LISTESI(),
+          sesler: Ayarlar.SESLER,
           uyeler: kullaniciListesi().map((u) => ({ id: u.id, email: u.email, name: u.name })),
         });
       },

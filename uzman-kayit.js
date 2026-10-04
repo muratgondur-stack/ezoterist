@@ -9,7 +9,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-const { dataDir } = require("./ayarlar");
+const { dataDir, SESLER } = require("./ayarlar");
 
 const dizin = path.join(dataDir, "uzman");
 const dosya = path.join(dizin, "uzmanlar.json");
@@ -96,6 +96,8 @@ function yoneticiGuncelle(id, g, gecerliBolumler) {
     if (g.unvan !== undefined) u.unvan = temiz(g.unvan, 50);
     if (g.tanitim !== undefined) u.tanitim = temiz(g.tanitim, 400);
     if (g.aktif !== undefined) u.aktif = Boolean(g.aktif);
+    // Yazılı cevabın seslendirileceği ses (karakterin cinsiyetine uygun); boş = bölümün sesi.
+    if (g.ses !== undefined) u.ses = SESLER.includes(g.ses) ? g.ses : "";
     if (Array.isArray(g.bolumler)) u.bolumler = g.bolumler.filter((b) => gecerliBolumler.includes(b));
     if (u.tip === "gercek" && g.oran !== undefined) u.oran = Math.min(100, Math.max(0, Number(g.oran) || 0));
     if (u.tip === "sanal" && g.sabitUzman !== undefined) {

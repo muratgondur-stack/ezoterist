@@ -599,7 +599,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         if (!sesVar()) throw hata("Seslendirme henüz hazır değil.", 503);
         const talep = await readCache(talepDosyasi(String(url.searchParams.get("id") || "").replace(/[^0-9a-f]/g, "")));
         if (!talep?.cevap?.metin || (talep.userId !== user.id && !uzmanMi(user))) throw hata("Yorum bulunamadı.", 404);
-        const file = await sesDosyasi(talep.cevap.metin, dir, `${talep.id}-ses`);
+        const file = await sesDosyasi(talep.cevap.metin, dir, `${talep.id}-ses`, UzmanKayit.bul(talep.uzman)?.ses || "");
         sendFile(request, response, file);
       },
     };

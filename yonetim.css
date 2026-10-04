@@ -175,3 +175,6 @@
 .uz-duzen label { display: grid; gap: 4px; font-size: 0.78rem; font-weight: 700; }
 .uz-kalemler summary { cursor: pointer; color: var(--gold); font-size: 0.84rem; font-weight: 700; }
 @media (max-width: 760px) { .uz-ust { grid-template-columns: 52px 1fr; } .uz-hakedis { grid-column: 1 / -1; justify-content: flex-start; } .uz-duzen { grid-template-columns: 1fr 1fr; } .sn-kart { grid-template-columns: 1fr; } .sn-resim { height: 220px; } }
+.uz-ses-kutu { display: flex; gap: 6px; align-items: center; }
+.uz-ses-kutu select { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--card-border); border-radius: 9px; color: #fff; background: rgba(0, 0, 0, 0.35); font: inherit; font-size: 0.86rem; }
+.uz-ses-kutu select option { color: #000; }

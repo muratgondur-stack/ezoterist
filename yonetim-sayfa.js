@@ -416,6 +416,31 @@ function bolumSecici(secili) {
   return kutu;
 }
 
+// Uzmanın yazılı cevabını okuyacak ses: seçim kutusu + kendi adıyla örnek dinletme.
+let ornekSes = null;
+function sesSecici(u) {
+  const sec = el("select", { className: "uz-ses" }, el("option", { value: "", textContent: "Bölümün sesi" }),
+    ...uzVeri.sesler.map((x) => el("option", { value: x, textContent: x[0].toLocaleUpperCase("tr-TR") + x.slice(1), selected: x === u.ses })));
+  const dinle = el("button", { type: "button", className: "btn btn-ghost btn-sm", textContent: "▶ Dinle" });
+  dinle.addEventListener("click", async () => {
+    dinle.disabled = true;
+    dinle.textContent = "⏳";
+    try {
+      const r = await fetch("/api/yonetim/ses-ornek", {
+        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin",
+        body: JSON.stringify({ ses: sec.value, metin: `Merhaba, ben ${u.ad || "uzmanınız"}. Fincanına, yıldızlarına ve kalbine birlikte bakalım.` }),
+      });
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Ses çalınamadı.");
+      ornekSes?.pause();
+      ornekSes = new Audio(URL.createObjectURL(await r.blob()));
+      await ornekSes.play();
+    } catch (error) { toast(error.message); } finally { dinle.disabled = false; dinle.textContent = "▶ Dinle"; }
+  });
+  const kutu = el("div", { className: "uz-ses-kutu" }, sec, dinle);
+  kutu.deger = () => sec.value;
+  return kutu;
+}
+
 async function fotoYukle(id, dosya) {
   const r = await fetch(`/api/yonetim/uzman-foto?id=${encodeURIComponent(id)}`, { method: "POST", headers: { "Content-Type": dosya.type }, credentials: "same-origin", body: dosya });
   const d = await r.json().catch(() => ({}));
@@ -445,13 +470,14 @@ function renderSanal() {
     const sabit = el("select", {}, el("option", { value: "", textContent: "Havuz: bölümü seçen bütün uzmanlar" }),
       ...gercekler.map((g) => el("option", { value: g.id, textContent: `Yalnız ${g.ad} (${g.email})`, selected: g.id === u.sabitUzman })));
     const sira = el("input", { type: "number", min: 1, max: 99, value: u.sira || 1, className: "uz-sira" });
+    const ses = sesSecici(u);
     const acik = el("input", { type: "checkbox", checked: u.aktif });
     const kaydet = el("button", { type: "button", className: "btn btn-primary btn-sm", textContent: "Kaydet" });
     const sil = el("button", { type: "button", className: "btn btn-ghost btn-sm", textContent: "Sil" });
     kaydet.addEventListener("click", async () => {
       kaydet.disabled = true;
       try {
-        await api("/api/yonetim/uzman-guncelle", { id: u.id, ad: ad.value, unvan: unvan.value, tanitim: tanitim.value, bolumler: bolumler.secilenler(), sabitUzman: sabit.value, sira: Number(sira.value), aktif: acik.checked });
+        await api("/api/yonetim/uzman-guncelle", { id: u.id, ad: ad.value, unvan: unvan.value, tanitim: tanitim.value, bolumler: bolumler.secilenler(), sabitUzman: sabit.value, sira: Number(sira.value), aktif: acik.checked, ses: ses.deger() });
         toast(`${ad.value || "Karakter"} kaydedildi.`);
         uzmanlariYukle();
       } catch (error) { toast(error.message); kaydet.disabled = false; }
@@ -466,6 +492,7 @@ function renderSanal() {
       el("div", { className: "sn-alanlar" },
         ad, unvan, tanitim,
         el("small", { className: "uz-etiket", textContent: "Görüneceği bölümler" }), bolumler,
+        el("small", { className: "uz-etiket", textContent: "Yazılı cevabı okuyacak ses" }), ses,
         el("small", { className: "uz-etiket", textContent: "Talepler kime gitsin" }), sabit,
         el("div", { className: "sn-alt" }, el("label", { className: "uz-acik" }, acik, " Açık"), el("label", { className: "uz-acik" }, "Sıra ", sira), fotoDugmesi(u.id), sil, kaydet)));
   }));
@@ -482,10 +509,11 @@ function renderGercek() {
     const oran = el("input", { type: "number", min: 0, max: 100, value: u.oran, className: "uz-sira" });
     const acik = el("input", { type: "checkbox", checked: u.aktif });
     const bolumler = bolumSecici(u.bolumler);
+    const gses = sesSecici(u);
     const kaydet = el("button", { type: "button", className: "btn btn-primary btn-sm", textContent: "Kaydet" });
     kaydet.addEventListener("click", async () => {
       try {
-        await api("/api/yonetim/uzman-guncelle", { id: u.id, ad: ad.value, unvan: unvan.value, oran: Number(oran.value), aktif: acik.checked, bolumler: bolumler.secilenler() });
+        await api("/api/yonetim/uzman-guncelle", { id: u.id, ad: ad.value, unvan: unvan.value, oran: Number(oran.value), aktif: acik.checked, bolumler: bolumler.secilenler(), ses: gses.deger() });
         toast(`${ad.value} kaydedildi.`);
         uzmanlariYukle();
       } catch (error) { toast(error.message); }
@@ -511,7 +539,8 @@ function renderGercek() {
         el("div", {}, el("b", { textContent: u.ad }), el("small", { textContent: `${u.email} · ${u.vitrinde ? (u.gorunuyor ? "kendi adıyla vitrinde" : "vitrinde görünmek istiyor (foto/bölüm eksik)") : "yalnız arka planda cevaplıyor"}` })),
         el("div", { className: "uz-hakedis" }, el("span", {}, "Toplam ", el("b", { textContent: tl2(h.toplam) })), el("span", {}, "Ödenen ", el("b", { textContent: tl2(h.odenen) })), el("span", { className: "kalan" }, "Kalan ", el("b", { textContent: tl2(h.kalan) })), ode)),
       el("div", { className: "uz-duzen" }, el("label", {}, "Görünen ad", ad), el("label", {}, "Unvan", unvan), el("label", {}, "Oran %", oran), el("label", { className: "uz-acik" }, acik, " Açık"), fotoDugmesi(u.id, "🖼 Foto"), kaydet),
-      el("small", { className: "uz-etiket", textContent: "Yorum yazabileceği bölümler (uzman kendisi de seçer)" }), bolumler, kalemler);
+      el("small", { className: "uz-etiket", textContent: "Yorum yazabileceği bölümler (uzman kendisi de seçer)" }), bolumler,
+      el("small", { className: "uz-etiket", textContent: "Kendi adıyla görünürse yazılı cevabını okuyacak ses" }), gses, kalemler);
   }) : [el("p", { className: "section-note", textContent: "Henüz gerçek uzman yok. Yukarıdan bir üyeyi uzman yap." })]));
 }
 

@@ -261,10 +261,11 @@ const sesMetni = (text) =>
 
 // Ses bir kez üretilip dosyaya yazılır; metin değişmedikçe V100'e tekrar gidilmez. Dosya adındaki kısa
 // özet, metin değişirse (ör. yapay zekâ sonradan açılırsa) yeni sesin üretilmesini sağlar.
-async function sesDosyasi(text, dir, name) {
+async function sesDosyasi(text, dir, name, sesSecimi = "") {
   const clean = sesMetni(text).slice(0, 4000);
-  // Ses ve hız yönetim panelinden: bölüme özel ses (veri klasöründen anlaşılır) yoksa varsayılan ses.
-  const voice = Ayarlar.sesFor(Ayarlar.bolumDizini(dir));
+  // Ses ve hız yönetim panelinden: istenen ses (ör. uzman karakterinin sesi), yoksa bölüme özel ses
+  // (veri klasöründen anlaşılır), o da yoksa varsayılan ses.
+  const voice = (Ayarlar.SESLER.includes(sesSecimi) && sesSecimi) || Ayarlar.sesFor(Ayarlar.bolumDizini(dir));
   const rate = Ayarlar.get("ses.hiz");
   // Hız 1 iken eski dosya adları geçerli kalsın diye hız özete yalnız 1'den farklıysa katılır.
   const hash = crypto.createHash("sha1").update(rate === 1 ? `${voice}|${clean}` : `${voice}|${rate}|${clean}`).digest("hex").slice(0, 10);
