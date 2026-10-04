@@ -194,6 +194,7 @@ $("quizSubmit").addEventListener("click", async () => {
 // --- Sonuç ---
 
 function showKayit(kayit, kaydir = false) {
+  window.yorumcuGoster?.(kayit); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   stopVoice();
   acikKayit = kayit;
   const y = kayit.yorum;

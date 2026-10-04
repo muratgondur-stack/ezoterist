@@ -111,6 +111,7 @@ window.FotoSayfa = function FotoSayfa(ayar) {
 
   // --- Sonuç ---
   function goster(kayit, kaydir = false) {
+    window.yorumcuGoster?.(kayit); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
     stopVoice();
     acikKayit = kayit;
     $("sonuc").hidden = false;

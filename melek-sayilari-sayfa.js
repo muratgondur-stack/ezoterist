@@ -234,6 +234,7 @@ personal.addEventListener("submit", async (e) => {
 const ALAN_BASLIK = { genel: "☼ Hayatına dair", ask: "♡ Aşk ve ilişkiler", kariyer: "✦ İş ve para", ruhsal: "✧ Ruhsal yolun", aile: "⌂ Aile ve ev" };
 
 function showKayit(kayit, kaydir = false) {
+  window.yorumcuGoster?.(kayit); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   stopVoice();
   acikKayit = kayit;
   const y = kayit.yorum;

@@ -280,6 +280,7 @@ function fillForm(girdi) {
 
 // Sunucudaki kayıtlı haritayı (yorum + ses) gösterir.
 function showSaved(kayit) {
+  window.yorumcuGoster?.(kayit); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   fillForm(kayit.girdi);
   drawChart(kayit.girdi);
   $("chartReading").textContent = kayit.metin;

@@ -61,7 +61,27 @@ function readJson(request) {
 }
 
 const readCache = (file) => fs.promises.readFile(file, "utf8").then(JSON.parse).catch(() => null);
+// Yorumun yazarı (Murat 2026-10-04): kişisel yapay zekâ yorumu bir sanal uzmanın üslubuyla yazıldıysa, bu istekte
+// oluşan kayda { yorumcu: { id, ad } } işlenir. Bütün bölümler kayıtlarını buradan yazdığı için tek yerde yapılır:
+// günlük dizisinin başındaki ya da "kayitlar" dizisindeki yeni kayıtlar ve tek kayıtlık dosyalar (harita, profil).
+function yazariIsle(value) {
+  const y = Olcum.simdikiYorumcu();
+  if (!y?.uslup || !value || typeof value !== "object") return;
+  const bas = Olcum.istekBaslangici() - 2000;
+  const isaretle = (k) => {
+    if (!k || typeof k !== "object" || Array.isArray(k) || k.yorumcu) return;
+    const zaman = Number(k.tarih) || Number(k.olusturma) || 0;
+    if (zaman >= bas) k.yorumcu = { id: y.id, ad: y.ad };
+  };
+  if (Array.isArray(value)) value.slice(0, 3).forEach(isaretle);
+  else {
+    if (Array.isArray(value.kayitlar)) value.kayitlar.slice(0, 3).forEach(isaretle);
+    isaretle(value);
+  }
+}
+
 async function writeCache(file, value) {
+  yazariIsle(value);
   await fs.promises.mkdir(path.dirname(file), { recursive: true });
   const tmp = `${file}.${process.pid}.tmp`;
   await fs.promises.writeFile(tmp, JSON.stringify(value));

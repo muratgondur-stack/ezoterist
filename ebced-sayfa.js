@@ -26,6 +26,7 @@ klavye($("klavye"), $("arapca"));
 // --- Sonuç ---
 
 function goster(k, kaydir = false) {
+  window.yorumcuGoster?.(k); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   acikKayit = k;
   const h = k.hesap;
   $("sonuc").hidden = false;

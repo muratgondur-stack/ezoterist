@@ -183,6 +183,7 @@ function renderPlacements(kayit) {
 const listItems = (items) => items.map((text) => { const li = document.createElement("li"); li.textContent = text; return li; });
 
 function showKayit(kayit, kaydir = false) {
+  window.yorumcuGoster?.(kayit); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   stopVoice();
   acikKayit = kayit;
   const y = kayit.yorum;

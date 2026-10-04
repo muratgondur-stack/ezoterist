@@ -249,6 +249,11 @@ const bilgilendirmeKontrol = (user) => {
     "/ebced": "#ebcedSubmit",
     "/cifir": "#cifirSubmit",
   };
+  // Sayfalar bir yorumu ekranda açınca window.yorumcuGoster(kayit) çağırır; kayıtta yazar (yorumcu) varsa rozet,
+  // büyük figür ve ses o yazara göre olur. Seçim kutusu hazır olmadan gelen çağrı bekletilir.
+  let bekleyenKayit = null;
+  window.yorumcuGoster = (k) => { bekleyenKayit = k; };
+
   // "Yorumunu kim yapsın?" (Murat 2026-10-04): bölümün yorum düğmesinin üstünde sanal uzman seçimi. Seçilen uzman yorumu
   // kendi promptundaki üslupla yazar ve kendi sesiyle okur (sunucu çerezden okur: ezoy_<bölüm>). Seçim tarayıcıda hatırlanır.
   (async () => {
@@ -320,10 +325,14 @@ const bilgilendirmeKontrol = (user) => {
 
     // Yorum sonuçlarında, "sesli dinle" düğmelerinin yanında yorumu yazan/okuyan sanal uzmanın resmi (orta boy);
     // okurken resim ışıldar. Gerçek uzman cevaplarına (uzman kartı) eklenmez.
+    // Ekranda açık yorumun yazarı (yoksa seçili uzman) rozet, figür ve seste kullanılır.
+    let gosterilen = null;
+    const kisi = () => gosterilen || liste.find((x) => x.id === secili);
     // Seçili yorumcu sayfanın kendi koduna da duyurulur; büyük okuyucu figürü (tarot, numeroloji) onun resmini alır.
     function duyur() {
-      const u = liste.find((x) => x.id === secili);
-      window.SeciliYorumcu = u;
+      window.SeciliYorumcu = liste.find((x) => x.id === secili);
+      const u = kisi();
+      window.GosterilenYorumcu = u;
       const fig = document.getElementById("numerolog");
       if (fig) {
         const img = fig.querySelector("img");
@@ -335,12 +344,13 @@ const bilgilendirmeKontrol = (user) => {
     }
     duyur();
     const rozetIcerik = (r) => {
-      const u = liste.find((x) => x.id === secili);
+      const u = kisi();
       if (r.dataset.yorumcu === u.id) return; // yalnız değişince yaz (gözlemci döngüye girmesin)
       r.dataset.yorumcu = u.id;
       r.querySelector("img").src = u.resim;
       r.querySelector("b").textContent = u.ad;
       r.querySelector("small").textContent = `${u.unvan ? `${u.unvan} · ` : ""}yorumunu o yazdı, sesli dinlersen o okur`;
+      r.querySelector("img").hidden = !u.resim;
     };
     function rozetleriYerlestir() {
       document.querySelectorAll("button.listen").forEach((btn) => {
@@ -359,6 +369,15 @@ const bilgilendirmeKontrol = (user) => {
       });
     }
     rozetleriYerlestir();
+    window.yorumcuGoster = (k) => {
+      const y = k?.yorumcu;
+      gosterilen = y ? (window.Uzmanlar || []).find((u) => u.id === y.id) || { id: y.id, ad: y.ad, unvan: "", resim: "" } : null;
+      // Sunucu dinlemede bu yazarın sesini kullanır (yeni yorum yine seçili uzmanla yazılır).
+      document.cookie = gosterilen ? `ezoyk_${sayfa.bolum}=${gosterilen.id}; path=/; max-age=86400; SameSite=Lax` : `ezoyk_${sayfa.bolum}=; path=/; max-age=0; SameSite=Lax`;
+      duyur();
+      rozetleriYerlestir();
+    };
+    if (bekleyenKayit) window.yorumcuGoster(bekleyenKayit);
     let bekleyen = 0;
     new MutationObserver(() => {
       cancelAnimationFrame(bekleyen);

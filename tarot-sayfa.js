@@ -252,13 +252,14 @@ $("resetButton").addEventListener("click", () => {
 // --- Yorum ---
 
 function showReading(kayit, kaydir = false) {
+  window.yorumcuGoster?.(kayit); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   stopVoice();
   acikKayit = kayit;
   const a = acilimlar[kayit.acilim];
   $("sonuc").hidden = false;
   $("readingMeta").textContent = `${tarih(kayit.tarih)} · ${a.ad}${kayit.soru ? ` · “${kayit.soru}”` : ""}`;
   $("readingTitle").textContent = kayit.yorum.baslik;
-  $("readingBadge").textContent = kayit.kaynak === "ai" ? `✨ ${window.SeciliYorumcu?.ad || "Okuyucumuzun"} yorumu` : "📖 Kartların anlamı";
+  $("readingBadge").textContent = kayit.kaynak === "ai" ? `✨ ${window.GosterilenYorumcu?.ad || "Okuyucumuzun"} yorumu` : "📖 Kartların anlamı";
   $("cardReadings").replaceChildren(...kayit.kartlar.map((c, i) => {
     const k = kartBul(c.id);
     const li = document.createElement("li");

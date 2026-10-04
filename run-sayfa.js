@@ -217,6 +217,7 @@ $("revealButton").addEventListener("click", async () => {
 const NORN_RESIM = ["urd", "verdandi", "skuld"];
 
 function showKayit(kayit, kaydir = false, canli = false) {
+  window.yorumcuGoster?.(kayit); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   stopVoice();
   acikKayit = kayit;
   const acilim = acilimlar[kayit.acilim];

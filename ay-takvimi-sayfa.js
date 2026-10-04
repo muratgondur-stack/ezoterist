@@ -192,6 +192,7 @@ function renderCycle() {
 }
 
 function renderGuide(r) {
+  window.yorumcuGoster?.(r); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   $("guideStart").hidden = Boolean(r);
   $("guide").hidden = !r;
   if (!r) return;

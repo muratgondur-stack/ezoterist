@@ -39,7 +39,8 @@ const kayit = (bolum) => {
 
 // İsteği bölüm etiketiyle çalıştırır (server.js). ek: { yorumcu } — müşterinin seçtiği sanal uzman (askLlm ve
 // seslendirme kullanır).
-const calistir = (bolum, fn, ek = {}) => baglam.run({ bolum, llmSayildi: false, ...ek }, fn);
+const calistir = (bolum, fn, ek = {}) => baglam.run({ bolum, llmSayildi: false, baslangic: Date.now(), ...ek }, fn);
+const istekBaslangici = () => baglam.getStore()?.baslangic || 0;
 const simdikiBolum = () => baglam.getStore()?.bolum || null;
 const simdikiYorumcu = () => baglam.getStore()?.yorumcu || null;
 
@@ -69,4 +70,4 @@ function gorsel(bolum) {
 }
 const ozet = () => JSON.parse(JSON.stringify(oku()));
 
-module.exports = { calistir, simdikiBolum, simdikiYorumcu, llm, tts, gorsel, ozet };
+module.exports = { calistir, simdikiBolum, simdikiYorumcu, istekBaslangici, llm, tts, gorsel, ozet };

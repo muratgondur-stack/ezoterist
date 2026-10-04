@@ -105,6 +105,7 @@ async function renderPersonalDay() {
 const form = $("profileForm");
 
 function renderProfile(kayit) {
+  window.yorumcuGoster?.(kayit); // yorumun yazarı: rozet, figür ve ses (ust-cubuk.js)
   profil = kayit;
   form.elements.adSoyad.value = kayit.girdi.adSoyad;
   form.elements.tarih.value = kayit.girdi.tarih;

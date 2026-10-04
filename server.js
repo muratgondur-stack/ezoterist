@@ -212,14 +212,21 @@ function istekBolumu(adres) {
 
 // Müşterinin bu bölüm için seçtiği sanal uzman (çerez "ezoy_<bölüm>"; seçim kutusu ust-cubuk.js'te). Ses her istekte,
 // üslup yalnız kişisel yapay zekâ yorumlarında uygulanır (ortak önbelleğe giden üretimlere karakter karışmasın).
+// Yeni yorum (kişisel POST) seçili uzmanla (ezoy_) yazılır; dinleme gibi diğer isteklerde ekranda açık yorumun
+// yazarı (ezoyk_, ust-cubuk.js yorum açılınca koyar) önceliklidir; böylece eski yorum kendi yazarının sesiyle okunur.
 function yorumcuBul(request, bolum) {
   if (!bolum) return null;
-  const id = new RegExp(`(?:^|;\\s*)ezoy_${bolum.replace(/[^a-z-]/g, "")}=([0-9a-f]{10})`).exec(request.headers.cookie || "")?.[1];
-  const kart = id && UzmanKayit.bul(id);
-  const anahtar = yorumcuAnahtari(bolum);
-  if (!kart || kart.tip !== "sanal" || !UzmanKayit.vitrindeMi(kart) || !anahtar || !kart.bolumler.includes(anahtar)) return null;
+  const b = bolum.replace(/[^a-z-]/g, "");
+  const cerez = (ad) => new RegExp(`(?:^|;\\s*)${ad}_${b}=([0-9a-f]{10})`).exec(request.headers.cookie || "")?.[1];
   const yol = String(request.url || "").split("?")[0];
   const kisisel = request.method === "POST" && YAPAY_ZEKA_ISLEMI.test(yol) && !/^\/api\/(asistan|ruhsal)\//.test(yol);
+  if (!kisisel) {
+    const yazar = UzmanKayit.bul(cerez("ezoyk"));
+    if (yazar?.tip === "sanal") return { id: yazar.id, ad: yazar.ad, ses: yazar.ses || "", uslup: "" };
+  }
+  const kart = UzmanKayit.bul(cerez("ezoy"));
+  const anahtar = yorumcuAnahtari(bolum);
+  if (!kart || kart.tip !== "sanal" || !UzmanKayit.vitrindeMi(kart) || !anahtar || !kart.bolumler.includes(anahtar)) return null;
   return { id: kart.id, ad: kart.ad, ses: kart.ses || "", uslup: kisisel ? Promptlar.karakterMetni(kart) : "" };
 }
 
