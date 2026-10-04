@@ -136,3 +136,42 @@
 .grid-table td.ok { color: #8fe3a5; }
 .grid-table td.bad { color: #ffb4a0; }
 .btn-sm { min-height: 30px; padding: 4px 10px; font-size: 0.8rem; }
+
+/* Uzmanlar */
+.sn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; margin-top: 14px; }
+.sn-kart { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 12px; border: 1px solid var(--card-border); border-radius: 16px; background: rgba(0, 0, 0, 0.25); }
+.sn-kart.acik { border-color: rgba(143, 227, 165, 0.55); }
+.sn-resim { position: relative; align-self: start; display: grid; place-items: end center; height: 150px; border-radius: 12px; background: radial-gradient(circle at 50% 30%, #2b2f66, #0d0f24); overflow: hidden; }
+.sn-resim img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.sn-resim > span { align-self: center; color: var(--muted); font-size: 0.8rem; }
+.sn-durum { position: absolute; left: 6px; right: 6px; bottom: 6px; padding: 3px 6px; border-radius: 999px; background: rgba(0, 0, 0, 0.7); font-size: 0.7rem; text-align: center; }
+.sn-kart.acik .sn-durum { color: #8fe3a5; }
+.sn-alanlar { display: grid; gap: 6px; min-width: 0; }
+.sn-alanlar input:not([type="checkbox"]), .sn-alanlar textarea, .sn-alanlar select, .uz-duzen input:not([type="checkbox"]) { width: 100%; min-width: 0; padding: 7px 9px; border: 1px solid var(--card-border); border-radius: 9px; color: #fff; background: rgba(0, 0, 0, 0.35); font: inherit; font-size: 0.86rem; }
+.sn-alanlar select option { color: #000; }
+.sn-alt { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+.uz-etiket { margin-top: 4px; color: var(--muted); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+.uz-bolumler { display: flex; flex-wrap: wrap; gap: 5px; }
+.uz-bolum { display: inline-flex; cursor: pointer; }
+.uz-bolum input { position: absolute; opacity: 0; pointer-events: none; }
+.uz-bolum span { padding: 3px 9px; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 999px; color: var(--muted); font-size: 0.74rem; font-weight: 700; }
+.uz-bolum input:checked + span { border-color: var(--gold); color: #070914; background: var(--gold); }
+.uz-bolum input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
+.uz-acik { display: inline-flex; gap: 5px; align-items: center; font-size: 0.82rem; font-weight: 700; }
+.uz-sira { width: 64px !important; }
+.uz-ekle { grid-template-columns: minmax(220px, 2fr) 1fr 1fr 130px auto; }
+@media (max-width: 860px) { .uz-ekle { grid-template-columns: 1fr 1fr; } .uz-ekle .genis, .uz-ekle .btn { grid-column: 1 / -1; } }
+.uz-liste { display: grid; gap: 14px; margin-top: 16px; }
+.uz-kart { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--card-border); border-radius: 16px; background: rgba(0, 0, 0, 0.25); }
+.uz-ust { display: grid; grid-template-columns: 52px 1fr auto; gap: 12px; align-items: center; }
+.uz-ust > div { display: grid; min-width: 0; }
+.uz-ust small { color: var(--muted); font-size: 0.78rem; overflow-wrap: anywhere; }
+.uz-foto { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
+.uz-foto.bos { display: grid; place-items: center; background: rgba(255, 255, 255, 0.08); }
+.uz-hakedis { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; font-size: 0.82rem; color: var(--muted); }
+.uz-hakedis b { color: var(--foreground); }
+.uz-hakedis .kalan b { color: var(--gold); }
+.uz-duzen { display: grid; grid-template-columns: 1fr 1fr 90px auto auto auto; gap: 8px; align-items: end; }
+.uz-duzen label { display: grid; gap: 4px; font-size: 0.78rem; font-weight: 700; }
+.uz-kalemler summary { cursor: pointer; color: var(--gold); font-size: 0.84rem; font-weight: 700; }
+@media (max-width: 760px) { .uz-ust { grid-template-columns: 52px 1fr; } .uz-hakedis { grid-column: 1 / -1; justify-content: flex-start; } .uz-duzen { grid-template-columns: 1fr 1fr; } .sn-kart { grid-template-columns: 1fr; } .sn-resim { height: 220px; } }

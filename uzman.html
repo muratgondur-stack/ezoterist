@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/astroloji.css?v=14" />
-    <link rel="stylesheet" href="/uzman.css?v=3" />
+    <link rel="stylesheet" href="/astroloji.css?v=15" />
+    <link rel="stylesheet" href="/uzman.css?v=4" />
   </head>
   <body>
     <header class="topbar">
@@ -26,14 +26,57 @@
           <h2>Uzman Paneli</h2>
           <p class="section-note" id="panelSummary">Talepler yükleniyor…</p>
         </div>
-        <p class="card panel-denied" id="panelDenied" hidden>Bu sayfa yalnızca uzmanlarımız içindir.</p>
+        <p class="card panel-denied" id="panelDenied" hidden>Bu sayfa yalnızca uzmanlarımız içindir. Uzman olmak için bizimle iletişime geç.</p>
 
-        <div class="panel-layout" id="panelLayout" hidden>
-          <ul class="panel-list" id="panelList" aria-label="Talepler"></ul>
+        <nav class="tabs uz-sekmeler" id="uzSekmeler" role="tablist" hidden>
+          <button type="button" role="tab" data-tab="talepler" aria-selected="true">📥 Talepler</button>
+          <button type="button" role="tab" data-tab="profil" aria-selected="false">👤 Profilim</button>
+          <button type="button" role="tab" data-tab="hakedis" aria-selected="false">💰 Hakedişlerim</button>
+        </nav>
 
-          <article class="card panel-detail" id="panelDetail">
-            <p class="panel-empty">Soldan bir talep seç.</p>
-          </article>
+        <div class="uz-panel" id="tab-talepler">
+          <div class="panel-layout" id="panelLayout" hidden>
+            <ul class="panel-list" id="panelList" aria-label="Talepler"></ul>
+            <article class="card panel-detail" id="panelDetail">
+              <p class="panel-empty">Soldan bir talep seç.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="uz-panel" id="tab-profil" hidden>
+          <form class="card uz-profil" id="profilForm">
+            <div class="uz-profil-foto">
+              <img id="profilFoto" alt="" hidden />
+              <span id="profilFotoBos">👤</span>
+              <label class="btn btn-ghost">🖼 Fotoğrafımı yükle<input type="file" id="profilFotoGirdi" accept="image/jpeg,image/png,image/webp" hidden /></label>
+              <small>Kare, yüzün net görünen bir fotoğraf (en çok 3 MB).</small>
+            </div>
+            <div class="uz-profil-alanlar">
+              <p class="eyebrow" id="profilAd"></p>
+              <label>Unvan <input id="profilUnvan" maxlength="50" placeholder="Tarot uzmanı" /></label>
+              <label>Kendini tanıt <textarea id="profilTanitim" maxlength="400" rows="3" placeholder="Kaç yıldır, hangi konularda yorum yapıyorsun?"></textarea></label>
+              <fieldset class="uz-bolum-sec">
+                <legend>Yorum yazabileceğim bölümler</legend>
+                <p class="section-note">Seçtiğin bölümlerdeki talepler sana e-postayla gelir; ilk üstlenen cevaplar.</p>
+                <div id="profilBolumler"></div>
+              </fieldset>
+              <label class="uz-vitrin"><input type="checkbox" id="profilVitrin" /> Müşteriler beni kendi adım ve fotoğrafımla da seçebilsin</label>
+              <div class="panel-actions"><button type="submit" class="btn btn-primary">Kaydet</button><span class="section-note" id="profilDurum"></span></div>
+            </div>
+          </form>
+        </div>
+
+        <div class="uz-panel" id="tab-hakedis" hidden>
+          <div class="card">
+            <div class="uz-hk-ozet" id="hkOzet"></div>
+            <p class="section-note" id="hkNot"></p>
+            <div class="table-wrap">
+              <table class="moves" id="hkTablo">
+                <thead><tr><th>Tarih</th><th>Bölüm</th><th>Müşteri</th><th>Tür</th><th class="num">Hakediş</th><th>Durum</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -66,10 +109,21 @@
         </div>
         <p class="reading-text panel-ai" data-f="ai"></p>
       </div>
+      <div class="panel-block uz-ustlen" data-f="ustlenKutu">
+        <p>Bu talep, bu bölümü seçen uzmanlara gönderildi. Üstlenirsen yalnız sen cevaplarsın.</p>
+        <button type="button" class="btn btn-primary" data-f="ustlen">✋ Üstlen</button>
+      </div>
       <form class="panel-editor" data-f="form">
+        <div class="cevap-turu" role="radiogroup" aria-label="Cevap türü">
+          <button type="button" data-tur="yazi" aria-pressed="true">✍️ Yazılı</button>
+          <button type="button" data-tur="ses" aria-pressed="false">🎙️ Sesli</button>
+          <button type="button" data-tur="video" aria-pressed="false">🎬 Videolu</button>
+        </div>
+        <div class="kaydedici-yeri" data-f="kayit" hidden></div>
+        <p class="medya-hazir" data-f="medyaHazir" hidden></p>
         <label>
-          <span>Senin yorumun</span>
-          <textarea name="metin" rows="12" minlength="40" maxlength="6000" required placeholder="Haritayı kendi gözünle yorumla. Teslim edince kullanıcıya e-posta gider; yorum sesli de dinlenebilir."></textarea>
+          <span data-f="metinEtiket">Senin yorumun</span>
+          <textarea name="metin" rows="12" maxlength="6000" placeholder="Kendi gözünle yorumla. Teslim edince kullanıcıya e-posta gider; yazılı yorum sesli de dinlenebilir."></textarea>
         </label>
         <div class="panel-actions">
           <button type="submit" class="btn btn-primary">Teslim et</button>
@@ -81,6 +135,7 @@
           <h4>Teslim edilen yorum</h4>
           <button type="button" class="listen" data-f="dinle">🔊 Sesli dinle</button>
         </div>
+        <div data-f="cevapMedya"></div>
         <p class="reading-text" data-f="cevap"></p>
       </div>
     </template>
@@ -88,8 +143,8 @@
     <audio id="voice" preload="none"></audio>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="/uzmanlar.js?v=3"></script>
-    <script src="/uzman.js?v=5"></script>
+    <script src="/uzman-kaydedici.js?v=1"></script>
+    <script src="/uzman.js?v=6"></script>
     <script src="/ust-cubuk.js?v=12" defer></script>
 </body>
 </html>

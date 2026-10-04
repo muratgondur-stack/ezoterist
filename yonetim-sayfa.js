@@ -34,6 +34,7 @@ function sekme(ad) {
   if (ad === "kullanicilar" && !kullanicilar.length) kullanicilariYukle();
   if (ad === "anahtarlar") anahtarlariYukle();
   if (ad === "odeme") odemeYukle();
+  if (ad === "uzmanlar") uzmanlariYukle();
   if (ad === "fiyatlar") maliyetYukle();
 }
 document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => sekme(b.dataset.tab)));
@@ -389,6 +390,147 @@ function renderAnahtarlar(liste) {
   }));
 }
 
+// --- Uzmanlar (sanal karakterler, gerçek uzmanlar, hakediş) ---
+
+let uzVeri = null;
+const tl2 = (n) => `${new Intl.NumberFormat("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0)} ₺`;
+
+async function uzmanlariYukle() {
+  try {
+    uzVeri = await api("/api/yonetim/uzmanlar");
+    renderSanal();
+    renderGercek();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+// Bölüm seçimi: işaretlenebilir küçük etiketler.
+function bolumSecici(secili) {
+  const kutu = el("div", { className: "uz-bolumler" });
+  uzVeri.bolumListesi.forEach((b) => {
+    const c = el("input", { type: "checkbox", value: b.id, checked: secili.includes(b.id) });
+    kutu.append(el("label", { className: "uz-bolum" }, c, el("span", { textContent: b.ad })));
+  });
+  kutu.secilenler = () => [...kutu.querySelectorAll("input:checked")].map((x) => x.value);
+  return kutu;
+}
+
+async function fotoYukle(id, dosya) {
+  const r = await fetch(`/api/yonetim/uzman-foto?id=${encodeURIComponent(id)}`, { method: "POST", headers: { "Content-Type": dosya.type }, credentials: "same-origin", body: dosya });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || "Fotoğraf yüklenemedi.");
+  return d;
+}
+const fotoDugmesi = (id, yazi = "🖼 Resmi değiştir") => {
+  const girdi = el("input", { type: "file", accept: "image/jpeg,image/png,image/webp", hidden: true });
+  const b = el("button", { type: "button", className: "btn btn-ghost btn-sm", textContent: yazi });
+  b.addEventListener("click", () => girdi.click());
+  girdi.addEventListener("change", async () => {
+    if (!girdi.files[0]) return;
+    try { await fotoYukle(id, girdi.files[0]); toast("Resim güncellendi."); uzmanlariYukle(); } catch (error) { toast(error.message); }
+  });
+  return el("span", {}, b, girdi);
+};
+
+function renderSanal() {
+  const sanallar = uzVeri.uzmanlar.filter((u) => u.tip === "sanal");
+  const gercekler = uzVeri.uzmanlar.filter((u) => u.tip === "gercek");
+  $("snOzet").textContent = `${sanallar.filter((u) => u.gorunuyor).length} / ${sanallar.length} vitrinde`;
+  $("snGrid").replaceChildren(...sanallar.map((u) => {
+    const ad = el("input", { value: u.ad, maxLength: 40, placeholder: "İsim ver (ör. Nuran Ana)" });
+    const unvan = el("input", { value: u.unvan, maxLength: 50, placeholder: "Unvan (ör. Kahve falı ustası)" });
+    const tanitim = el("textarea", { value: u.tanitim, maxLength: 400, rows: 2, placeholder: "Kısa tanıtım (müşteri görür)" });
+    const bolumler = bolumSecici(u.bolumler);
+    const sabit = el("select", {}, el("option", { value: "", textContent: "Havuz: bölümü seçen bütün uzmanlar" }),
+      ...gercekler.map((g) => el("option", { value: g.id, textContent: `Yalnız ${g.ad} (${g.email})`, selected: g.id === u.sabitUzman })));
+    const sira = el("input", { type: "number", min: 1, max: 99, value: u.sira || 1, className: "uz-sira" });
+    const acik = el("input", { type: "checkbox", checked: u.aktif });
+    const kaydet = el("button", { type: "button", className: "btn btn-primary btn-sm", textContent: "Kaydet" });
+    const sil = el("button", { type: "button", className: "btn btn-ghost btn-sm", textContent: "Sil" });
+    kaydet.addEventListener("click", async () => {
+      kaydet.disabled = true;
+      try {
+        await api("/api/yonetim/uzman-guncelle", { id: u.id, ad: ad.value, unvan: unvan.value, tanitim: tanitim.value, bolumler: bolumler.secilenler(), sabitUzman: sabit.value, sira: Number(sira.value), aktif: acik.checked });
+        toast(`${ad.value || "Karakter"} kaydedildi.`);
+        uzmanlariYukle();
+      } catch (error) { toast(error.message); kaydet.disabled = false; }
+    });
+    sil.addEventListener("click", async () => {
+      if (!confirm(`${u.ad || "Bu karakter"} silinsin mi?`)) return;
+      try { await api("/api/yonetim/uzman-sil", { id: u.id }); uzmanlariYukle(); } catch (error) { toast(error.message); }
+    });
+    const durum = u.gorunuyor ? "✓ Vitrinde" : !u.aktif ? "Kapalı" : !u.ad ? "İsim yok" : !u.bolumler.length ? "Bölüm seçilmedi" : "Resim yok";
+    return el("article", { className: `sn-kart${u.gorunuyor ? " acik" : ""}` },
+      el("div", { className: "sn-resim" }, u.resim ? el("img", { src: u.resim, alt: "", loading: "lazy" }) : el("span", { textContent: "Resim yok" }), el("b", { className: "sn-durum", textContent: durum })),
+      el("div", { className: "sn-alanlar" },
+        ad, unvan, tanitim,
+        el("small", { className: "uz-etiket", textContent: "Görüneceği bölümler" }), bolumler,
+        el("small", { className: "uz-etiket", textContent: "Talepler kime gitsin" }), sabit,
+        el("div", { className: "sn-alt" }, el("label", { className: "uz-acik" }, acik, " Açık"), el("label", { className: "uz-acik" }, "Sıra ", sira), fotoDugmesi(u.id), sil, kaydet)));
+  }));
+}
+
+function renderGercek() {
+  const uyeler = uzVeri.uyeler.filter((m) => !uzVeri.uzmanlar.some((u) => u.userId === m.id));
+  $("uzUyeler").replaceChildren(...uyeler.map((m) => el("option", { value: m.email, textContent: m.name })));
+  const gercekler = uzVeri.uzmanlar.filter((u) => u.tip === "gercek");
+  $("uzListe").replaceChildren(...(gercekler.length ? gercekler.map((u) => {
+    const h = u.hakedis || { toplam: 0, odenen: 0, kalan: 0, adet: 0, kalemler: [], odemeler: [] };
+    const ad = el("input", { value: u.ad, maxLength: 40 });
+    const unvan = el("input", { value: u.unvan, maxLength: 50 });
+    const oran = el("input", { type: "number", min: 0, max: 100, value: u.oran, className: "uz-sira" });
+    const acik = el("input", { type: "checkbox", checked: u.aktif });
+    const bolumler = bolumSecici(u.bolumler);
+    const kaydet = el("button", { type: "button", className: "btn btn-primary btn-sm", textContent: "Kaydet" });
+    kaydet.addEventListener("click", async () => {
+      try {
+        await api("/api/yonetim/uzman-guncelle", { id: u.id, ad: ad.value, unvan: unvan.value, oran: Number(oran.value), aktif: acik.checked, bolumler: bolumler.secilenler() });
+        toast(`${ad.value} kaydedildi.`);
+        uzmanlariYukle();
+      } catch (error) { toast(error.message); }
+    });
+    const ode = el("button", { type: "button", className: "btn btn-ghost btn-sm", textContent: "💸 Ödeme yaptım", disabled: !(h.kalan > 0) });
+    ode.addEventListener("click", async () => {
+      const not = prompt(`${u.ad} için ${tl2(h.kalan)} ödendi olarak işaretlensin. Not (ör. havale tarihi / açıklama):`, "");
+      if (not === null) return;
+      try { const r = await api("/api/yonetim/hakedis-ode", { uzmanId: u.id, not }); toast(`${tl2(r.odeme.tutar)} ödeme kaydedildi.`); uzmanlariYukle(); } catch (error) { toast(error.message); }
+    });
+    const kalemler = el("details", { className: "uz-kalemler" }, el("summary", { textContent: `Cevaplar ve ödemeler (${h.adet} cevap, ${h.odemeler.length} ödeme)` }),
+      el("table", { className: "grid-table" },
+        el("thead", {}, el("tr", {}, ...["Tarih", "Bölüm", "Müşteri", "Tür", "Fiyat", "Oran", "Hakediş", ""].map((x) => el("th", { textContent: x })))),
+        el("tbody", {}, ...h.kalemler.map((k) => el("tr", {},
+          el("td", { textContent: tarih(k.tarih) }), el("td", { textContent: k.bolumAdi }), el("td", { textContent: k.musteri }),
+          el("td", { textContent: { video: "🎬 Video", ses: "🎙️ Ses", yazi: "✍️ Yazı" }[k.tur] || k.tur }),
+          el("td", { textContent: `${k.fiyatKontor} kontör` }), el("td", { textContent: `%${k.oran}` }),
+          el("td", { className: "num", textContent: tl2(k.tutar) }), el("td", { className: k.odendi ? "ok" : "muted", textContent: k.odendi ? "Ödendi" : "Bekliyor" }))))),
+      ...h.odemeler.map((o) => el("p", { className: "section-note small", textContent: `💸 ${tarih(o.tarih)} · ${tl2(o.tutar)} · ${o.adet} cevap${o.not ? ` · ${o.not}` : ""} · ${o.kim}` })));
+    return el("article", { className: "uz-kart" },
+      el("div", { className: "uz-ust" },
+        u.resim ? el("img", { className: "uz-foto", src: u.resim, alt: "" }) : el("span", { className: "uz-foto bos", textContent: "👤" }),
+        el("div", {}, el("b", { textContent: u.ad }), el("small", { textContent: `${u.email} · ${u.vitrinde ? (u.gorunuyor ? "kendi adıyla vitrinde" : "vitrinde görünmek istiyor (foto/bölüm eksik)") : "yalnız arka planda cevaplıyor"}` })),
+        el("div", { className: "uz-hakedis" }, el("span", {}, "Toplam ", el("b", { textContent: tl2(h.toplam) })), el("span", {}, "Ödenen ", el("b", { textContent: tl2(h.odenen) })), el("span", { className: "kalan" }, "Kalan ", el("b", { textContent: tl2(h.kalan) })), ode)),
+      el("div", { className: "uz-duzen" }, el("label", {}, "Görünen ad", ad), el("label", {}, "Unvan", unvan), el("label", {}, "Oran %", oran), el("label", { className: "uz-acik" }, acik, " Açık"), fotoDugmesi(u.id, "🖼 Foto"), kaydet),
+      el("small", { className: "uz-etiket", textContent: "Yorum yazabileceği bölümler (uzman kendisi de seçer)" }), bolumler, kalemler);
+  }) : [el("p", { className: "section-note", textContent: "Henüz gerçek uzman yok. Yukarıdan bir üyeyi uzman yap." })]));
+}
+
+$("snYeni").addEventListener("click", async () => {
+  try { await api("/api/yonetim/sanal-ekle", {}); toast("Yeni karakter eklendi; resmini yükleyip isim ver."); uzmanlariYukle(); } catch (error) { toast(error.message); }
+});
+$("uzEkle").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const q = $("uzUye").value.trim().toLowerCase();
+  const uye = uzVeri.uyeler.find((m) => m.email.toLowerCase() === q) || uzVeri.uyeler.find((m) => m.name.toLocaleLowerCase("tr-TR") === q);
+  if (!uye) { toast("Listeden bir üye seç (e-postasını yaz)."); return; }
+  try {
+    await api("/api/yonetim/uzman-ekle", { userId: uye.id, ad: $("uzAd").value || uye.name, unvan: $("uzUnvan").value, oran: Number($("uzOran").value) });
+    $("uzEkle").reset();
+    toast(`${uye.name || uye.email} artık uzman. Panel adresi: /uzman`);
+    uzmanlariYukle();
+  } catch (error) { toast(error.message); }
+});
+
 // --- Ödeme (PayTR) ve kuponlar ---
 
 const SIPARIS_DURUM = { basladi: "Başladı", bekliyor: "Ödeme sayfasında", acilamadi: "Açılamadı", basarisiz: "Başarısız", odendi: "Ödendi ✓" };
@@ -542,5 +684,5 @@ window.addEventListener("beforeunload", (e) => { if (Object.keys(taslak).length)
     return;
   }
   const hedef = location.hash.slice(1);
-  if (["ozet", "ayarlar", "kullanicilar", "fiyatlar", "odeme", "anahtarlar", "gecmis"].includes(hedef)) sekme(hedef);
+  if (["ozet", "ayarlar", "kullanicilar", "fiyatlar", "uzmanlar", "odeme", "anahtarlar", "gecmis"].includes(hedef)) sekme(hedef);
 })();

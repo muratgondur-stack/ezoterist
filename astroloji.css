@@ -773,3 +773,11 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
 .onay-sorma input { width: 18px; height: 18px; accent-color: var(--accent); }
 .onay-dugmeler { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; }
 .onay-dugmeler .btn { width: 100%; justify-content: center; }
+
+/* Uzman kartı: sanal karakterlerin şeffaf resimleri gece zemini önünde (2026-10-04) */
+.expert-slot img, .expert-answer-head .expert-face img { object-position: 50% 8%; background: radial-gradient(circle at 50% 35%, #353a7a, #0d0f24 75%); }
+.expert-answer-head .expert-face img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+.expert-yok { grid-column: 1 / -1; padding: 14px; border: 1px dashed rgba(243, 194, 107, 0.35); border-radius: 14px; color: var(--muted); text-align: center; }
+.expert-medya video { width: 100%; max-height: 480px; margin: 8px 0; border-radius: 14px; background: #000; }
+.expert-medya audio { width: 100%; margin: 8px 0; }
+.expert-medya:empty { display: none; }

@@ -10,6 +10,8 @@ const Anahtarlar = require("./anahtarlar");
 const Olcum = require("./olcum");
 const Odeme = require("./odeme");
 const Kupon = require("./kupon");
+const UzmanKayit = require("./uzman-kayit");
+const { hakedisOzeti, hakedisOde, BOLUM_LISTESI, hamOku } = require("./uzman-api");
 
 // --- Maliyet hesabı (Murat 2026-10-04): hizmet kendi Gemma/TTS/resim motorumuzla verilir; burada dış API'lerden
 // (OpenAI gpt-4.1-mini, Google standart TTS, OpenAI görsel) alınsaydı bir işlemin kaça mal olacağı hesaplanır.
@@ -270,6 +272,57 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
         const body = await readJson(request);
         await Kupon.sil(body?.kod);
         sendJson(response, 200, { kuponlar: Kupon.liste() });
+      },
+      // Uzman kadrosu ve hakedişler.
+      "GET /api/yonetim/uzmanlar": async () => {
+        const ozet = await hakedisOzeti(dataDir);
+        sendJson(response, 200, {
+          uzmanlar: UzmanKayit.hepsi().map((u) => ({
+            ...UzmanKayit.herkeseAcik(u), userId: u.userId || null, email: u.email || null, oran: u.oran ?? null, vitrinde: Boolean(u.vitrinde),
+            sabitUzman: u.sabitUzman || null, sira: u.sira || null, olusturma: u.olusturma, gorunuyor: UzmanKayit.vitrindeMi(u),
+            hakedis: ozet.find((o) => o.uzmanId === u.id) || null,
+          })),
+          bolumListesi: BOLUM_LISTESI(),
+          uyeler: kullaniciListesi().map((u) => ({ id: u.id, email: u.email, name: u.name })),
+        });
+      },
+      "POST /api/yonetim/uzman-ekle": async () => {
+        const body = await readJson(request);
+        const uye = kullaniciListesi().find((u) => u.id === String(body?.userId || ""));
+        if (!uye) throw hata("Üye bulunamadı.", 404);
+        const u = await UzmanKayit.ekle({ userId: uye.id, email: uye.email, ad: body?.ad || uye.name, unvan: body?.unvan, oran: body?.oran });
+        await gecmiseYaz(user, { [`uzman.${u.id}`]: `${u.ad} (${u.email}) uzman yapıldı · %${u.oran}` }, {});
+        sendJson(response, 200, { uzman: u });
+      },
+      "POST /api/yonetim/uzman-guncelle": async () => {
+        const body = await readJson(request);
+        const bulunan = UzmanKayit.bul(String(body?.id || ""));
+        const onceki = bulunan && JSON.parse(JSON.stringify(bulunan)); // kayıt yerinde değiştiği için kopya
+        const u = await UzmanKayit.yoneticiGuncelle(String(body?.id || ""), body || {}, BOLUM_LISTESI().map((b) => b.id));
+        const ozetle = (x) => `${x.ad || "isimsiz"}${x.tip === "gercek" ? ` · %${x.oran}` : ""} · ${x.aktif ? "açık" : "kapalı"} · ${x.bolumler.length} bölüm`;
+        if (onceki && ozetle(onceki) !== ozetle(u)) await gecmiseYaz(user, { [`uzman.${u.id}`]: ozetle(u) }, { [`uzman.${u.id}`]: ozetle(onceki) });
+        sendJson(response, 200, { uzman: u });
+      },
+      "POST /api/yonetim/sanal-ekle": async () => sendJson(response, 200, { uzman: await UzmanKayit.sanalEkle() }),
+      "POST /api/yonetim/uzman-sil": async () => {
+        const body = await readJson(request);
+        const u = UzmanKayit.bul(String(body?.id || ""));
+        await UzmanKayit.sil(String(body?.id || ""));
+        await gecmiseYaz(user, { [`uzman.${body?.id}`]: "(silindi)" }, { [`uzman.${body?.id}`]: u?.ad || "sanal karakter" });
+        sendJson(response, 200, { tamam: true });
+      },
+      "POST /api/yonetim/uzman-foto": async () => {
+        const veri = await hamOku(request, 3 * 1024 * 1024);
+        const u = await UzmanKayit.fotoKaydet(String(url.searchParams.get("id") || ""), String(request.headers["content-type"] || "").split(";")[0], veri);
+        sendJson(response, 200, { resim: UzmanKayit.resimAdresi(u) });
+      },
+      "POST /api/yonetim/hakedis-ode": async () => {
+        const body = await readJson(request);
+        const u = UzmanKayit.bul(String(body?.uzmanId || ""));
+        if (!u) throw hata("Uzman bulunamadı.", 404);
+        const odeme = await hakedisOde(dataDir, u.id, body?.not, user.email);
+        await gecmiseYaz(user, { [`hakedis.${u.id}`]: `${u.ad}: ${odeme.tutar} ₺ ödendi (${odeme.adet} cevap)` }, {});
+        sendJson(response, 200, { odeme });
       },
       "POST /api/yonetim/anahtar-test": async () => {
         const body = await readJson(request);

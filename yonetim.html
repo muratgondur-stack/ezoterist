@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/astroloji.css?v=14" />
-    <link rel="stylesheet" href="/yonetim.css?v=8" />
+    <link rel="stylesheet" href="/astroloji.css?v=15" />
+    <link rel="stylesheet" href="/yonetim.css?v=9" />
   </head>
   <body>
     <header class="topbar">
@@ -34,6 +34,7 @@
         <button type="button" data-tab="ayarlar" aria-selected="false">⚙️ Ayarlar</button>
         <button type="button" data-tab="kullanicilar" aria-selected="false">👥 Kullanıcılar</button>
         <button type="button" data-tab="fiyatlar" aria-selected="false">💰 Fiyatlar</button>
+        <button type="button" data-tab="uzmanlar" aria-selected="false">🧙 Uzmanlar</button>
         <button type="button" data-tab="odeme" aria-selected="false">💳 Ödeme ve kupon</button>
         <button type="button" data-tab="anahtarlar" aria-selected="false">🔑 API anahtarları</button>
         <button type="button" data-tab="gecmis" aria-selected="false">🕓 Değişiklik geçmişi</button>
@@ -90,6 +91,30 @@
             </table>
           </div>
           <p class="section-note small">* Bir işlemin (asistanda her soru + cevap) dışarıdan alınsaydı maliyeti: metin + dinlenirse seslendirme + varsa görsel. Ayrıntı için tutarın üzerine gel. "≈" = henüz ölçüm yok, tahmini değer. Sesle sorma (konuşmayı yazıya çevirme) dahil değil.</p>
+        </div>
+      </section>
+
+      <section class="panel" id="tab-uzmanlar" hidden>
+        <div class="card">
+          <div class="users-head">
+            <h2>Sanal uzmanlar <small id="snOzet"></small></h2>
+            <button type="button" class="btn btn-ghost" id="snYeni">＋ Yeni karakter</button>
+          </div>
+          <p class="section-note">Müşterinin seçtiği karakterler. İsim ver, hangi bölümlerde görüneceğini seç ve aç. Karakteri seçen müşterinin talebi, o bölümü seçmiş bütün gerçek uzmanlara gider; ilk "Üstlen" diyen cevaplar. İstersen karaktere sabit bir uzman ata, talep yalnız ona gitsin.</p>
+          <div class="sn-grid" id="snGrid"></div>
+        </div>
+
+        <div class="card">
+          <h2>Gerçek uzmanlar</h2>
+          <p class="section-note">Üyeler arasından uzman yap. Uzman hangi bölümlere yorum yazacağını, fotoğrafını ve tanıtımını kendi panelinden (/uzman → Profilim) seçer; burada sen de değiştirebilirsin. Hakediş = bölümün uzman fiyatı × 1 kontörün TL değeri × oran.</p>
+          <form class="pay-form uz-ekle" id="uzEkle">
+            <label class="genis">Üye (e-posta ya da ad yaz) <input id="uzUye" list="uzUyeler" autocomplete="off" required /><datalist id="uzUyeler"></datalist></label>
+            <label>Görünen ad <input id="uzAd" maxlength="40" /></label>
+            <label>Unvan <input id="uzUnvan" maxlength="50" placeholder="Tarot uzmanı" /></label>
+            <label>Hakediş oranı (%) <input id="uzOran" type="number" min="0" max="100" value="50" /></label>
+            <button type="submit" class="btn btn-primary">Uzman yap</button>
+          </form>
+          <div class="uz-liste" id="uzListe"></div>
         </div>
       </section>
 
@@ -178,7 +203,7 @@
 
     <audio id="sample" preload="none"></audio>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="/yonetim-sayfa.js?v=10"></script>
+    <script src="/yonetim-sayfa.js?v=11"></script>
     <script src="/ust-cubuk.js?v=12" defer></script>
 </body>
 </html>

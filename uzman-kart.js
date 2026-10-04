@@ -4,12 +4,22 @@
 window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
   const $ = (id) => document.getElementById(id);
   let talep = null;
-  let secili = Uzmanlar.find((u) => u.aktif)?.id;
-  const uzmanBul = (id) => Uzmanlar.find((u) => u.id === id) || Uzmanlar[0];
+  // Bu bölümde seçilebilen uzmanlar (yönetim panelinde açılmış sanal karakterler ve kendi adıyla görünen uzmanlar).
+  const liste = () => (window.Uzmanlar || []).filter((u) => u.secilebilir && u.bolumler.includes(bolum));
+  let secili = liste()[0]?.id;
+  const uzmanBul = (id) => (window.Uzmanlar || []).find((u) => u.id === id) || { ad: "Uzmanımız", unvan: "", resim: "" };
   const tarih = (ms) => new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(ms));
 
   function renderUzmanlar() {
-    $("expertGrid").replaceChildren(...Uzmanlar.map((u) => {
+    if (!liste().length) {
+      const li = document.createElement("li");
+      li.className = "expert-yok";
+      li.textContent = "Bu bölümde uzmanlarımız çok yakında hizmet verecek.";
+      $("expertGrid").replaceChildren(li);
+      $("expertForm").hidden = true;
+      return;
+    }
+    $("expertGrid").replaceChildren(...liste().map((u) => {
       const li = document.createElement("li");
       const button = document.createElement("button");
       button.type = "button";
@@ -24,6 +34,7 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
       const unvan = document.createElement("small");
       unvan.textContent = u.unvan;
       button.append(ad, unvan);
+      if (u.tanitim) button.title = u.tanitim;
       button.addEventListener("click", () => { secili = u.id; renderUzmanlar(); });
       li.append(button);
       // Fare üzerine gelince (ya da dokununca) numeroloğun kısa videosu oynar.
@@ -39,7 +50,7 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
   function renderDurum() {
     const status = $("expertStatus");
     const bekliyor = talep && talep.durum !== "hazir";
-    $("expertForm").hidden = Boolean(bekliyor);
+    $("expertForm").hidden = Boolean(bekliyor) || !liste().length;
     $("expertGrid").hidden = Boolean(bekliyor);
     if (!talep) { status.hidden = true; return; }
     status.hidden = false;
@@ -53,12 +64,24 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
       return;
     }
 
-    status.innerHTML = `<div class="expert-answer"><div class="expert-answer-head">${uzman.resim ? `<img src="${uzman.resim}" alt="" />` : ""}<div><b></b><small></small></div></div>
-      <p class="reading-text"></p><button type="button" class="listen" id="expertListen">🔊 Sesli dinle</button></div>`;
+    status.innerHTML = `<div class="expert-answer"><div class="expert-answer-head">${uzman.resim ? `<span class="expert-face"><img src="${uzman.resim}" alt="" /></span>` : ""}<div><b></b><small></small></div></div>
+      <div class="expert-medya"></div><p class="reading-text"></p><button type="button" class="listen" id="expertListen">🔊 Sesli dinle</button></div>`;
     status.querySelector(".expert-answer-head b").textContent = `${uzman.ad} yorumladı`;
     status.querySelector(".expert-answer-head small").textContent = tarih(talep.cevap.tarih);
-    status.querySelector(".reading-text").textContent = talep.cevap.metin;
-    bindListen($("expertListen"), () => `/api/uzman/ses?id=${talep.id}`);
+    // Sesli / videolu cevap.
+    const medya = talep.cevap.medya;
+    if (medya) {
+      const m = document.createElement(medya.tur === "video" ? "video" : "audio");
+      m.controls = true;
+      m.preload = "metadata";
+      m.playsInline = true;
+      m.className = `expert-${medya.tur}`;
+      m.src = `/api/uzman/medya?id=${talep.id}`;
+      status.querySelector(".expert-medya").append(m);
+    }
+    status.querySelector(".reading-text").textContent = talep.cevap.metin || "";
+    if (talep.cevap.metin) bindListen($("expertListen"), () => `/api/uzman/ses?id=${talep.id}`);
+    else $("expertListen").remove();
   }
 
   $("expertForm").addEventListener("submit", async (event) => {
