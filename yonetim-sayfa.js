@@ -225,7 +225,8 @@ async function kullanicilariYukle() {
 function renderKullanicilar() {
   const q = $("userSearch").value.trim().toLocaleLowerCase("tr-TR");
   const liste = kullanicilar.filter((u) => !q || u.email.includes(q) || u.name.toLocaleLowerCase("tr-TR").includes(q));
-  $("userCount").textContent = `${liste.length} / ${kullanicilar.length}`;
+  const onayli = kullanicilar.filter((u) => u.bilgilendirmeOnay).length;
+  $("userCount").textContent = `${liste.length} / ${kullanicilar.length} · bilgilendirmeyi onaylayan ${onayli}`;
   $("userTable").querySelector("tbody").replaceChildren(...liste.map((u) => {
     const ekle = el("button", { type: "button", className: "mini-btn", textContent: "🪙 Kontör" });
     ekle.addEventListener("click", () => {
@@ -238,6 +239,7 @@ function renderKullanicilar() {
       el("td", {}, u.name || "—", el("small", { textContent: u.email })),
       el("td", { textContent: u.createdAt ? tarih(Date.parse(u.createdAt), false) : "—" }),
       el("td", { textContent: [u.sifreVar ? "şifre" : "", u.google ? "Google" : ""].filter(Boolean).join(" + ") || "—" }),
+      el("td", { className: u.bilgilendirmeOnay ? "ok" : "muted", textContent: u.bilgilendirmeOnay ? `✓ ${tarih(Date.parse(u.bilgilendirmeOnay))}` : "Onaylamadı" }),
       el("td", { className: "num", textContent: sayi(u.bakiye) }),
       el("td", {}, ekle),
     );
