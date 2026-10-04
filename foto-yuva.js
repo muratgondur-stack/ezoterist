@@ -54,13 +54,27 @@ window.kameraIleCek = function kameraIleCek(yon = "environment") {
       durum.hidden = false;
       durum.textContent = "Kamera açılıyor…";
       try {
-        akim = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: aktifYon }, width: { ideal: 1920 }, height: { ideal: 1440 } },
-          audio: false,
-        });
+        try {
+          akim = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: aktifYon }, width: { ideal: 1920 }, height: { ideal: 1440 } },
+            audio: false,
+          });
+        } catch (error) {
+          if (error?.name === "NotAllowedError") throw error;
+          // Yüksek çözünürlük isteği bazı kameralarda reddedilir ya da siyah görüntü verir: sade istekle tekrar.
+          akim = await navigator.mediaDevices.getUserMedia({ video: { facingMode: aktifYon }, audio: false });
+        }
+        video.muted = true;
+        video.setAttribute("playsinline", "");
         video.srcObject = akim;
         video.classList.toggle("is-mirrored", aktifYon === "user");
         await video.play();
+        // Görüntü 3 sn içinde gelmezse kullanıcı boş pencerede kalmasın.
+        await new Promise((ok, hata) => {
+          if (video.videoWidth) return ok();
+          const t = setTimeout(() => hata(Object.assign(new Error(""), { name: "GoruntuYok" })), 3000);
+          video.addEventListener("loadeddata", () => { clearTimeout(t); ok(); }, { once: true });
+        });
         durum.hidden = true;
         cekBtn.disabled = false;
       } catch (error) {
@@ -68,7 +82,9 @@ window.kameraIleCek = function kameraIleCek(yon = "environment") {
           ? "Kamera izni verilmedi. Tarayıcının adres çubuğundan kamera iznini açıp tekrar dene."
           : error?.name === "NotFoundError" || error?.name === "OverconstrainedError"
             ? "Bu cihazda kullanılabilir bir kamera bulunamadı."
-            : "Kamera açılamadı.";
+            : error?.name === "GoruntuYok"
+              ? "Kameradan görüntü gelmedi. Galeriden seç ile fotoğraf yükleyebilirsin."
+              : "Kamera açılamadı.";
         kapat();
         reject(new Error(mesaj));
       }
@@ -132,17 +148,26 @@ window.fotoYuvasi = function fotoYuvasi({ yuva, foto, kamera = "environment", on
     label.append(input, yazi);
     return label;
   };
-  const kameraBtn = document.createElement("button");
-  kameraBtn.type = "button";
-  kameraBtn.className = "slot-btn";
-  kameraBtn.textContent = "📷 Kamerayla çek";
-  kameraBtn.addEventListener("click", async () => {
-    try {
-      onSec(await window.kameraIleCek(kamera));
-    } catch (error) {
-      if (!error.iptal) onHata(error.message);
-    }
-  });
+  // Telefonda (Murat 2026-10-04: iPhone Safari'de kamera penceresi açılıyor ama görüntü siyah) cihazın kendi kamera
+  // uygulaması açılır: <input capture> telefonlarda güvenilir. Bilgisayarda capture yok sayıldığı için canlı pencere kalır.
+  const telefon = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+  let kameraBtn;
+  if (telefon) {
+    kameraBtn = dugme("📷 Kamerayla çek");
+    kameraBtn.querySelector("input").setAttribute("capture", kamera);
+  } else {
+    kameraBtn = document.createElement("button");
+    kameraBtn.type = "button";
+    kameraBtn.className = "slot-btn";
+    kameraBtn.textContent = "📷 Kamerayla çek";
+    kameraBtn.addEventListener("click", async () => {
+      try {
+        onSec(await window.kameraIleCek(kamera));
+      } catch (error) {
+        if (!error.iptal) onHata(error.message);
+      }
+    });
+  }
   slot.querySelector(".slot-actions").append(kameraBtn, dugme("🖼️ Galeriden seç"));
   return slot;
 };
