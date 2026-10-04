@@ -229,6 +229,7 @@ currentUser.then((user) => {
   });
   menu.append(baslik, oge("🗂️ Kişisel arşivim", "/arsiv"), oge("👤 Profilim", "/arsiv#profil"),
     oge("🎁 Hediye kupon", "/arsiv#hediye"), oge("📜 Bilgilendirme", "/bilgilendirme"),
+    ...(user.uzman || user.yonetici ? [oge("🧙 Uzman paneli", "/uzman")] : []),
     ...(user.yonetici ? [oge("⚙️ Yönetim paneli", "/yonetim")] : []), cikis);
 
   const menuyuAc = (acik) => {

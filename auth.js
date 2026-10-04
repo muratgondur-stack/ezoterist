@@ -81,6 +81,8 @@ const publicUser = (user) => ({
   google: Boolean(user.googleId),
   createdAt: user.createdAt || null,
   yonetici: Ayarlar.yoneticiMi(user),
+  // Kullanıcı menüsünde "Uzman paneli" bağlantısı için (uzman-kayit.js).
+  uzman: require("./uzman-kayit").uzmanMi(user),
   bilgilendirmeGerekli: user.bilgilendirmeOnay?.surum !== BILGILENDIRME_SURUMU,
   bilgilendirmeOnay: user.bilgilendirmeOnay?.tarih || null,
 });
