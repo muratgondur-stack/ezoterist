@@ -59,6 +59,7 @@ const SEMA = {
   "genel.muzik": { grup: "Genel", ad: "Ana menü müzik seviyesi", tur: "sayi", min: 0, max: 0.5, adim: 0.01, vars: 0.1 },
   // Fiyatlar ve maliyet varsayımları ("Fiyatlar" sekmesi; Murat 2026-10-04). Hizmet kendi Gemma/TTS/resim
   // motorumuzla verilir; maliyet ise dış API'lerden alınıyormuş gibi hesaplanır (birim fiyatlar USD).
+  "fiyat.uzman": { grup: "Fiyatlar", ad: "Uzman yorumu", tur: "tam", min: 0, max: 10000, vars: 0, birim: "kontör", aciklama: "uzmana yorumlatma (insan uzman); 0 = ücretsiz" },
   "fiyat.kontorTL": { grup: "Fiyatlar", ad: "1 kontörün TL değeri", tur: "sayi", min: 0, max: 1000, adim: 0.01, vars: 1, birim: "₺" },
   "maliyet.usdTry": { grup: "Maliyet", ad: "Dolar kuru (USD/TRY)", tur: "sayi", min: 0, max: 1000, adim: 0.01, vars: 0, aciklama: "0 = TCMB'den otomatik" },
   "maliyet.metinGiris": { grup: "Maliyet", ad: "OpenAI gpt-4.1-mini girdi", tur: "sayi", min: 0, max: 100, adim: 0.01, vars: 0.4, birim: "$ / 1M token" },
