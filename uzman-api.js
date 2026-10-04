@@ -34,7 +34,7 @@ const { ebcedKaydiOku, cifirKaydiOku } = require("./ebced-cifir-api");
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
 const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu, "yuz-okuma": yuzFotoYolu, "fotograf-analizi": analizFotoYolu, dizim: (dataDir, userId, kayitId) => dizimGorselYolu(dataDir, userId, kayitId) };
 
-const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri, askLlm, llmEnabled } = yardimci;
+const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri, askLlm, llmEnabled, bugun } = yardimci;
 const Promptlar = require("./uzman-promptlari");
 
 // Uzman yanıt süresi yönetim panelinden (saat).
@@ -42,7 +42,13 @@ const teslimSuresi = () => Ayarlar.get("sure.uzmanSaat") * 60 * 60 * 1000;
 const SITE = (process.env.SITE_URL || "https://ezoter.ist").replace(/\/$/, "");
 // Panele uzmanlar ve yönetici girer; yönetici bütün talepleri görür.
 const uzmanMi = (user) => UzmanKayit.uzmanMi(user) || Ayarlar.yoneticiMi(user);
-const uzmanAdi = (id) => UzmanKayit.bul(id)?.ad || "Uzmanımız";
+const uzmanAdi = (id) => (id === UzmanKayit.HAVUZ ? "Uzman ekibimiz" : UzmanKayit.bul(id)?.ad || "Uzmanımız");
+// Cevabı yazanın adı ve resmi: havuz siparişinde cevaplayan gerçek uzman, diğerlerinde seçilen kart.
+const yazan = (t) => {
+  const id = t.uzman === UzmanKayit.HAVUZ && t.cevaplayan ? t.cevaplayan : t.uzman;
+  const u = UzmanKayit.bul(id);
+  return { ad: uzmanAdi(id), resim: u ? UzmanKayit.resimAdresi(u) : "" };
+};
 
 const hata = (message, status = 400) => Object.assign(new Error(message), { status });
 
@@ -58,7 +64,7 @@ async function tumTalepler(dir) {
 
 // Kullanıcıya gösterilen hâli: kişisel e-posta ya da iç alanlar gitmez.
 const kullaniciGorunumu = (t) =>
-  t && { id: t.id, uzman: t.uzman, bolum: t.bolum || "astroloji-harita", soru: t.soru, durum: t.durum, olusturma: t.olusturma, sonTarih: t.sonTarih, cevap: t.cevap || null };
+  t && { id: t.id, uzman: t.uzman, yazan: t.cevap ? yazan(t) : null, sanal: Boolean(t.sanal), bolum: t.bolum || "astroloji-harita", soru: t.soru, durum: t.durum, olusturma: t.olusturma, sonTarih: t.sonTarih, cevap: t.cevap || null };
 
 // Uzmana gönderilebilen analizler. Her bölüm kayıtlı analizi okur ve uzmana gösterilecek özeti hazırlar.
 const BOLUMLER = {
@@ -333,24 +339,26 @@ function createHandler({ dataDir, currentUser, sendFile }) {
   const cfg = setup(dataDir);
   const talepDosyasi = (id) => path.join(dir, `${id}.json`);
 
-  async function kullanicininTalebi(userId, bolum) {
-    const hepsi = (await tumTalepler(dir)).filter((t) => t.userId === userId && (t.bolum || "astroloji-harita") === bolum);
+  async function kullanicininTalebi(userId, bolum, filtre = () => true) {
+    const hepsi = (await tumTalepler(dir)).filter((t) => t.userId === userId && (t.bolum || "astroloji-harita") === bolum && filtre(t));
     return hepsi.sort((a, b) => b.olusturma - a.olusturma)[0] || null;
   }
+  // Gerçek uzmanda bekleyen sipariş (sanal yorumlar beklemez).
+  const bekleyenSiparis = (userId, bolum) => kullanicininTalebi(userId, bolum, (t) => !t.sanal && t.durum !== "hazir");
 
   async function talepOlustur(user, body) {
     const soru = String(body?.soru || "").trim().slice(0, 600);
     const bolumAdi = String(body?.bolum || "astroloji-harita");
     const bolum = BOLUMLER[bolumAdi];
     if (!bolum) throw hata("Geçersiz bölüm.");
-    const uzman = UzmanKayit.vitrin().find((u) => u.id === String(body?.uzman || "") && u.bolumler.includes(bolumAdi));
-    if (!uzman) throw hata("Bu uzman bu bölümde şu an hizmet vermiyor. Başka bir uzman seç.");
-    // Cevaplayacak gerçek uzmanlar: karakterin sabit uzmanı ya da bu bölümü seçmiş herkes.
+    // Sipariş yalnız gerçek uzmanlara: "havuz" (o bölümü seçmiş herkes) ya da kendi adıyla görünen bir uzman.
+    const kartId = String(body?.uzman || "");
+    const uzman = kartId === UzmanKayit.HAVUZ ? { id: UzmanKayit.HAVUZ, ad: "Uzman ekibimiz" } : UzmanKayit.vitrin().find((u) => u.id === kartId && u.tip === "gercek" && u.bolumler.includes(bolumAdi));
+    if (!uzman) throw hata("Bu uzman bu bölümde şu an sipariş almıyor. Başka bir uzman seç.");
     const adaylar = UzmanKayit.cevaplayanlar(uzman.id, bolumAdi);
     if (!adaylar.length) throw hata("Bu bölümde şu an müsait uzmanımız yok. Biraz sonra tekrar dene.", 503);
 
-    const onceki = await kullanicininTalebi(user.id, bolumAdi);
-    if (onceki && onceki.durum !== "hazir") throw hata("Uzmanımızda bu analiz için zaten bekleyen bir talebin var.", 409);
+    if (await bekleyenSiparis(user.id, bolumAdi)) throw hata("Gerçek uzmanımızda bu bölüm için zaten bekleyen bir talebin var.", 409);
 
     const analiz = bolum.yukle ? await bolum.yukle(dataDir, user.id, body) : await readCache(bolum.dosya(cfg, dataDir, user.id));
     if (!analiz?.metin) throw hata(`Önce ${bolum.ad} analizini çıkarmalısın.`);
@@ -380,10 +388,10 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       void epostaYolla({
         kime: aday.email,
         konu: `Ezoter.ist: ${bolum.ad} için yeni yorum talebi`,
-        metin: `Merhaba ${aday.ad}, ${talep.userName || "bir üyemiz"} ${bolum.ad} için yorum istedi (seçtiği karakter: ${uzman.ad}).${soru ? ` Sorusu: ${soru}` : ""}${havuz ? " Talebi ilk üstlenen uzman cevaplar." : ""} Teslim: ${teslimMetni}. Panel: ${SITE}/uzman`,
+        metin: `Merhaba ${aday.ad}, ${talep.userName || "bir üyemiz"} ${bolum.ad} için yorum istedi.${soru ? ` Sorusu: ${soru}` : ""}${havuz ? " Talebi ilk üstlenen uzman cevaplar." : ""} Teslim: ${teslimMetni}. Panel: ${SITE}/uzman`,
         html: epostaSablon(
           "Yeni yorum talebi ✨",
-          `<p>Merhaba ${htmlKacis(aday.ad)},</p><p><b>${htmlKacis(talep.userName || "Bir üyemiz")}</b> ${bolum.ad} için yorum bekliyor. Seçtiği uzman kartı: <b>${htmlKacis(uzman.ad)}</b>.</p>` +
+          `<p>Merhaba ${htmlKacis(aday.ad)},</p><p><b>${htmlKacis(talep.userName || "Bir üyemiz")}</b> ${bolum.ad} için ${uzman.id === UzmanKayit.HAVUZ ? "uzman ekibimizden" : "<b>senden</b>"} yorum bekliyor.</p>` +
             (soru ? `<p>Sorusu: <i>${htmlKacis(soru)}</i></p>` : "") +
             (havuz ? "<p>Bu talep bu bölümü seçen birden çok uzmana gönderildi; <b>ilk üstlenen</b> cevaplar.</p>" : "") +
             `<p>Teslim süresi: <b>${teslimMetni}</b> tarihine kadar. Yazılı, sesli ya da videolu cevap verebilirsin.</p>`,
@@ -391,6 +399,46 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         ),
       }).catch(() => {});
     }
+    return talep;
+  }
+
+  // Sanal uzman yorumu: karakterin promptuyla yapay zekâ hemen yazar; kayıt talep olarak saklanır (sanal: true,
+  // durum hazır), sesli dinlemede karakterin sesi kullanılır. Gerçek uzmanların paneline düşmez, hakediş yoktur.
+  async function sanalYorum(user, body) {
+    if (!llmEnabled) throw hata("Sanal uzmanlarımız şu an müsait değil, biraz sonra tekrar dene.", 503);
+    const bolumAdi = String(body?.bolum || "astroloji-harita");
+    const bolum = BOLUMLER[bolumAdi];
+    if (!bolum) throw hata("Geçersiz bölüm.");
+    const kart = UzmanKayit.vitrin().find((u) => u.id === String(body?.uzman || "") && u.tip === "sanal" && u.bolumler.includes(bolumAdi));
+    if (!kart) throw hata("Bu uzman bu bölümde şu an yorum yapmıyor.");
+    const sayac = path.join(dir, "sanal-sayac", `${String(user.id).replace(/[^a-zA-Z0-9-]/g, "")}.json`);
+    const s = await readCache(sayac);
+    const bugunku = s?.gun === bugun() ? s.adet : 0;
+    const sinir = Ayarlar.sinir("sanalUzman");
+    if (bugunku >= sinir) throw hata(`Bugün ${sinir} sanal uzman yorumu hakkını kullandın. Yarın yeniden bekleriz; gerçek uzmanlarımızdan da yorum isteyebilirsin.`, 429);
+    const analiz = bolum.yukle ? await bolum.yukle(dataDir, user.id, body) : await readCache(bolum.dosya(cfg, dataDir, user.id));
+    if (!analiz?.metin) throw hata(`Önce ${bolum.ad} analizini çıkarmalısın.`);
+    const soru = String(body?.soru || "").trim().slice(0, 600);
+    const k = bolum.kaynak(analiz);
+    const tam = UzmanKayit.bul(kart.id);
+    const kullanici =
+      `<girdi>Danışan: ${user.name || "danışan"}. Konu: ${bolum.ad}. ${k.girdiMetni || ""}\n` +
+      `Analiz özeti: ${k.ozet || ""}\n${soru ? `Danışanın sana sorusu: ${soru}\n` : ""}` +
+      `İlk yapay zekâ yorumu (yalnızca kaynak, kopyalama): ${String(analiz.metin).slice(0, 3000)}</girdi>\n` +
+      `Bu analizi kendi üslubunla, danışana doğrudan hitap ederek 3-5 paragrafta yorumla.${soru ? " Sorusuna mutlaka cevap ver." : ""} Yalnızca yorum metnini yaz.`;
+    const metin = String(await askLlm(Promptlar.sistemPromptu(tam), kullanici, { maxTokens: 1400, temperature: 0.8 }) || "").trim().slice(0, 6000);
+    if (metin.length < 40) throw hata("Uzmanımız şu an yazamadı, biraz sonra tekrar dene.", 502);
+    const simdi = Date.now();
+    const talep = {
+      id: crypto.randomBytes(8).toString("hex"), sanal: true,
+      userId: user.id, userEmail: user.email, userName: user.name || "",
+      uzman: kart.id, bolum: bolumAdi, soru,
+      kaynak: { girdi: analiz.girdi, ...k, aiMetin: analiz.metin },
+      durum: "hazir", olusturma: simdi, sonTarih: simdi,
+      cevap: { metin, yazan: kart.id, tarih: simdi },
+    };
+    await writeCache(talepDosyasi(talep.id), talep);
+    await writeCache(sayac, { gun: bugun(), adet: bugunku + 1 });
     return talep;
   }
 
@@ -422,7 +470,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     await writeCache(talepDosyasi(talep.id), talep);
 
     const bolum = BOLUMLER[talep.bolum] || BOLUMLER["astroloji-harita"];
-    const ad = uzmanAdi(talep.uzman);
+    const ad = yazan(talep).ad;
     const turAdi = medya?.tur === "video" ? "videolu" : medya?.tur === "ses" ? "sesli" : "yazılı";
     void epostaYolla({
       kime: talep.userEmail,
@@ -477,7 +525,8 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     if (url.pathname === "/uzmanlar.js" && request.method === "GET") {
       const liste = UzmanKayit.hepsi().map((u) => ({ ...UzmanKayit.herkeseAcik(u), secilebilir: UzmanKayit.vitrin().some((v) => v.id === u.id) }));
       response.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-cache" });
-      response.end(`// Uzman kadrosu (sunucudan, uzman-kayit.js)\nwindow.Uzmanlar = ${JSON.stringify(liste)};\n`);
+      response.end(`// Uzman kadrosu (sunucudan, uzman-kayit.js)\nwindow.Uzmanlar = ${JSON.stringify(liste)};\n` +
+        `// Bölüm başına sipariş alan gerçek uzman sayısı ("Uzman ekibimiz" kartı)\nwindow.UzmanHavuzu = ${JSON.stringify(UzmanKayit.havuzSayilari())};\n`);
       return true;
     }
     const foto = /^\/uzman-foto\/([0-9a-f]{10})$/.exec(url.pathname);
@@ -500,8 +549,14 @@ function createHandler({ dataDir, currentUser, sendFile }) {
 
     const routes = {
       "GET /api/uzman/durum": async () => {
-        const talep = await kullanicininTalebi(user.id, String(url.searchParams.get("bolum") || "astroloji-harita"));
-        sendJson(response, 200, { uzman: uzmanMi(user), ses: sesVar(), talep: kullaniciGorunumu(talep) });
+        const b = String(url.searchParams.get("bolum") || "astroloji-harita");
+        // talep: gösterilecek son cevap; bekleyen: gerçek uzmanda bekleyen sipariş (ayrıca durum satırı olarak gösterilir).
+        const [talep, bekleyen] = await Promise.all([kullanicininTalebi(user.id, b, (t) => t.durum === "hazir"), bekleyenSiparis(user.id, b)]);
+        sendJson(response, 200, { uzman: uzmanMi(user), ses: sesVar(), talep: kullaniciGorunumu(talep), bekleyen: kullaniciGorunumu(bekleyen) });
+      },
+      "POST /api/uzman/sanal": async () => {
+        const talep = await sanalYorum(user, await readJson(request));
+        sendJson(response, 201, { talep: kullaniciGorunumu(talep) });
       },
       "POST /api/uzman/talep": async () => {
         const talep = await talepOlustur(user, await readJson(request));
@@ -514,7 +569,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         const yonetici = Ayarlar.yoneticiMi(user);
         const sira = { sirada: 0, inceleniyor: 1, hazir: 2 };
         const benimMi = (t) => ben && (t.cevaplayan === ben.id || (!t.cevaplayan && t.durum !== "hazir" && (t.adaylar || []).includes(ben.id)));
-        const talepler = (await tumTalepler(dir)).filter((t) => yonetici || benimMi(t)).sort(
+        const talepler = (await tumTalepler(dir)).filter((t) => !t.sanal && (yonetici || benimMi(t))).sort(
           (a, b) => sira[a.durum] - sira[b.durum] || (a.durum === "hazir" ? b.olusturma - a.olusturma : a.sonTarih - b.sonTarih),
         );
         const benimkiler = talepler.filter((t) => ben && t.cevaplayan === ben.id && t.hakedis);
@@ -526,25 +581,6 @@ function createHandler({ dataDir, currentUser, sendFile }) {
           bolumListesi: BOLUM_LISTESI(),
           hakedis: ben ? { toplam, odenen, kalan: toplam - odenen, adet: benimkiler.length, oran: ben.oran } : null,
         });
-      },
-      // Karakterin ağzından taslak: seçilen kartın promptuyla yapay zekâ bir taslak yazar; uzman düzeltip teslim eder.
-      "POST /api/uzman/panel/taslak": async () => {
-        sadeceUzman();
-        if (!llmEnabled) throw hata("Yapay zekâ şu an bağlı değil.", 503);
-        const body = await readJson(request);
-        const talep = await yetkiliTalep(user, body?.id);
-        const kart = UzmanKayit.bul(talep.uzman) || { ad: "Uzmanımız", prompt: "" };
-        const k = talepKaynagi(talep);
-        const bolum = (BOLUMLER[talep.bolum] || BOLUMLER["astroloji-harita"]).ad;
-        const kullanici =
-          `<girdi>Danışan: ${talep.userName || "danışan"}. Konu: ${bolum}. ${k.girdiMetni || ""}\n` +
-          `Analiz özeti: ${k.ozet || ""}\n${talep.soru ? `Danışanın uzmana notu: ${talep.soru}\n` : ""}` +
-          `Yapay zekânın ilk yorumu (yalnızca kaynak olarak kullan, kopyalama): ${String(k.aiMetin || "").slice(0, 3000)}</girdi>\n` +
-          `Bu analizi ${kart.ad || "uzman"} olarak, kendi üslubunla ve danışana doğrudan hitap ederek 3-5 paragrafta yorumla. ` +
-          (talep.soru ? "Danışanın notuna mutlaka cevap ver. " : "") + "Yalnızca yorum metnini yaz.";
-        const metin = String(await askLlm(Promptlar.sistemPromptu(kart), kullanici, { maxTokens: 1400, temperature: 0.8 }) || "").trim().slice(0, 6000);
-        if (metin.length < 40) throw hata("Taslak üretilemedi, tekrar dene.", 502);
-        sendJson(response, 200, { metin, kart: kart.ad });
       },
       // Havuzdaki talebi üstlenme: ilk gelen alır.
       "POST /api/uzman/panel/ustlen": async () => {

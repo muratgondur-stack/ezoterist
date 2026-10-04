@@ -2,9 +2,10 @@
 // - gercek: üyeler arasından yönetim panelinde uzman yapılan kişi. Hangi bölümlere yorum yazacağını, fotoğrafını,
 //   unvanını ve tanıtımını kendi panelinden seçer; isterse kendi adıyla da vitrinde görünür (vitrinde). Hakediş oranı
 //   ve açık/kapalı yöneticidedir.
-// - sanal: müşterinin seçtiği karakter (resimler uzman/sanal/s1..8.webp, yeşil perdesi silinmiş). Adını, unvanını ve
-//   hangi bölümlerde görüneceğini yönetici belirler. Talep, o bölümü seçmiş bütün gerçek uzmanlara gider; ilk
-//   "Üstlen" diyen cevaplar. Yönetici bir karaktere sabit bir uzman atarsa talep yalnız ona gider.
+// - sanal: yapay zekâ karakteri (resimler uzman/sanal/s1..8.webp, yeşil perdesi silinmiş). Müşteri seçince yorum
+//   hemen, karakterin promptu ve sesiyle yazılır; sipariş, bekleme ve hakediş yoktur (Murat 2026-10-04).
+// Siparişler (48 saat) yalnız gerçek uzmanlara gider: kendi adıyla vitrinde olana ya da "havuz"a (o bölümü seçmiş
+// bütün gerçek uzmanlar; ilk "Üstlen" diyen cevaplar).
 // Fotoğraf yüklemeleri DATA_DIR/uzman/foto/<id>.jpg|png|webp.
 const crypto = require("node:crypto");
 const fs = require("node:fs");
@@ -40,6 +41,8 @@ function hepsi() {
       if (!u.bolumler.length) u.bolumler = [...k.bolumler];
       if (u.ses === undefined) u.ses = k.ses;
     });
+    // Sanal karakterler sipariş almadığı için hepsi açılır (bir kez; sonra panelden kapatılabilir).
+    bellek.filter((u) => u.tip === "sanal" && (u.surum || 0) < 2).forEach((u) => { u.aktif = Boolean(u.ad); u.surum = 2; });
   }
   return bellek;
 }
@@ -69,15 +72,21 @@ const vitrindeMi = (u) => u.aktif && Boolean(u.ad) && u.bolumler.length > 0 && B
 const herkeseAcik = (u) => ({ id: u.id, tip: u.tip, ad: u.ad, unvan: u.unvan, tanitim: u.tanitim, resim: resimAdresi(u), bolumler: u.bolumler, aktif: u.aktif });
 const vitrin = () => hepsi().filter(vitrindeMi).sort((a, b) => (a.sira || 99) - (b.sira || 99)).map(herkeseAcik);
 
-// Bir kart + bölüm için cevap verebilecek gerçek uzmanlar.
+// Sipariş için cevap verebilecek gerçek uzmanlar: "havuz" = o bölümü seçmiş herkes; gerçek kart = yalnız o.
+// Sanal karakterler sipariş almaz.
+const HAVUZ = "havuz";
 function cevaplayanlar(kartId, bolum) {
-  const kart = bul(kartId);
-  if (!kart) return [];
   const uygun = (g) => g && g.tip === "gercek" && g.aktif && g.bolumler.includes(bolum);
-  if (kart.tip === "gercek") return uygun(kart) ? [kart] : [];
-  if (kart.sabitUzman) return uygun(bul(kart.sabitUzman)) ? [bul(kart.sabitUzman)] : [];
-  return gercekler().filter(uygun);
+  if (kartId === HAVUZ) return gercekler().filter(uygun);
+  const kart = bul(kartId);
+  return kart?.tip === "gercek" && uygun(kart) ? [kart] : [];
 }
+// Bölüm başına sipariş alabilen gerçek uzman sayısı (sayfa "Uzman ekibimiz" kartını buna göre gösterir).
+const havuzSayilari = () => {
+  const s = {};
+  gercekler().filter((g) => g.aktif).forEach((g) => g.bolumler.forEach((b) => { s[b] = (s[b] || 0) + 1; }));
+  return s;
+};
 
 // --- Yönetici ---
 
@@ -165,4 +174,4 @@ const fotoYolu = (id) => {
   return u?.foto ? path.join(fotoDizini, `${u.id}.${u.foto.uzanti}`) : null;
 };
 
-module.exports = { hepsi, bul, gercekler, kullanicininUzmanligi, uzmanMi, herkeseAcik, vitrin, vitrindeMi, cevaplayanlar, resimAdresi, ekle, sanalEkle, yoneticiGuncelle, sil, profilGuncelle, fotoKaydet, fotoYolu };
+module.exports = { HAVUZ, havuzSayilari, hepsi, bul, gercekler, kullanicininUzmanligi, uzmanMi, herkeseAcik, vitrin, vitrindeMi, cevaplayanlar, resimAdresi, ekle, sanalEkle, yoneticiGuncelle, sil, profilGuncelle, fotoKaydet, fotoYolu };

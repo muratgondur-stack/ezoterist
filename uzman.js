@@ -261,22 +261,6 @@ function renderDetail(t) {
   turSec(tur);
   if (medya && medya.tur === tur) { kayitYeri.hidden = true; aktifKaydedici?.kapat(); medyaGoster(); }
 
-  const kt = f("karakterTaslak");
-  kt.textContent = `✨ ${t.uzmanAdi} ağzından taslak`;
-  kt.addEventListener("click", async () => {
-    if (textarea.value.trim() && !confirm(`Yazdığın metin ${t.uzmanAdi} üslubuyla yazılmış bir taslakla değiştirilsin mi?`)) return;
-    kt.disabled = true;
-    const eski = kt.textContent;
-    kt.textContent = "⏳ Taslak yazılıyor…";
-    try {
-      const d = await postJson("/api/uzman/panel/taslak", { id: t.id });
-      if (tur !== "yazi") form.querySelector('.cevap-turu button[data-tur="yazi"]').click();
-      textarea.value = d.metin;
-      textarea.dispatchEvent(new Event("input"));
-      textarea.focus();
-      toast("Taslak hazır. Okuyup kendi gözünle düzelt, sonra teslim et.");
-    } catch (error) { toast(error.message); } finally { kt.disabled = false; kt.textContent = eski; }
-  });
   f("taslak").addEventListener("click", () => {
     if (textarea.value.trim() && !confirm("Yazdığın metin yapay zekâ yorumuyla değiştirilsin mi?")) return;
     textarea.value = t.kaynak.aiMetin;
