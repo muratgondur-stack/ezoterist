@@ -309,7 +309,9 @@ function renderProfil() {
     l.querySelector("span").textContent = b.ad;
     return l;
   }));
-  $("profilDurum").textContent = p.bolumler.length ? `${p.bolumler.length} bölümde talep alıyorsun.` : "Henüz bölüm seçmedin; sana talep gelmez.";
+  const eksik = p.vitrinde && !p.gorunuyor ? (!p.resim ? " Kendi adınla görünmen için fotoğraf yükle." : !p.bolumler.length ? " Kendi adınla görünmen için bölüm seç." : "") : "";
+  $("profilDurum").textContent = (p.bolumler.length ? `${p.bolumler.length} bölümde talep alıyorsun.` : "Henüz bölüm seçmedin; sana talep gelmez.") +
+    (p.vitrinde && p.gorunuyor ? " Müşteriler seni kendi adınla da seçebiliyor." : eksik);
 }
 $("profilForm").addEventListener("submit", async (e) => {
   e.preventDefault();

@@ -585,7 +585,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         const odenen = benimkiler.filter((t) => t.hakedis.odemeId).reduce((a, t) => a + t.hakedis.tutar, 0);
         sendJson(response, 200, {
           talepler: talepler.map((t) => ({ ...panelGorunumu(t), benim: Boolean(ben && t.cevaplayan === ben.id), ustlenilebilir: Boolean(ben && !t.cevaplayan && (t.adaylar || []).includes(ben.id)) })), yonetici,
-          profil: ben ? { ...UzmanKayit.herkeseAcik(ben), oran: ben.oran, email: ben.email } : null,
+          profil: ben ? { ...UzmanKayit.herkeseAcik(ben), oran: ben.oran, email: ben.email, vitrinde: Boolean(ben.vitrinde), gorunuyor: UzmanKayit.vitrindeMi(ben) } : null,
           bolumListesi: BOLUM_LISTESI(),
           hakedis: ben ? { toplam, odenen, kalan: toplam - odenen, adet: benimkiler.length, oran: ben.oran } : null,
         });
@@ -609,7 +609,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         sadeceUzman();
         const body = await readJson(request);
         const u = await UzmanKayit.profilGuncelle(user.id, body || {}, Object.keys(BOLUMLER));
-        sendJson(response, 200, { profil: { ...UzmanKayit.herkeseAcik(u), oran: u.oran, email: u.email } });
+        sendJson(response, 200, { profil: { ...UzmanKayit.herkeseAcik(u), oran: u.oran, email: u.email, vitrinde: Boolean(u.vitrinde), gorunuyor: UzmanKayit.vitrindeMi(u) } });
       },
       "POST /api/uzman/profil/foto": async () => {
         sadeceUzman();
