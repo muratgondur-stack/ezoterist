@@ -37,8 +37,8 @@ const BOLUMLER = [
   { id: "asistan", ad: "Ezoterik Asistan", sayfa: "/asistan", api: "/api/asistan/", dizin: "asistan", sinir: 30 },
   { id: "dizim", ad: "Taşlarla Dizim", sayfa: "/taslarla-dizim", api: "/api/dizim/", dizin: "dizim", sinir: 5 },
   { id: "yuz-muzigi", ad: "Yüz Müziği", sayfa: "/yuz-muzigi", api: "/api/yuz-muzigi/", dizin: "yuz-muzigi", sinir: null },
-  { id: "ebced", ad: "Ebced", sayfa: "/ebced", api: "/api/ebced/", dizin: "ebced", sinir: 5 },
-  { id: "cifir", ad: "Cifir", sayfa: "/cifir", api: "/api/cifir/", dizin: "cifir", sinir: 3 },
+  { id: "ebced", ad: "Ebced", sayfa: "/ebced", api: "/api/ebced/", dizin: "ebced", sinir: 5, ses: "davis" },
+  { id: "cifir", ad: "Cifir", sayfa: "/cifir", api: "/api/cifir/", dizin: "cifir", sinir: 3, ses: "davis" },
 ];
 
 const listeOrtam = (ad) => String(process.env[ad] || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
@@ -76,7 +76,7 @@ const SEMA = {
 const UZMANLI = ["astroloji", "numeroloji", "ruya", "kahve-fali", "el-fali", "tarot", "yuz-okuma", "fotograf-analizi", "ask-uyumu", "melek-sayilari", "iching", "run-taslari", "ay-takvimi", "cakralar", "kristaller", "semboller", "dizim", "ebced", "cifir"];
 BOLUMLER.forEach((b) => {
   SEMA[`bolum.${b.id}.acik`] = { grup: "Bölümler", ad: b.ad, tur: "bool", vars: true };
-  SEMA[`bolum.${b.id}.ses`] = { grup: "Bölüm sesleri", ad: b.ad, tur: "secim", secenekler: ["", ...SESLER], vars: "", aciklama: "boş = varsayılan ses" };
+  SEMA[`bolum.${b.id}.ses`] = { grup: "Bölüm sesleri", ad: b.ad, tur: "secim", secenekler: ["", ...SESLER], vars: b.ses || "", aciklama: "boş = varsayılan ses" };
   if (b.sinir !== null) SEMA[`sinir.${b.id}`] = { grup: "Günlük sınırlar", ad: b.ad, tur: "tam", min: 0, max: 1000, vars: b.sinir, birim: "/gün", aciklama: "0 = sınırsız" };
   SEMA[`fiyat.${b.id}`] = { grup: "Fiyatlar", ad: b.ad, tur: "tam", min: 0, max: 10000, vars: 0, birim: "kontör", aciklama: "bir işlem için; 0 = ücretsiz" };
   // Uzman (insan) değerlendirmesi olan bölümlerde ayrı fiyat (Murat 2026-10-04)
