@@ -284,7 +284,14 @@ const bilgilendirmeKontrol = (user) => {
       .yorumcu-liste b { font: 700 .76rem/1.2 Manrope, sans-serif; text-align: center; }
       .yorumcu-liste button[aria-pressed="true"] { border-color: #f3c26b; background: rgba(243,194,107,.12); }
       .yorumcu-liste button[aria-pressed="true"] img { box-shadow: 0 0 0 3px #f3c26b, 0 0 18px rgba(243,194,107,.5); }
-      .yorumcu-sec small { display: block; color: rgba(255,255,255,.65); font: 500 .76rem Manrope, sans-serif; }`;
+      .yorumcu-sec small { display: block; color: rgba(255,255,255,.65); font: 500 .76rem Manrope, sans-serif; }
+      .yorumcu-rozet { display: flex; align-items: center; gap: 14px; width: 100%; margin: 10px 0 12px; padding: 10px 14px 10px 10px; border: 1px solid rgba(243,194,107,.28); border-radius: 18px; background: linear-gradient(90deg, rgba(243,194,107,.10), rgba(0,0,0,.15)); box-sizing: border-box; text-align: left; }
+      .yorumcu-rozet img { flex: none; width: 92px; height: 92px; border-radius: 50%; object-fit: cover; object-position: 50% 8%; background: radial-gradient(circle at 50% 35%, #353a7a, #0d0f24 75%); box-shadow: 0 0 0 2px #f3c26b, 0 8px 22px rgba(0,0,0,.45); transition: box-shadow .3s; }
+      .yorumcu-rozet b { display: block; color: #f3c26b; font: 700 1.15rem "Cormorant Garamond", Georgia, serif; }
+      .yorumcu-rozet small { display: block; color: rgba(255,255,255,.72); font: 500 .8rem/1.4 Manrope, sans-serif; }
+      .yorumcu-rozet.konusuyor img { animation: yorumcu-nabiz 1.2s ease-in-out infinite; }
+      @keyframes yorumcu-nabiz { 0%,100% { box-shadow: 0 0 0 2px #f3c26b, 0 0 10px rgba(243,194,107,.35); } 50% { box-shadow: 0 0 0 4px #f3c26b, 0 0 30px rgba(243,194,107,.8); } }
+      @media (max-width: 520px) { .yorumcu-rozet img { width: 76px; height: 76px; } }`;
     document.head.append(stil);
 
     const kutu = document.createElement("div");
@@ -302,7 +309,7 @@ const bilgilendirmeKontrol = (user) => {
         b.innerHTML = '<img alt="" loading="lazy" /><b></b>';
         b.querySelector("img").src = u.resim;
         b.querySelector("b").textContent = u.ad;
-        b.addEventListener("click", () => { secili = u.id; yaz(); ciz(); });
+        b.addEventListener("click", () => { secili = u.id; yaz(); ciz(); rozetleriYerlestir(); });
         return b;
       }));
       const u = liste.find((x) => x.id === secili);
@@ -310,6 +317,45 @@ const bilgilendirmeKontrol = (user) => {
     };
     ciz();
     dugme.insertAdjacentElement("beforebegin", kutu);
+
+    // Yorum sonuçlarında, "sesli dinle" düğmelerinin yanında yorumu yazan/okuyan sanal uzmanın resmi (orta boy);
+    // okurken resim ışıldar. Gerçek uzman cevaplarına (uzman kartı) eklenmez.
+    const rozetIcerik = (r) => {
+      const u = liste.find((x) => x.id === secili);
+      if (r.dataset.yorumcu === u.id) return; // yalnız değişince yaz (gözlemci döngüye girmesin)
+      r.dataset.yorumcu = u.id;
+      r.querySelector("img").src = u.resim;
+      r.querySelector("b").textContent = u.ad;
+      r.querySelector("small").textContent = `${u.unvan ? `${u.unvan} · ` : ""}yorumunu o yazdı, sesli dinlersen o okur`;
+    };
+    function rozetleriYerlestir() {
+      document.querySelectorAll("button.listen").forEach((btn) => {
+        if (btn.closest("#expertCard, .yorumcu-sec, .journal, ul, li")) return;
+        const hedef = btn.closest(".reading-head") || btn;
+        let r = hedef.previousElementSibling?.classList.contains("yorumcu-rozet") ? hedef.previousElementSibling
+          : hedef.nextElementSibling?.classList.contains("yorumcu-rozet") ? hedef.nextElementSibling : null;
+        if (!r) {
+          r = document.createElement("div");
+          r.className = "yorumcu-rozet";
+          r.innerHTML = '<img alt="" /><div><b></b><small></small></div>';
+          // Başlık satırındaki düğmede rozet başlığın altına, tek başına duran düğmede düğmenin üstüne gelir.
+          hedef.insertAdjacentElement(hedef === btn ? "beforebegin" : "afterend", r);
+        }
+        rozetIcerik(r);
+      });
+    }
+    rozetleriYerlestir();
+    let bekleyen = 0;
+    new MutationObserver(() => {
+      cancelAnimationFrame(bekleyen);
+      bekleyen = requestAnimationFrame(rozetleriYerlestir);
+    }).observe(document.querySelector("main") || document.body, { childList: true, subtree: true });
+    const ses = document.getElementById("voice");
+    if (ses) {
+      const isilti = (acik) => document.querySelectorAll(".yorumcu-rozet").forEach((r) => r.classList.toggle("konusuyor", acik));
+      ses.addEventListener("playing", () => isilti(!document.querySelector("#expertCard .is-playing, #expertListen.is-playing")));
+      ["pause", "ended", "error", "emptied"].forEach((o) => ses.addEventListener(o, () => isilti(false)));
+    }
   })();
 
   // Her zaman ücretsiz olanlar (fiyatı yok): günlük burç yorumu herkes için ortak üretilir.
