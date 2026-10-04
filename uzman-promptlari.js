@@ -54,4 +54,7 @@ const varsayilanKimlik = (hazirResim) => KIMLIK[resimAnahtari(hazirResim)] || nu
 // Promptu karakterin adıyla doldurur ve ortak kuralları ekler.
 const sistemPromptu = (kart) => `${String(kart.prompt || "Senin adın {ad}. Sen Ezoter.ist'in sıcakkanlı, bilge bir uzmanısın.").replace(/\{ad\}/g, kart.ad || "uzman")}${ORTAK}`;
 
-module.exports = { VARSAYILAN, KIMLIK, ORTAK, varsayilanPrompt, varsayilanKimlik, sistemPromptu };
+// Bölüm yorumlarında kullanılan karakter tarifi (ortak kurallar bölümün kendi talimatından gelir).
+const karakterMetni = (kart) => String(kart.prompt || "Senin adın {ad}. Sen Ezoter.ist'in sıcakkanlı, bilge bir uzmanısın.").replace(/\{ad\}/g, kart.ad || "uzman");
+
+module.exports = { VARSAYILAN, KIMLIK, ORTAK, varsayilanPrompt, varsayilanKimlik, sistemPromptu, karakterMetni };

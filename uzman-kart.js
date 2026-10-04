@@ -1,7 +1,6 @@
-// "İstersen uzmanımıza da yorumlat" kartı (bütün bölüm sayfaları ortak kullanır). İki grup (Murat 2026-10-04):
-// - Sanal uzmanlar: yapay zekâ karakterleri; seçilince yorum hemen, karakterin üslubu ve sesiyle yazılır.
-// - Gerçek uzmanlar: sipariş; "Uzman ekibimiz" (o bölümü seçmiş bütün uzmanlar) ya da kendi adıyla görünen bir uzman,
-//   48 saat içinde cevaplar.
+// "İstersen uzmanımıza da yorumlat" kartı (bütün bölüm sayfaları ortak kullanır): yalnız gerçek uzmanlara sipariş;
+// "Uzman ekibimiz" (o bölümü seçmiş bütün uzmanlar) ya da kendi adıyla görünen bir uzman, 48 saat içinde cevaplar.
+// Sanal uzmanlar burada yok: bölümün yorumunu zaten müşterinin baştan seçtiği sanal uzman yazar (ust-cubuk.js).
 // Sayfada #expertCard, #expertGrid, #expertForm ve #expertStatus öğeleri bulunur. ekVeri: talebe eklenecek bölüme
 // özel bilgi (ör. rüyada hangi kayıt).
 window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
@@ -10,7 +9,7 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
   let talep = null; // gösterilen son cevap
   let bekleyen = null; // gerçek uzmanda bekleyen sipariş
   const tum = () => window.Uzmanlar || [];
-  const sanallar = () => tum().filter((u) => u.secilebilir && u.tip === "sanal" && u.bolumler.includes(bolum));
+  const sanallar = () => [];
   const gercekler = () => [
     ...((window.UzmanHavuzu || {})[bolum] ? [{ id: HAVUZ, tip: "gercek", ad: "Uzman ekibimiz", unvan: "Gerçek uzman · 48 saat", resim: "" }] : []),
     ...tum().filter((u) => u.secilebilir && u.tip === "gercek" && u.bolumler.includes(bolum)),
@@ -52,13 +51,11 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
 
   function renderUzmanlar() {
     const lead = $("expertCard").querySelector(".expert-lead");
-    if (lead) lead.textContent = "Sanal uzmanlarımız analizine hemen, kendi üsluplarıyla yorum yazar ve sesli okur. Gerçek uzmanlarımız ise 48 saat içinde sana özel, kişisel bir yorum hazırlar.";
-    const rozet = $("expertCard").querySelector(".reading-head .badge");
-    if (rozet) rozet.textContent = "Sanal: hemen · Gerçek: 48 saat";
+    if (lead) lead.textContent = "Dilersen gerçek uzmanlarımızdan biri analizini kendi gözüyle de incelesin; 48 saat içinde sana özel, kişisel bir yorum hazırlar (yazılı, sesli ya da videolu).";
     if (!secilebilirler().length) {
       const li = document.createElement("li");
       li.className = "expert-yok";
-      li.textContent = "Bu bölümde uzmanlarımız çok yakında hizmet verecek.";
+      li.textContent = bekleyen ? "Talebin uzmanımızda; hazır olunca e-posta ile haber vereceğiz." : "Gerçek uzmanlarımız bu bölüme çok yakında katılacak.";
       $("expertGrid").replaceChildren(li);
       $("expertForm").hidden = true;
       return;
@@ -66,8 +63,8 @@ window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
     if (!seciliKart()) secili = secilebilirler()[0].id;
     const ogeler = [];
     if (sanallar().length) ogeler.push(grupBasligi("✨ Sanal uzmanlarımız", "Hemen yorumlar"), ...sanallar().map(slot));
-    ogeler.push(grupBasligi("👤 Gerçek uzmanlarımız", bekleyen ? "Talebin hazırlanıyor; bitince yenisini isteyebilirsin" : gercekler().length ? "48 saat içinde, kişisel" : "Bu bölüme çok yakında katılacak"),
-      ...(bekleyen ? [] : gercekler().map(slot)));
+    if (bekleyen) ogeler.push(grupBasligi("Talebin hazırlanıyor", "Bitince yeni bir talep verebilirsin"));
+    else ogeler.push(...gercekler().map(slot));
     $("expertGrid").replaceChildren(...ogeler);
     const k = seciliKart();
     const dugme = $("expertForm").querySelector('button[type="submit"]');

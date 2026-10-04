@@ -37,9 +37,11 @@ const kayit = (bolum) => {
   return v.bolumler[bolum];
 };
 
-// İsteği bölüm etiketiyle çalıştırır (server.js).
-const calistir = (bolum, fn) => baglam.run({ bolum, llmSayildi: false }, fn);
+// İsteği bölüm etiketiyle çalıştırır (server.js). ek: { yorumcu } — müşterinin seçtiği sanal uzman (askLlm ve
+// seslendirme kullanır).
+const calistir = (bolum, fn, ek = {}) => baglam.run({ bolum, llmSayildi: false, ...ek }, fn);
 const simdikiBolum = () => baglam.getStore()?.bolum || null;
+const simdikiYorumcu = () => baglam.getStore()?.yorumcu || null;
 
 function llm(giris, cikis) {
   const s = baglam.getStore();
@@ -67,4 +69,4 @@ function gorsel(bolum) {
 }
 const ozet = () => JSON.parse(JSON.stringify(oku()));
 
-module.exports = { calistir, simdikiBolum, llm, tts, gorsel, ozet };
+module.exports = { calistir, simdikiBolum, simdikiYorumcu, llm, tts, gorsel, ozet };

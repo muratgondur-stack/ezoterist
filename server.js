@@ -6,7 +6,9 @@ const Ayarlar = require("./ayarlar");
 const Olcum = require("./olcum");
 const { createHandler: createYonetimHandler } = require("./yonetim-api");
 const { createHandler: createAstrolojiHandler } = require("./astroloji-api");
-const { createHandler: createUzmanHandler } = require("./uzman-api");
+const { createHandler: createUzmanHandler, yorumcuAnahtari } = require("./uzman-api");
+const UzmanKayit = require("./uzman-kayit");
+const Promptlar = require("./uzman-promptlari");
 const { createHandler: createNumerolojiHandler } = require("./numeroloji-api");
 const { createHandler: createRuyaHandler } = require("./ruya-api");
 const { createHandler: createFalHandler } = require("./fal-api");
@@ -208,7 +210,23 @@ function istekBolumu(adres) {
   return Ayarlar.BOLUMLER.find((b) => yol.startsWith(b.api))?.id || null;
 }
 
-const server = http.createServer((request, response) => Olcum.calistir(istekBolumu(request.url), () => anaIsleyici(request, response)));
+// Müşterinin bu bölüm için seçtiği sanal uzman (çerez "ezoy_<bölüm>"; seçim kutusu ust-cubuk.js'te). Ses her istekte,
+// üslup yalnız kişisel yapay zekâ yorumlarında uygulanır (ortak önbelleğe giden üretimlere karakter karışmasın).
+function yorumcuBul(request, bolum) {
+  if (!bolum) return null;
+  const id = new RegExp(`(?:^|;\\s*)ezoy_${bolum.replace(/[^a-z-]/g, "")}=([0-9a-f]{10})`).exec(request.headers.cookie || "")?.[1];
+  const kart = id && UzmanKayit.bul(id);
+  const anahtar = yorumcuAnahtari(bolum);
+  if (!kart || kart.tip !== "sanal" || !UzmanKayit.vitrindeMi(kart) || !anahtar || !kart.bolumler.includes(anahtar)) return null;
+  const yol = String(request.url || "").split("?")[0];
+  const kisisel = request.method === "POST" && YAPAY_ZEKA_ISLEMI.test(yol) && !/^\/api\/(asistan|ruhsal)\//.test(yol);
+  return { id: kart.id, ad: kart.ad, ses: kart.ses || "", uslup: kisisel ? Promptlar.karakterMetni(kart) : "" };
+}
+
+const server = http.createServer((request, response) => {
+  const bolum = istekBolumu(request.url);
+  Olcum.calistir(bolum, () => anaIsleyici(request, response), { yorumcu: yorumcuBul(request, bolum) });
+});
 
 // Yapay zekâ işlemleri en az belli bir sürede cevaplanır (Murat 2026-10-04; varsayılan 8 sn, asistan 2 sn): yorum
 // önbellekten hemen hazır olsa da başarılı cevap bu süre dolmadan gönderilmez. Hata cevapları (eksik bilgi, günlük hak vb.) bekletilmez.

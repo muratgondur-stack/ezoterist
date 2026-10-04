@@ -76,6 +76,13 @@ function once(key, task) {
 }
 
 async function askLlm(system, user, { maxTokens = 700, temperature = 0.85 } = {}) {
+  // Müşterinin bu bölüm için seçtiği sanal uzman (server.js bağlama koyar): yorum onun üslubuyla yazılır;
+  // görev talimatı ve istenen çıktı biçimi (JSON) aynen korunur.
+  const yorumcu = Olcum.simdikiYorumcu();
+  if (yorumcu?.uslup) {
+    system = `${yorumcu.uslup}\n\nBu yorumu ${yorumcu.ad} olarak yazıyorsun. Aşağıdaki görev talimatlarına, kurallara ve istenen çıktı biçimine (JSON isteniyorsa yalnızca JSON) aynen uy; ` +
+      `yalnızca anlatım üslubun, hitapların ve benzetmelerin ${yorumcu.ad} karakterine ait olsun. Kendini ${yorumcu.ad} olarak tanıtabilirsin.\n\n--- GÖREV ---\n${system}`;
+  }
   const body = {
     model: llm.model,
     // Yönetim panelindeki yaratıcılık çarpanı bölümün sıcaklık değerini ölçekler.
@@ -265,7 +272,8 @@ async function sesDosyasi(text, dir, name, sesSecimi = "") {
   const clean = sesMetni(text).slice(0, 4000);
   // Ses ve hız yönetim panelinden: istenen ses (ör. uzman karakterinin sesi), yoksa bölüme özel ses
   // (veri klasöründen anlaşılır), o da yoksa varsayılan ses.
-  const voice = (Ayarlar.SESLER.includes(sesSecimi) && sesSecimi) || Ayarlar.sesFor(Ayarlar.bolumDizini(dir));
+  const yorumcuSesi = Olcum.simdikiYorumcu()?.ses || "";
+  const voice = (Ayarlar.SESLER.includes(sesSecimi) && sesSecimi) || (Ayarlar.SESLER.includes(yorumcuSesi) && yorumcuSesi) || Ayarlar.sesFor(Ayarlar.bolumDizini(dir));
   const rate = Ayarlar.get("ses.hiz");
   // Hız 1 iken eski dosya adları geçerli kalsın diye hız özete yalnız 1'den farklıysa katılır.
   const hash = crypto.createHash("sha1").update(rate === 1 ? `${voice}|${clean}` : `${voice}|${rate}|${clean}`).digest("hex").slice(0, 10);

@@ -319,6 +319,13 @@ const ayarBolumu = (bolumAdi) => {
   const sayfa = (BOLUMLER[bolumAdi] || BOLUMLER["astroloji-harita"]).link.split("#")[0];
   return Ayarlar.BOLUMLER.find((b) => b.sayfa === sayfa) || null;
 };
+// Yönetim panelindeki bölüm kimliği (ör. "ruya") → sanal uzmanların bölüm anahtarı (ör. "ruya-yorumu").
+const yorumcuAnahtari = (ayarId) => {
+  const ab = Ayarlar.BOLUMLER.find((b) => b.id === ayarId);
+  return ab ? Object.keys(BOLUMLER).find((k) => BOLUMLER[k].link.split("#")[0] === ab.sayfa) || null : null;
+};
+// Sayfa yolu → { bolum, anahtar }: sayfadaki "yorumunu kim yapsın" seçimi için.
+const yorumcuSayfalari = () => Object.fromEntries(Ayarlar.BOLUMLER.map((b) => [b.sayfa, { bolum: b.id, anahtar: yorumcuAnahtari(b.id) }]).filter(([, v]) => v.anahtar));
 const BOLUM_LISTESI = () => Object.entries(BOLUMLER).map(([id, b]) => ({ id, ad: b.ad, bolum: ayarBolumu(id)?.ad || "" }));
 
 // Hakediş: bölümün "uzman değerlendirmesi" fiyatı (kontör) × kontörün TL değeri × uzmanın oranı. Tanıtım
@@ -526,7 +533,8 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       const liste = UzmanKayit.hepsi().map((u) => ({ ...UzmanKayit.herkeseAcik(u), secilebilir: UzmanKayit.vitrin().some((v) => v.id === u.id) }));
       response.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-cache" });
       response.end(`// Uzman kadrosu (sunucudan, uzman-kayit.js)\nwindow.Uzmanlar = ${JSON.stringify(liste)};\n` +
-        `// Bölüm başına sipariş alan gerçek uzman sayısı ("Uzman ekibimiz" kartı)\nwindow.UzmanHavuzu = ${JSON.stringify(UzmanKayit.havuzSayilari())};\n`);
+        `// Bölüm başına sipariş alan gerçek uzman sayısı ("Uzman ekibimiz" kartı)\nwindow.UzmanHavuzu = ${JSON.stringify(UzmanKayit.havuzSayilari())};\n` +
+        `// Sayfa → yorumu yapacak sanal uzman seçimi için bölüm anahtarı\nwindow.YorumcuSayfalari = ${JSON.stringify(yorumcuSayfalari())};\n`);
       return true;
     }
     const foto = /^\/uzman-foto\/([0-9a-f]{10})$/.exec(url.pathname);
@@ -738,4 +746,4 @@ async function kullaniciTalepleri(dataDir, userId) {
   });
 }
 
-module.exports = { createHandler, kullaniciTalepleri, hakedisOzeti, hakedisOde, BOLUM_LISTESI, hamOku };
+module.exports = { createHandler, kullaniciTalepleri, hakedisOzeti, hakedisOde, BOLUM_LISTESI, hamOku, yorumcuAnahtari };

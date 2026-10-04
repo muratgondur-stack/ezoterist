@@ -248,6 +248,69 @@ const bilgilendirmeKontrol = (user) => {
     "/ebced": "#ebcedSubmit",
     "/cifir": "#cifirSubmit",
   };
+  // "Yorumunu kim yapsın?" (Murat 2026-10-04): bölümün yorum düğmesinin üstünde sanal uzman seçimi. Seçilen uzman yorumu
+  // kendi promptundaki üslupla yazar ve kendi sesiyle okur (sunucu çerezden okur: ezoy_<bölüm>). Seçim tarayıcıda hatırlanır.
+  (async () => {
+    const secici = ISLEM_DUGMESI[location.pathname];
+    const dugme = secici && document.querySelector(secici.split(",")[0]);
+    if (!dugme) return;
+    if (!window.YorumcuSayfalari) {
+      await new Promise((tamam) => {
+        const s = document.createElement("script");
+        s.src = "/uzmanlar.js?v=4";
+        s.onload = tamam;
+        s.onerror = tamam;
+        document.head.append(s);
+      });
+    }
+    const sayfa = (window.YorumcuSayfalari || {})[location.pathname];
+    if (!sayfa) return;
+    const liste = (window.Uzmanlar || []).filter((u) => u.secilebilir && u.tip === "sanal" && u.bolumler.includes(sayfa.anahtar));
+    if (!liste.length) return;
+    const cerez = `ezoy_${sayfa.bolum}`;
+    const kayitli = new RegExp(`(?:^|;\\s*)${cerez}=([0-9a-f]{10})`).exec(document.cookie)?.[1];
+    let secili = liste.some((u) => u.id === kayitli) ? kayitli : liste[0].id;
+    const yaz = () => { document.cookie = `${cerez}=${secili}; path=/; max-age=31536000; SameSite=Lax`; };
+    yaz();
+
+    const stil = document.createElement("style");
+    stil.textContent = `
+      .yorumcu-sec { flex-basis: 100%; width: 100%; margin: 4px 0 14px; padding: 12px 14px; border: 1px solid rgba(243,194,107,.3); border-radius: 18px; background: rgba(0,0,0,.25); text-align: left; }
+      .yorumcu-sec > p { margin: 0 0 8px; font: 800 .9rem Manrope, sans-serif; color: #f3c26b; }
+      .yorumcu-liste { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 6px; scrollbar-width: thin; }
+      .yorumcu-liste button { flex: 0 0 auto; display: grid; justify-items: center; gap: 4px; width: 88px; padding: 6px 4px; border: 1.5px solid transparent; border-radius: 14px; color: inherit; background: none; font: inherit; cursor: pointer; }
+      .yorumcu-liste img { width: 62px; height: 62px; border-radius: 50%; object-fit: cover; object-position: 50% 8%; background: radial-gradient(circle at 50% 35%, #353a7a, #0d0f24 75%); box-shadow: 0 0 0 2px rgba(255,255,255,.12); }
+      .yorumcu-liste b { font: 700 .76rem/1.2 Manrope, sans-serif; text-align: center; }
+      .yorumcu-liste button[aria-pressed="true"] { border-color: #f3c26b; background: rgba(243,194,107,.12); }
+      .yorumcu-liste button[aria-pressed="true"] img { box-shadow: 0 0 0 3px #f3c26b, 0 0 18px rgba(243,194,107,.5); }
+      .yorumcu-sec small { display: block; color: rgba(255,255,255,.65); font: 500 .76rem Manrope, sans-serif; }`;
+    document.head.append(stil);
+
+    const kutu = document.createElement("div");
+    kutu.className = "yorumcu-sec";
+    kutu.innerHTML = '<p>🔮 Yorumunu kim yapsın?</p><div class="yorumcu-liste" role="radiogroup" aria-label="Yorumu yapacak uzman"></div><small></small>';
+    const not = kutu.querySelector("small");
+    const ciz = () => {
+      kutu.querySelector(".yorumcu-liste").replaceChildren(...liste.map((u) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.setAttribute("role", "radio");
+        b.setAttribute("aria-pressed", String(u.id === secili));
+        b.setAttribute("aria-checked", String(u.id === secili));
+        b.title = [u.unvan, u.tanitim].filter(Boolean).join(" — ");
+        b.innerHTML = '<img alt="" loading="lazy" /><b></b>';
+        b.querySelector("img").src = u.resim;
+        b.querySelector("b").textContent = u.ad;
+        b.addEventListener("click", () => { secili = u.id; yaz(); ciz(); });
+        return b;
+      }));
+      const u = liste.find((x) => x.id === secili);
+      not.textContent = `${u.ad}${u.unvan ? ` · ${u.unvan}` : ""}: yorumunu kendi üslubuyla yazar ve kendi sesiyle okur.`;
+    };
+    ciz();
+    dugme.insertAdjacentElement("beforebegin", kutu);
+  })();
+
   // Her zaman ücretsiz olanlar (fiyatı yok): günlük burç yorumu herkes için ortak üretilir.
   const HEP_UCRETSIZ = { "/astroloji": 'a.btn[href="#burclar"]' };
   const UZMAN_DUGMESI = '#expertForm button[type="submit"]';
