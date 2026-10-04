@@ -84,11 +84,11 @@
         <div class="card">
           <div class="table-wrap">
             <table class="grid-table cost-table" id="costTable">
-              <thead><tr><th>Bölüm</th><th class="num">Kontör</th><th class="num">Satış</th><th class="num">Maliyet</th><th class="num">Kâr</th><th>Ölçüm</th><th class="num">Ort. token (girdi / çıktı)</th><th class="num">Metin</th><th class="num">Ses*</th><th class="num">Görsel</th></tr></thead>
+              <thead><tr><th>Bölüm</th><th class="num">Kontör</th><th class="num">Satış</th><th class="num">Maliyet*</th><th class="num">Kâr</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
-          <p class="section-note small">* Ses maliyeti yalnız kullanıcı "Sesli dinle"ye basarsa oluşur; maliyete ve kâra dahil edilmiştir (en kötü durum). Tutarlar TL, bir işlem için (Ezoterik Asistan'da her soru + cevap bir işlemdir). Sesle sorma (konuşmayı yazıya çevirme) maliyete katılmaz.</p>
+          <p class="section-note small">* Bir işlemin (asistanda her soru + cevap) dışarıdan alınsaydı maliyeti: metin + dinlenirse seslendirme + varsa görsel. Ayrıntı için tutarın üzerine gel. "≈" = henüz ölçüm yok, tahmini değer. Sesle sorma (konuşmayı yazıya çevirme) dahil değil.</p>
         </div>
       </section>
 
@@ -121,7 +121,7 @@
 
     <audio id="sample" preload="none"></audio>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="/yonetim-sayfa.js?v=5"></script>
+    <script src="/yonetim-sayfa.js?v=6"></script>
     <script src="/ust-cubuk.js?v=4" defer></script>
 </body>
 </html>
