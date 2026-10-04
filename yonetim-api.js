@@ -65,9 +65,10 @@ async function maliyetTablosu() {
     const tl = Object.fromEntries(Object.entries(usd).map(([k, x]) => [k, yuvarla(x * kur)]));
     const maliyet = yuvarla(tl.metin + tl.ses + tl.gorsel);
     const kontor = fiyatli ? Ayarlar.get(`fiyat.${id}`) : null;
+    const uzmanKontor = Ayarlar.SEMA[`fiyat.${id}.uzman`] ? Ayarlar.get(`fiyat.${id}.uzman`) : null;
     const satis = fiyatli ? yuvarla(kontor * kontorTL, 2) : null;
     return {
-      id, ad, kontor, satis, maliyet, tl,
+      id, ad, kontor, satis, maliyet, tl, uzmanKontor, uzmanSatis: uzmanKontor == null ? null : yuvarla(uzmanKontor * kontorTL, 2),
       olculen: Boolean(islem), islem, llmCagri: o?.llm?.n || 0, sesUretim: o?.tts?.n || 0,
       ortalama: { giris: Math.round(giris), cikis: Math.round(cikis), karakter: Math.round(karakter), gorsel: yuvarla(gorsel, 2) },
       kar: fiyatli ? yuvarla(satis - maliyet, 2) : null,
@@ -77,7 +78,7 @@ async function maliyetTablosu() {
     kur, kurKaynagi: elle > 0 ? "elle" : otomatik ? `TCMB ${otomatik.tarih}` : "alınamadı",
     tcmb: otomatik?.deger || null, birim, kontorTL, olcumBaslangic: olcum.baslangic,
     // Asistanda fiyat ve maliyet her soru + cevap içindir (Murat 2026-10-04); sesle sorma (Whisper) hesaba katılmaz.
-    bolumler: [...Ayarlar.BOLUMLER.map((b) => satir(b.id, b.id === "asistan" ? `${b.ad} (her soru + cevap)` : b.ad, true)), satir("uzman", "Uzman yorumu (insan uzman)", true)],
+    bolumler: Ayarlar.BOLUMLER.map((b) => satir(b.id, b.id === "asistan" ? `${b.ad} (her soru + cevap)` : b.ad, true)),
   };
 }
 

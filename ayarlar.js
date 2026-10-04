@@ -59,7 +59,6 @@ const SEMA = {
   "genel.muzik": { grup: "Genel", ad: "Ana menü müzik seviyesi", tur: "sayi", min: 0, max: 0.5, adim: 0.01, vars: 0.1 },
   // Fiyatlar ve maliyet varsayımları ("Fiyatlar" sekmesi; Murat 2026-10-04). Hizmet kendi Gemma/TTS/resim
   // motorumuzla verilir; maliyet ise dış API'lerden alınıyormuş gibi hesaplanır (birim fiyatlar USD).
-  "fiyat.uzman": { grup: "Fiyatlar", ad: "Uzman yorumu", tur: "tam", min: 0, max: 10000, vars: 0, birim: "kontör", aciklama: "uzmana yorumlatma (insan uzman); 0 = ücretsiz" },
   "fiyat.kontorTL": { grup: "Fiyatlar", ad: "1 kontörün TL değeri", tur: "sayi", min: 0, max: 1000, adim: 0.01, vars: 1, birim: "₺" },
   "maliyet.usdTry": { grup: "Maliyet", ad: "Dolar kuru (USD/TRY)", tur: "sayi", min: 0, max: 1000, adim: 0.01, vars: 0, aciklama: "0 = TCMB'den otomatik" },
   "maliyet.metinGiris": { grup: "Maliyet", ad: "OpenAI gpt-4.1-mini girdi", tur: "sayi", min: 0, max: 100, adim: 0.01, vars: 0.4, birim: "$ / 1M token" },
@@ -67,11 +66,15 @@ const SEMA = {
   "maliyet.ses": { grup: "Maliyet", ad: "Google Cloud TTS (standart ses)", tur: "sayi", min: 0, max: 100, adim: 0.01, vars: 4, birim: "$ / 1M karakter" },
   "maliyet.gorsel": { grup: "Maliyet", ad: "OpenAI görsel (gpt-image, 1024×1024)", tur: "sayi", min: 0, max: 5, adim: 0.001, vars: 0.011, birim: "$ / görsel" },
 };
+// "Uzmanımıza da yorumlat" seçeneği olan bölümler (uzman-api.js BOLUMLER ile aynı küme).
+const UZMANLI = ["astroloji", "numeroloji", "ruya", "kahve-fali", "el-fali", "tarot", "yuz-okuma", "fotograf-analizi", "ask-uyumu", "melek-sayilari", "iching", "run-taslari", "ay-takvimi", "cakralar", "kristaller", "semboller", "dizim"];
 BOLUMLER.forEach((b) => {
   SEMA[`bolum.${b.id}.acik`] = { grup: "Bölümler", ad: b.ad, tur: "bool", vars: true };
   SEMA[`bolum.${b.id}.ses`] = { grup: "Bölüm sesleri", ad: b.ad, tur: "secim", secenekler: ["", ...SESLER], vars: "", aciklama: "boş = varsayılan ses" };
   if (b.sinir !== null) SEMA[`sinir.${b.id}`] = { grup: "Günlük sınırlar", ad: b.ad, tur: "tam", min: 0, max: 1000, vars: b.sinir, birim: "/gün", aciklama: "0 = sınırsız" };
   SEMA[`fiyat.${b.id}`] = { grup: "Fiyatlar", ad: b.ad, tur: "tam", min: 0, max: 10000, vars: 0, birim: "kontör", aciklama: "bir işlem için; 0 = ücretsiz" };
+  // Uzman (insan) değerlendirmesi olan bölümlerde ayrı fiyat (Murat 2026-10-04)
+  if (UZMANLI.includes(b.id)) SEMA[`fiyat.${b.id}.uzman`] = { grup: "Fiyatlar", ad: `${b.ad} · uzman değerlendirmesi`, tur: "tam", min: 0, max: 10000, vars: 0, birim: "kontör", aciklama: "0 = ücretsiz" };
 });
 
 let kayitli = {};

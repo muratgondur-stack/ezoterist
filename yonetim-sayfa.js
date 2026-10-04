@@ -305,17 +305,19 @@ async function maliyetYukle() {
     kutu("OpenAI görsel", sayiGirdisi("maliyet.gorsel", m.birim.gorsel, { adim: 0.001 }), "$ / görsel"),
   );
   $("costTable").querySelector("tbody").replaceChildren(...m.bolumler.map((b) => {
-    const kontor = b.kontor == null ? el("span", { textContent: "—" }) : sayiGirdisi(`fiyat.${b.id}`, b.kontor, { adim: 1 });
     const kar = el("td", { className: `num ${b.kar == null ? "" : b.kar >= 0 ? "kar-arti" : "kar-eksi"}`, textContent: b.kar == null ? "—" : tl(b.kar) });
     // Yalnız fiyat girişi ve sonuç; maliyetin kırılımı tutarın ipucunda.
     const ayrinti = `${b.olculen ? `${sayi(b.islem)} işlemden ölçüldü` : "Tahmin (henüz ölçüm yok)"} · ort. ${sayi(b.ortalama.giris)} girdi / ${sayi(b.ortalama.cikis)} çıktı token\n` +
       `Metin: ${tl(b.tl.metin, 4)} · Ses (dinlenirse): ${tl(b.tl.ses, 4)} · Görsel: ${tl(b.tl.gorsel, 4)}`;
+    // Sıra: maliyet → kâr → fiyat → uzman (insan) değerlendirmesi fiyatı.
+    const fiyatKutusu = (anahtar, deger, tlKarsiligi) => el("div", { className: "fiyat-kutu" },
+      sayiGirdisi(anahtar, deger, { adim: 1 }), el("small", { textContent: `= ${tl(tlKarsiligi)}` }));
     return el("tr", {},
       el("td", { className: "bolum-ad", textContent: b.ad }),
-      el("td", { className: "num" }, kontor),
-      el("td", { className: "num", textContent: b.satis == null ? "—" : tl(b.satis) }),
       el("td", { className: `num ${b.olculen ? "" : "tahmin"}`, textContent: `${b.olculen ? "" : "≈ "}${tl(b.maliyet, 2)}`, title: ayrinti }),
       kar,
+      el("td", { className: "num" }, fiyatKutusu(`fiyat.${b.id}`, b.kontor, b.satis)),
+      el("td", { className: "num" }, b.uzmanKontor == null ? el("span", { className: "tahmin", textContent: "—" }) : fiyatKutusu(`fiyat.${b.id}.uzman`, b.uzmanKontor, b.uzmanSatis)),
     );
   }));
 }

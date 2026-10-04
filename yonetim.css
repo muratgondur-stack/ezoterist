@@ -111,3 +111,5 @@
 .cost-table .kar-eksi { color: #ffb4a0; font-weight: 800; }
 .small { font-size: 0.8rem; }
 .cost-table .bolum-ad { font-weight: 700; white-space: nowrap; }
+.cost-table .fiyat-kutu { display: inline-flex; align-items: center; gap: 8px; }
+.cost-table .fiyat-kutu small { min-width: 64px; color: var(--muted); font-size: 0.78rem; text-align: left; }
