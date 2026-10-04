@@ -61,6 +61,10 @@ const SEMA = {
   "sinir.sesleAnlatma": { grup: "Günlük sınırlar", ad: "Sesle anlatma (yazıya çevirme)", tur: "tam", min: 0, max: 500, vars: 20, birim: "/gün", aciklama: "0 = sınırsız" },
   "izin.uzmanlar": { grup: "İzinler", ad: "Uzman e-postaları", tur: "epostalar", vars: listeOrtam("UZMAN_EPOSTA") },
   "elfali.cizgiOlcum": { grup: "Yapay zekâ", ad: "El falı çizgi ölçümü (V100 MediaPipe + U-Net)", tur: "bool", vars: true, aciklama: "Açıkken çizgiler avuca çizilir ve ölçülür; kapalıysa yalnız Gemma bakar" },
+  // Resim motoru (Murat 2026-10-04): acer = evdeki Acer FLUX.2 klein, ücretsiz; kapalı/dolu/yavaşsa kendiliğinden OpenAI.
+  "resim.motor": { grup: "Resim", ad: "Resim motoru", tur: "secim", secenekler: ["acer", "openai"], vars: "acer", aciklama: "acer = evdeki FLUX (ücretsiz, 400×400 ~2 sn); Acer kapalı, sırası dolu ya da yavaşsa OpenAI'a geçer. openai = her zaman OpenAI (ücretli)" },
+  "resim.acerBoyut": { grup: "Resim", ad: "Acer resim boyutu (kare)", tur: "tam", min: 256, max: 1024, vars: 400, birim: "px", aciklama: "16'nın katına yuvarlanır; 400 ≈ 2 sn, 640 ≈ 3,7 sn, 1024 ≈ 7 sn" },
+  "resim.acerZamanAsimi": { grup: "Resim", ad: "Acer bekleme sınırı", tur: "tam", min: 5, max: 120, vars: 30, birim: "sn", aciklama: "bu sürede resim gelmezse OpenAI'a geçilir" },
   "genel.muzik": { grup: "Genel", ad: "Ana menü müzik seviyesi", tur: "sayi", min: 0, max: 0.5, adim: 0.01, vars: 0.1 },
   // Fiyatlar ve maliyet varsayımları ("Fiyatlar" sekmesi; Murat 2026-10-04). Hizmet kendi Gemma/TTS/resim
   // motorumuzla verilir; maliyet ise dış API'lerden alınıyormuş gibi hesaplanır (birim fiyatlar USD).

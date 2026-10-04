@@ -7,7 +7,6 @@ const path = require("node:path");
 const RuyaVeri = require("./ruya-veri");
 const { yardimci } = require("./astroloji-api");
 const Ayarlar = require("./ayarlar");
-const Olcum = require("./olcum");
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
@@ -15,11 +14,9 @@ const GUNLUK_SINIR = () => Ayarlar.sinir("ruya"); // yönetim panelinden (0 = s�
 const STT_GUNLUK_SINIR = () => (Ayarlar.get("sinir.sesleAnlatma") || Infinity); // yönetim panelinden (0 = sınırsız)
 const MAX_SES_BAYT = 12 * 1024 * 1024;
 
-const resim = {
-  url: (process.env.RESIM_URL || "").trim(),
-  token: (process.env.RESIM_TOKEN || "").trim(),
-};
-const resimVar = Boolean(resim.url && resim.token);
+// Resim: Acer FLUX (ücretsiz) → olmazsa quiz.ist/OpenAI (resim.js, motor yönetim panelinden).
+const Resim = require("./resim");
+const resimVar = Resim.var();
 
 const stt = {
   url: (process.env.STT_URL || (process.env.TTS_URL || "").replace(/\/tts\/synthesize$/, "/stt/transcribe")).trim(),
@@ -132,17 +129,9 @@ function createHandler({ dataDir, currentUser, sendFile }) {
       const prompt =
         "Dreamlike, mystical, painterly digital illustration with a deep indigo, violet and soft gold palette, gentle glowing light, " +
         "magical atmosphere, family-safe, no text, no letters, no logos, no real people's likeness. Scene: " + kisalt(tarif, 900);
-      const result = await fetch(resim.url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Ezoterist-Token": resim.token },
-        body: JSON.stringify({ prompt }),
-        signal: AbortSignal.timeout(200_000),
-      });
-      const data = await result.json().catch(() => ({}));
-      if (!result.ok || !data.imageBase64) throw new Error(`resim ${result.status}: ${String(data.error || "").slice(0, 160)}`);
+      const { buf } = await Resim.uret(prompt, "ruya");
       await fs.promises.mkdir(dizin(userId), { recursive: true });
-      await fs.promises.writeFile(path.join(dizin(userId), `${kayit.id}.jpg`), Buffer.from(data.imageBase64, "base64"));
-      Olcum.gorsel("ruya");
+      await fs.promises.writeFile(path.join(dizin(userId), `${kayit.id}.jpg`), buf);
       await kayitGuncelle(userId, (g) => { const k = g.find((x) => x.id === kayit.id); if (k) k.resim = "hazir"; });
     } catch (error) {
       console.error("Rüya resmi üretilemedi:", error.message);

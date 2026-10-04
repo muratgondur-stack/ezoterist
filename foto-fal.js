@@ -6,11 +6,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { yardimci } = require("./astroloji-api");
 const Ayarlar = require("./ayarlar");
-const Olcum = require("./olcum");
 
-// Resim üretimi quiz.ist üzerinden (rüya ile aynı uç; OpenAI anahtarı ezoter.ist'e taşınmaz).
-const RESIM = { url: (process.env.RESIM_URL || "").trim(), token: (process.env.RESIM_TOKEN || "").trim() };
-const resimVar = Boolean(RESIM.url && RESIM.token);
+// Resim üretimi: Acer FLUX (ücretsiz) → olmazsa quiz.ist/OpenAI (resim.js; OpenAI anahtarı ezoter.ist'e taşınmaz).
+const Resim = require("./resim");
+const resimVar = Resim.var();
 
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
@@ -141,16 +140,8 @@ function fotoFal(ayar) {
     // Falı anlatan resim arka planda üretilir; sayfa kaydı yoklayıp hazır olunca gösterir.
     async function resimUret(userId, kayitId, tarif) {
       try {
-        const r = await fetch(RESIM.url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Ezoterist-Token": RESIM.token },
-          body: JSON.stringify({ prompt: tarif }),
-          signal: AbortSignal.timeout(200_000),
-        });
-        const d = await r.json().catch(() => ({}));
-        if (!r.ok || !d.imageBase64) throw new Error(`resim ${r.status}: ${String(d.error || "").slice(0, 160)}`);
-        await fs.promises.writeFile(resimYolu(dataDir, userId, kayitId), Buffer.from(d.imageBase64, "base64"));
-        if (bolumId) Olcum.gorsel(bolumId);
+        const { buf } = await Resim.uret(tarif, bolumId);
+        await fs.promises.writeFile(resimYolu(dataDir, userId, kayitId), buf);
         await kayitGuncelle(userId, (g) => { const k = g.find((x) => x.id === kayitId); if (k) k.resim = "hazir"; });
       } catch (error) {
         console.error(`${ayar.ad} resmi üretilemedi:`, error.message);
