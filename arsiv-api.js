@@ -62,8 +62,29 @@ async function analizleriTopla(dataDir, userId) {
   return liste.filter((x) => x.tarih).sort((a, b) => b.tarih - a.tarih);
 }
 
-function createHandler({ dataDir, currentUser }) {
+// Hediye kuponun tarayıcıda çizilen görseli JSON içinde base64 gelir; genel okuyucunun 10 KB sınırı yetmez.
+function buyukJsonOku(request, sinir = 3 * 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    let boyut = 0;
+    const parcalar = [];
+    request.on("data", (p) => {
+      boyut += p.length;
+      if (boyut > sinir) { reject(Object.assign(new Error("Görsel çok büyük."), { status: 413 })); request.destroy(); return; }
+      parcalar.push(p);
+    });
+    request.on("end", () => {
+      try { resolve(JSON.parse(Buffer.concat(parcalar).toString("utf8"))); } catch { reject(Object.assign(new Error("Geçersiz istek."), { status: 400 })); }
+    });
+    request.on("error", reject);
+  });
+}
+
+const KUPON_SAYFASI = /^\/kupon\/([A-Za-z0-9]{4}-?[A-Za-z0-9]{4}-?[A-Za-z0-9]{4})$/;
+const KUPON_RESMI = /^\/kupon\/resim\/([A-Z0-9-]{14})\.jpg$/;
+
+function createHandler({ dataDir, currentUser, sendFile }) {
   const kontor = kontorDefteri(dataDir);
+  Kupon.devirZamanlayici(kontor);
 
   // Kontörüm sekmesinin ihtiyaç duyduğu ödeme bilgisi (paketler, satın alma açık mı).
   const hesapBilgisi = async (user) => ({
@@ -87,6 +108,22 @@ function createHandler({ dataDir, currentUser }) {
         });
       return true;
     }
+    // Hediye kupon: herkese açık sayfa, görsel ve bilgi (kodu bilen görür; yalnız ödenmiş kuponlar).
+    if (request.method === "GET" || request.method === "HEAD") {
+      if (KUPON_SAYFASI.test(url.pathname)) { sendFile(request, response, path.join(__dirname, "kupon.html")); return true; }
+      const resim = KUPON_RESMI.exec(url.pathname);
+      if (resim) {
+        const yol = Kupon.hediyeResimYolu(resim[1]);
+        if (yol) sendFile(request, response, yol);
+        else { response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }); response.end("Not found"); }
+        return true;
+      }
+      if (url.pathname === "/api/kupon/bilgi") {
+        const bilgi = Kupon.hediyeBilgisi(url.searchParams.get("kod"));
+        sendJson(response, bilgi ? 200 : 404, bilgi || { error: "Böyle bir hediye kupon bulunamadı." });
+        return true;
+      }
+    }
     if (url.pathname !== "/api/arsiv" && !url.pathname.startsWith("/api/kontor")) return false;
     const user = currentUser(request);
     if (!user) {
@@ -105,6 +142,23 @@ function createHandler({ dataDir, currentUser }) {
         if (body?.onay !== true) throw Object.assign(new Error("Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi onaylanmalı."), { status: 400 });
         sendJson(response, 200, await Odeme.odemeBaslat(request, user, Number(body?.tutar)));
       },
+      // Hediye kupon 1. adım: tasarım ve alıcı bilgisi, kod ayrılır (ödeme yapılmadıkça kullanılamaz).
+      "POST /api/kontor/hediye/hazirla": async () => {
+        if (!Odeme.acikMi(user)) throw Object.assign(new Error("Hediye kupon satışı çok yakında açılacak."), { status: 503 });
+        const body = await readJson(request);
+        const tutar = Number(body?.tutar);
+        if (!Odeme.PAKETLER.includes(tutar)) throw Object.assign(new Error("Geçersiz tutar."), { status: 400 });
+        sendJson(response, 200, await Kupon.hediyeHazirla(user, { ...body, tutar, kontor: Odeme.paketKontoru(tutar) }));
+      },
+      // 2. adım: çizilen görsel kaydedilir, PayTR ödeme sayfasının adresi döner.
+      "POST /api/kontor/hediye/ode": async () => {
+        const body = await buyukJsonOku(request);
+        if (body?.onay !== true) throw Object.assign(new Error("Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi onaylanmalı."), { status: 400 });
+        const resim = Buffer.from(String(body?.resim || "").replace(/^data:image\/jpeg;base64,/, ""), "base64");
+        const kupon = await Kupon.hediyeResmi(user, body?.kod, resim);
+        sendJson(response, 200, await Odeme.odemeBaslat(request, user, kupon.hediye.tutar, Kupon.kodNormalle(body.kod)));
+      },
+      "GET /api/kontor/hediyeler": async () => sendJson(response, 200, { hediyeler: Kupon.hediyelerim(user.id), sablonlar: Kupon.SABLONLAR, sureGun: Kupon.HEDIYE_SURESI / 86400000 }),
       "POST /api/kontor/kupon": async () => {
         const body = await readJson(request);
         sendJson(response, 200, await Kupon.kullan(user, body?.kod, kontor));

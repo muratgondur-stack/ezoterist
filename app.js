@@ -99,6 +99,18 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
   .catch(() => null);
 
 // Hazır olan bölümlerin kendi sayfaları var; diğerleri "çok yakında" der.
+// Bilgilendirme onayı (bilgilendirme-metin.js): onaylamamış üyeye pencere açılır. Yasal metin sayfalarında açılmaz
+// (penceredeki bağlantılar onları yeni sekmede açar, okunabilsinler).
+const bilgilendirmeKontrol = (user) => {
+  if (!user?.bilgilendirmeGerekli || /^\/(gizlilik|kullanim-kosullari|on-bilgilendirme|mesafeli-satis|iptal-iade|fiyatlar)$/.test(location.pathname)) return;
+  const ac = () => window.Bilgilendirme?.onayIste();
+  if (window.Bilgilendirme) return ac();
+  const s = document.createElement("script");
+  s.src = "/bilgilendirme-metin.js?v=1";
+  s.onload = ac;
+  document.head.append(s);
+};
+
 const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji", "#ruya-yorumu": "/ruya", "#kahve-fali": "/kahve-fali", "#el-fali": "/el-fali", "#tarot": "/tarot", "#yuz-okuma": "/yuz-okuma", "#fotograf-analizi": "/fotograf-analizi", "#ask-uyumu": "/ask-uyumu", "#dogum-haritasi": "/dogum-haritasi", "#melek-sayilari": "/melek-sayilari", "#i-ching": "/iching", "#run-taslari": "/run-taslari", "#ay-takvimi": "/ay-takvimi", "#cakralar": "/cakralar", "#kristaller": "/kristaller", "#kisisel-arsiv": "/arsiv", "#ruhsal-gunluk": "/ruhsal-gunluk", "#semboller": "/semboller", "#ezoterik-asistan": "/asistan", "#taslarla-dizim": "/taslarla-dizim", "#yuz-muzigi": "/yuz-muzigi" };
 
 // Yönetim panelinden gelen genel ayarlar: kapatılan bölümler ve müzik seviyesi.
@@ -177,6 +189,7 @@ currentUser.then((user) => {
   if (!user || !authBar) return;
 
   // Kullanıcı simgesi bir menü açar: arşiv, profil, (yöneticiye) yönetim paneli ve çıkış (Murat 2026-10-03).
+  bilgilendirmeKontrol(user);
   const kim = user.name || user.email;
   const name = document.createElement("button");
   name.type = "button";
@@ -215,6 +228,7 @@ currentUser.then((user) => {
       .finally(() => window.location.reload());
   });
   menu.append(baslik, oge("🗂️ Kişisel arşivim", "/arsiv"), oge("👤 Profilim", "/arsiv#profil"),
+    oge("🎁 Hediye kupon", "/arsiv#hediye"), oge("📜 Bilgilendirme", "/bilgilendirme"),
     ...(user.yonetici ? [oge("⚙️ Yönetim paneli", "/yonetim")] : []), cikis);
 
   const menuyuAc = (acik) => {

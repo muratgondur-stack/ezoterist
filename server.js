@@ -170,6 +170,7 @@ const pageRoutes = {
   "/on-bilgilendirme": "on-bilgilendirme.html",
   "/mesafeli-satis": "mesafeli-satis.html",
   "/iptal-iade": "iptal-iade.html",
+  "/bilgilendirme": "bilgilendirme.html",
 };
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
@@ -188,7 +189,7 @@ const handleIChingRequest = createIChingHandler({ dataDir, currentUser, sendFile
 const handleRunRequest = createRunHandler({ dataDir, currentUser, sendFile });
 const handleAyRequest = createAyHandler({ dataDir, currentUser, sendFile });
 const handleCakraKristalRequest = createCakraKristalHandler({ dataDir, currentUser, sendFile });
-const handleArsivRequest = createArsivHandler({ dataDir, currentUser });
+const handleArsivRequest = createArsivHandler({ dataDir, currentUser, sendFile });
 const handleRuhsalRequest = createRuhsalHandler({ dataDir, currentUser, sendFile });
 const handleSembolRequest = createSembolHandler({ dataDir, currentUser, sendFile });
 const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser, sendFile });

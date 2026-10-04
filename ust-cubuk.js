@@ -1,3 +1,15 @@
+// Bilgilendirme onayı (bilgilendirme-metin.js): onaylamamış üyeye pencere açılır. Yasal metin sayfalarında açılmaz
+// (penceredeki bağlantılar onları yeni sekmede açar, okunabilsinler).
+const bilgilendirmeKontrol = (user) => {
+  if (!user?.bilgilendirmeGerekli || /^\/(gizlilik|kullanim-kosullari|on-bilgilendirme|mesafeli-satis|iptal-iade|fiyatlar)$/.test(location.pathname)) return;
+  const ac = () => window.Bilgilendirme?.onayIste();
+  if (window.Bilgilendirme) return ac();
+  const s = document.createElement("script");
+  s.src = "/bilgilendirme-metin.js?v=1";
+  s.onload = ac;
+  document.head.append(s);
+};
+
 // Bölüm sayfalarının üst çubuğu (ana menüdeki banner sistemiyle aynı, Murat 2026-10-03):
 // banner "← Ana Menü" ile kullanıcı butonu arasını doldurur; sağda 👤 kullanıcı menüsü (arşiv, profil,
 // yöneticiye yönetim paneli, çıkış). Çubuğun yüksekliği --ust değişkenine yazılır; yapışkan öğeler buna göre durur.
@@ -29,6 +41,7 @@
         kutu.replaceChildren(giris);
         return;
       }
+      bilgilendirmeKontrol(user);
       const kim = user.name || user.email;
       const dugme = document.createElement("button");
       dugme.type = "button";
@@ -66,6 +79,7 @@
         fetch("/api/logout", { method: "POST", credentials: "same-origin" }).finally(() => window.location.assign("/"));
       });
       menu.append(baslik, oge("🏠 Ana menü", "/"), oge("🗂️ Kişisel arşivim", "/arsiv"), oge("👤 Profilim", "/arsiv#profil"),
+        oge("🎁 Hediye kupon", "/arsiv#hediye"), oge("📜 Bilgilendirme", "/bilgilendirme"),
         ...(user.yonetici ? [oge("⚙️ Yönetim paneli", "/yonetim")] : []), cikis);
 
       const ac = (acik) => {

@@ -10,9 +10,9 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=14" />
-    <link rel="stylesheet" href="/arsiv.css?v=3" />
+    <link rel="stylesheet" href="/arsiv.css?v=5" />
   </head>
   <body>
     <header class="topbar">
@@ -38,6 +38,7 @@
       <nav class="tabs" role="tablist" aria-label="Arşiv bölümleri">
         <button type="button" role="tab" data-tab="profil" aria-selected="true">👤 Profilim</button>
         <button type="button" role="tab" data-tab="kontor" aria-selected="false">🪙 Kontörüm</button>
+        <button type="button" role="tab" data-tab="hediye" aria-selected="false">🎁 Hediye kupon</button>
         <button type="button" role="tab" data-tab="analizler" aria-selected="false">📜 Analizlerim</button>
         <button type="button" role="tab" data-tab="guvenlik" aria-selected="false">🔒 Güvenlik</button>
       </nav>
@@ -107,6 +108,33 @@
         </div>
       </section>
 
+      <section class="tab-panel" id="tab-hediye" role="tabpanel" hidden>
+        <div class="card">
+          <h2>Gönderdiğim hediye kuponlar</h2>
+          <div class="gift-summary" id="giftSummary"></div>
+          <ul class="gift-list" id="giftList"></ul>
+          <p class="empty" id="giftEmpty">Henüz hediye kupon göndermedin.</p>
+        </div>
+        <div class="card gift" id="gift">
+          <h2>🎁 Hediye kupon gönder</h2>
+          <p class="section-note">Sevdiğin birine Ezoter.ist kontörü hediye et. Tasarımı seç, notunu yaz; kupon bizim üzerimizden arkadaşına e-postayla gider. Arkadaşın <span id="giftDays">30</span> gün içinde kullanmazsa kontörler senin bakiyene geçer; ikinize de haber veririz.</p>
+          <div class="gift-designs" id="giftDesigns" role="radiogroup" aria-label="Kupon tasarımı"></div>
+          <canvas class="gift-preview" id="giftPreview" width="1536" height="1024" aria-label="Kupon önizlemesi"></canvas>
+          <form class="gift-form" id="giftForm">
+            <label>Tutar <select id="giftAmount"></select></label>
+            <label>Arkadaşının adı <input id="giftName" maxlength="40" autocomplete="off" required /></label>
+            <label>Arkadaşının e-postası <input id="giftEmail" type="email" maxlength="120" autocomplete="off" required /></label>
+            <label class="genis">Notun (isteğe bağlı) <input id="giftNote" maxlength="140" autocomplete="off" placeholder="Doğum günün kutlu olsun, yıldızların hep parlasın ✨" /></label>
+            <label class="pay-consent genis">
+              <input type="checkbox" id="giftConsent" />
+              <span><a href="/on-bilgilendirme" target="_blank">Ön Bilgilendirme Formu</a>'nu ve <a href="/mesafeli-satis" target="_blank">Mesafeli Satış Sözleşmesi</a>'ni okudum, onaylıyorum.</span>
+            </label>
+            <button type="submit" class="btn btn-primary genis" id="giftBuy">Satın al ve gönder</button>
+            <p class="section-note genis" id="giftNoteText"></p>
+          </form>
+        </div>
+      </section>
+
       <section class="tab-panel" id="tab-analizler" role="tabpanel" hidden>
         <div class="card">
           <div class="panel-head">
@@ -153,7 +181,8 @@
 
     <script src="/astroloji-veri.js?v=1"></script>
     <script src="/uzmanlar.js?v=3"></script>
-    <script src="/arsiv-sayfa.js?v=2"></script>
-    <script src="/ust-cubuk.js?v=10" defer></script>
+    <script src="/kupon-cizim.js?v=2"></script>
+    <script src="/arsiv-sayfa.js?v=4"></script>
+    <script src="/ust-cubuk.js?v=11" defer></script>
 </body>
 </html>

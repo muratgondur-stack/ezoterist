@@ -9,6 +9,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const Ayarlar = require("./ayarlar");
+const Kupon = require("./kupon");
 
 const { dataDir } = Ayarlar;
 const ayarDosyasi = path.join(dataDir, "yonetim", "paytr.json");
@@ -128,7 +129,8 @@ async function tokenAl(a, { oid, eposta, tutar, ip, ad, urun, okUrl, failUrl }) 
 }
 
 // Kullanıcı paket seçer: sipariş kaydı + PayTR oturumu; dönen güvenli ödeme adresine yönlendirilir.
-async function odemeBaslat(request, user, tutar) {
+// hediyeKod verilirse bu bir hediye kupon alımıdır: ödeme onaylanınca kontör alana değil kupona yüklenir (kupon.js).
+async function odemeBaslat(request, user, tutar, hediyeKod = null) {
   if (!acikMi(user)) throw Object.assign(new Error("Ödeme henüz açık değil."), { status: 503 });
   if (!PAKETLER.includes(tutar)) throw Object.assign(new Error("Geçersiz paket."), { status: 400 });
   const a = ayar();
@@ -136,12 +138,12 @@ async function odemeBaslat(request, user, tutar) {
   const kontor = paketKontoru(tutar);
   const eposta = asciiEposta(user.email) || `${user.id}@ezoter.ist`;
   await siparisIsle((s) => {
-    s[oid] = { oid, userId: user.id, eposta, tutar, kontor, mod: a.mod, durum: "basladi", tarih: Date.now() };
+    s[oid] = { oid, userId: user.id, eposta, tutar, kontor, mod: a.mod, durum: "basladi", tarih: Date.now(), ...(hediyeKod ? { hediyeKod } : {}) };
   });
   const taban = siteTabani(request);
   const { httpDurum, veri } = await tokenAl(a, {
-    oid, eposta, tutar, ip: istemciIp(request), ad: user.name, urun: `${kontor} kontor paketi`,
-    okUrl: `${taban}/arsiv?odeme=basarili#kontor`, failUrl: `${taban}/arsiv?odeme=hata#kontor`,
+    oid, eposta, tutar, ip: istemciIp(request), ad: user.name, urun: hediyeKod ? `${kontor} kontor hediye kupon` : `${kontor} kontor paketi`,
+    okUrl: `${taban}/arsiv?odeme=basarili${hediyeKod ? "&hediye=1" : ""}#${hediyeKod ? "hediye" : "kontor"}`, failUrl: `${taban}/arsiv?odeme=hata#kontor`,
   });
   if (veri?.status !== "success" || !veri?.token) {
     const mesaj = `${veri?.reason || "PayTR ödeme oturumu açılamadı"} (HTTP ${httpDurum})`;
@@ -206,11 +208,12 @@ async function bildirimIsle(request, kontor) {
       sip.hata = String(g.failed_reason_msg || g.failed_reason_code || "Ödeme tamamlanmadı").slice(0, 300);
       return;
     }
-    await kontor.hareketEkle(sip.userId, { miktar: sip.kontor, tur: "yukleme", aciklama: `${sip.tutar} ₺ kontör paketi · PayTR${sip.mod === "test" ? " (test)" : ""}`, ref: oid });
+    if (sip.hediyeKod) await Kupon.hediyeEtkinlestir(sip.hediyeKod, oid);
+    else await kontor.hareketEkle(sip.userId, { miktar: sip.kontor, tur: "yukleme", aciklama: `${sip.tutar} ₺ kontör paketi · PayTR${sip.mod === "test" ? " (test)" : ""}`, ref: oid });
     sip.durum = "odendi";
     sip.odenen = Number(toplam) / 100 || sip.tutar;
   });
   return { kod: 200, metin: "OK" };
 }
 
-module.exports = { PAKETLER, BILDIRIM_YOLU, paketler, hazir, acikMi, ayar, ayarKaydet, ayarOzeti, siteTabani, sonSiparisler, odemeBaslat, baglantiTesti, bildirimIsle };
+module.exports = { paketKontoru, PAKETLER, BILDIRIM_YOLU, paketler, hazir, acikMi, ayar, ayarKaydet, ayarOzeti, siteTabani, sonSiparisler, odemeBaslat, baglantiTesti, bildirimIsle };

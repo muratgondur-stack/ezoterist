@@ -114,6 +114,7 @@ function renderWallet() {
   $("balanceBig").textContent = sayi(k.bakiye);
   $("balanceTop").textContent = sayi(k.bakiye);
   renderPacks();
+  renderGiftForm();
   const tbody = $("moves").querySelector("tbody");
   tbody.replaceChildren(...k.hareketler.map((h) => {
     const tr = document.createElement("tr");
@@ -193,6 +194,114 @@ $("couponForm").addEventListener("submit", async (event) => {
   }
 });
 
+// --- Hediye kupon ---
+
+let hediyeSablon = "a";
+let cizimZamanlayici;
+const hediyeVerisi = (kod) => ({
+  sablon: hediyeSablon,
+  kontor: Number($("giftAmount").selectedOptions[0]?.dataset.kontor || 0),
+  kimden: me?.name || "",
+  kime: $("giftName").value.trim(),
+  not: $("giftNote").value.trim(),
+  kod: kod || "XXXX-XXXX-XXXX",
+});
+const onizle = () => {
+  clearTimeout(cizimZamanlayici);
+  cizimZamanlayici = setTimeout(() => KuponCizim.ciz($("giftPreview"), hediyeVerisi()).catch(() => {}), 120);
+};
+
+function renderGiftForm() {
+  const k = arsiv.kontor;
+  $("giftDesigns").replaceChildren(...Object.entries(KuponCizim.SABLONLAR).map(([id, s]) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "gift-design";
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-checked", String(id === hediyeSablon));
+    b.innerHTML = `<img src="/kupon/sablon-${id}.jpg?v=1" alt="" loading="lazy" /><span></span>`;
+    b.querySelector("span").textContent = s.ad;
+    b.addEventListener("click", () => {
+      hediyeSablon = id;
+      document.querySelectorAll(".gift-design").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+      onizle();
+    });
+    return b;
+  }));
+  const secili = $("giftAmount").value;
+  $("giftAmount").replaceChildren(...(k.paketler || []).map((p) => {
+    const o = document.createElement("option");
+    o.value = p.tutar;
+    o.dataset.kontor = p.kontor;
+    o.textContent = `${sayi(p.kontor)} kontör · ${tl(p.tutar)}`;
+    return o;
+  }));
+  if (secili) $("giftAmount").value = secili;
+  else if (k.paketler?.[1]) $("giftAmount").value = k.paketler[1].tutar;
+  giftButonu();
+  $("giftNoteText").textContent = k.yuklemeAcik
+    ? (k.odemeModu === "test" ? "TEST modu: ödeme PayTR test ortamında yapılır, karttan para çekilmez (yalnız yönetici görür)." : "Ödemeden sonra kupon hemen arkadaşına gönderilir; sana da bir onay e-postası gelir.")
+    : "Hediye kupon satışı kontör satışıyla birlikte çok yakında açılacak.";
+  onizle();
+}
+const giftButonu = () => {
+  const o = $("giftAmount").selectedOptions[0];
+  $("giftBuy").textContent = o ? `Satın al ve gönder · ${tl(Number(o.value))}` : "Satın al ve gönder";
+  $("giftBuy").disabled = !arsiv.kontor.yuklemeAcik;
+};
+["giftName", "giftNote"].forEach((id) => $(id).addEventListener("input", onizle));
+$("giftAmount").addEventListener("change", () => { giftButonu(); onizle(); });
+
+$("giftForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!$("giftConsent").checked) { toast("Önce Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi onayını işaretle."); $("giftConsent").focus(); return; }
+  $("giftBuy").disabled = true;
+  try {
+    const h = await post("/api/kontor/hediye/hazirla", { tutar: Number($("giftAmount").value), sablon: hediyeSablon, kimeAd: $("giftName").value, kimeEposta: $("giftEmail").value, not: $("giftNote").value });
+    const tuval = document.createElement("canvas");
+    await KuponCizim.ciz(tuval, { ...hediyeVerisi(h.kod), kimden: h.kimden, kontor: h.kontor });
+    const blob = await KuponCizim.jpeg(tuval);
+    const resim = await new Promise((tamam) => { const r = new FileReader(); r.onload = () => tamam(r.result); r.readAsDataURL(blob); });
+    const r = await post("/api/kontor/hediye/ode", { kod: h.kod, resim, onay: true });
+    window.location.href = r.odemeAdresi;
+  } catch (error) {
+    toast(error.message);
+    giftButonu();
+  }
+});
+
+async function hediyeleriYukle() {
+  const d = await fetch("/api/kontor/hediyeler", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!d) return;
+  $("giftDays").textContent = d.sureGun;
+  const h = d.hediyeler;
+  const say = (durum) => h.filter((x) => x.durum === durum).length;
+  $("giftEmpty").hidden = Boolean(h.length);
+  $("giftSummary").hidden = !h.length;
+  $("giftSummary").replaceChildren(...[["Gönderilen", h.length, ""], ["Bekleyen", say("aktif"), "aktif"], ["Kullanılan", say("kullanildi"), "kullanildi"], ["Bakiyene dönen", say("devredildi"), "devredildi"]].map(([ad, n, sinif]) => {
+    const kutu = document.createElement("div");
+    kutu.className = `gift-stat ${sinif}`;
+    kutu.innerHTML = "<b></b><span></span>";
+    kutu.querySelector("b").textContent = sayi(n);
+    kutu.querySelector("span").textContent = ad;
+    return kutu;
+  }));
+  const gunKaldi = (ms) => Math.max(0, Math.ceil((ms - Date.now()) / 86400000));
+  $("giftList").replaceChildren(...h.map((x) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<div><b></b><span class="gift-meta"></span><span class="gift-code"></span></div><span class="gift-state"></span>`;
+    li.querySelector("b").textContent = `${x.kimeAd} · ${sayi(x.kontor)} kontör`;
+    li.querySelector(".gift-meta").textContent = `${x.kimeEposta} · ${tarih(x.aktiflesme, true)} gönderildi${x.epostaGitti ? "" : " · ⚠️ e-posta iletilemedi, kodu kendin paylaşabilirsin"}`;
+    li.querySelector(".gift-code").textContent = `Kod: ${x.kod}`;
+    const durum = li.querySelector(".gift-state");
+    durum.className = `gift-state ${x.durum}`;
+    durum.textContent = x.durum === "aktif"
+      ? `⏳ Henüz kullanılmadı · ${gunKaldi(x.sonGun)} gün kaldı (${tarih(x.sonGun)})`
+      : x.durum === "kullanildi" ? `✓ ${tarih(x.kullanma, true)} kullanıldı` : `↩︎ Kullanılmadı · ${tarih(x.devir)} bakiyene eklendi`;
+    return li;
+  }));
+}
+
 // PayTR'den dönüş: kontör bildirimle eklenir, birkaç saniye gecikebilir.
 async function odemeDonusu() {
   const q = new URLSearchParams(window.location.search);
@@ -208,6 +317,13 @@ async function odemeDonusu() {
     banner.textContent = "Ödeme tamamlanmadı. Kartından para çekilmedi; istersen tekrar deneyebilirsin.";
   } else {
     banner.className = "pay-banner ok";
+    if (q.get("hediye")) {
+      banner.textContent = "🎁 Ödemen alındı. Hediye kuponun arkadaşına gönderiliyor; sana da onay e-postası gelecek.";
+      setTimeout(hediyeleriYukle, 3000);
+      setTimeout(hediyeleriYukle, 9000);
+      sekmeAc("hediye");
+      return;
+    }
     banner.textContent = "✓ Ödemen alındı. Kontörün birkaç saniye içinde bakiyene eklenir.";
     const ilk = arsiv.kontor.bakiye;
     for (let i = 0; i < 8; i++) {
@@ -346,7 +462,8 @@ async function init() {
   renderAnalyses();
   renderPasswordForm();
   const hedef = window.location.hash.slice(1);
-  if (["profil", "kontor", "analizler", "guvenlik"].includes(hedef)) sekmeAc(hedef, false);
+  if (["profil", "kontor", "hediye", "analizler", "guvenlik"].includes(hedef)) sekmeAc(hedef, false);
+  hediyeleriYukle();
   odemeDonusu();
 }
 

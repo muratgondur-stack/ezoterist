@@ -69,6 +69,9 @@ function saveUsers() {
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
 const findUserByEmail = (email) => users.find((user) => user.email === email);
 const findUserById = (id) => users.find((user) => user.id === id);
+// Üyelere bir kez gösterilip onayı alınan bilgilendirme metni (bilgilendirme-metin.js). Metin değişirse sürüm
+// artırılır; herkes yeni metni bir kez daha onaylar. Onay tarihi ve IP users.json'da saklanır.
+const BILGILENDIRME_SURUMU = "2026-10-04";
 const publicUser = (user) => ({
   id: user.id,
   email: user.email,
@@ -78,6 +81,8 @@ const publicUser = (user) => ({
   google: Boolean(user.googleId),
   createdAt: user.createdAt || null,
   yonetici: Ayarlar.yoneticiMi(user),
+  bilgilendirmeGerekli: user.bilgilendirmeOnay?.surum !== BILGILENDIRME_SURUMU,
+  bilgilendirmeOnay: user.bilgilendirmeOnay?.tarih || null,
 });
 
 async function createUser({ email, name, passwordHash = null, googleId = null }) {
@@ -662,6 +667,22 @@ async function handleGoogleCallback(request, response, url) {
   }
 }
 
+async function handleBilgilendirmeOnay(request, response) {
+  const user = currentUser(request);
+  if (!user) {
+    sendJson(response, 401, { error: "Giriş yapmalısınız." });
+    return;
+  }
+  const body = await readJsonBody(request);
+  if (body.kabul !== true) {
+    sendJson(response, 400, { error: "Devam etmek için metni onaylamalısın." });
+    return;
+  }
+  user.bilgilendirmeOnay = { surum: BILGILENDIRME_SURUMU, tarih: new Date().toISOString(), ip: clientIp(request) };
+  await saveUsers();
+  sendJson(response, 200, { user: publicUser(user) });
+}
+
 // --- Yönlendirici ---
 
 const routes = {
@@ -674,6 +695,7 @@ const routes = {
   "POST /api/reset-password": handleResetPassword,
   "POST /api/profil": handleProfil,
   "POST /api/sifre": handleSifreDegistir,
+  "POST /api/bilgilendirme-onay": handleBilgilendirmeOnay,
   "GET /auth/google": handleGoogleStart,
   "GET /auth/google/callback": handleGoogleCallback,
 };
@@ -704,6 +726,7 @@ function handleAuthRequest(request, response, url) {
 const kullaniciListesi = () => users.map((u) => ({
   id: u.id, email: u.email, name: u.name || "", createdAt: u.createdAt || null,
   google: Boolean(u.googleId), sifreVar: Boolean(u.passwordHash), profilVar: Boolean(u.profil?.dogumTarihi),
+  bilgilendirmeOnay: u.bilgilendirmeOnay?.surum === BILGILENDIRME_SURUMU ? u.bilgilendirmeOnay.tarih : null,
 }));
 
 module.exports = { handleAuthRequest, dataDir, currentUser, kullaniciListesi };

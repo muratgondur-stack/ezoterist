@@ -26,3 +26,11 @@
 .fiyat-tablo td a { color: var(--foreground); text-decoration: none; }
 .fiyat-tablo td.bedava { color: #8fe3a5; }
 @media (max-width: 600px) { .fiyat-paketler { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Hediye kupon sayfası */
+.kp-resim { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; margin: 16px 0; border-radius: 16px; border: 1px solid rgba(243, 194, 107, 0.35); background: #0b0d1c; }
+.kp-eylem { display: grid; justify-items: center; gap: 8px; margin-top: 10px; text-align: center; }
+.kp-eylem .btn { min-width: 260px; }
+.kp-sonuc { padding: 12px 16px; border-radius: 12px; font-weight: 700; text-align: center; }
+.kp-sonuc.ok { color: #8fe3a5; background: rgba(143, 227, 165, 0.1); border: 1px solid rgba(143, 227, 165, 0.4); }
+.kp-sonuc.bad { color: #ffb4a0; background: rgba(255, 140, 110, 0.08); border: 1px solid rgba(255, 140, 110, 0.4); }
