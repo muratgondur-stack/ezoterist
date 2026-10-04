@@ -5,8 +5,10 @@ const path = require("node:path");
 const { yardimci } = require("./astroloji-api");
 const { kullaniciTalepleri } = require("./uzman-api");
 const { kontorDefteri, TURLER } = require("./kontor");
+const Odeme = require("./odeme");
+const Kupon = require("./kupon");
 
-const { sendJson, readCache } = yardimci;
+const { sendJson, readJson, readCache } = yardimci;
 const temizId = (userId) => String(userId).replace(/[^a-zA-Z0-9-]/g, "");
 
 // Günlük tutan bölümler: klasör adı, görünen ad, sayfa bağlantısı ve kayıttan başlık çıkarma.
@@ -63,7 +65,28 @@ async function analizleriTopla(dataDir, userId) {
 function createHandler({ dataDir, currentUser }) {
   const kontor = kontorDefteri(dataDir);
 
+  // Kontörüm sekmesinin ihtiyaç duyduğu ödeme bilgisi (paketler, satın alma açık mı).
+  const hesapBilgisi = async (user) => ({
+    ...(await kontor.oku(user.id)), turler: TURLER,
+    yuklemeAcik: Odeme.acikMi(user), odemeModu: Odeme.hazir() ? Odeme.ayar().mod : null, paketler: Odeme.paketler(),
+  });
+
   return function handleArsivRequest(request, response, url) {
+    // PayTR'nin sunucudan sunucuya ödeme bildirimi: oturum yok, imza ile doğrulanır, düz metin cevap ister.
+    if (url.pathname === Odeme.BILDIRIM_YOLU && request.method === "POST") {
+      Odeme.bildirimIsle(request, kontor)
+        .then(({ kod, metin }) => {
+          if (kod !== 200) console.error("PayTR bildirimi reddedildi:", metin);
+          response.writeHead(kod, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+          response.end(metin);
+        })
+        .catch((error) => {
+          console.error("PayTR bildirimi işlenemedi:", error);
+          response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+          response.end("PAYTR notification failed: server error");
+        });
+      return true;
+    }
     if (url.pathname !== "/api/arsiv" && !url.pathname.startsWith("/api/kontor")) return false;
     const user = currentUser(request);
     if (!user) {
@@ -73,11 +96,19 @@ function createHandler({ dataDir, currentUser }) {
     const routes = {
       "GET /api/arsiv": async () => {
         const [analizler, talepler, hesap] = await Promise.all([analizleriTopla(dataDir, user.id), kullaniciTalepleri(dataDir, user.id), kontor.oku(user.id)]);
-        sendJson(response, 200, { analizler, talepler, kontor: { ...hesap, turler: TURLER, yuklemeAcik: false } });
+        sendJson(response, 200, { analizler, talepler, kontor: { ...hesap, ...(await hesapBilgisi(user)) } });
       },
-      "GET /api/kontor": async () => sendJson(response, 200, { ...(await kontor.oku(user.id)), turler: TURLER, yuklemeAcik: false }),
-      // Ödeme altyapısı hazır olunca burada ödeme başlatılacak; şimdilik kapalı.
-      "POST /api/kontor/yukle": async () => sendJson(response, 503, { error: "Kontör yükleme çok yakında açılacak." }),
+      "GET /api/kontor": async () => sendJson(response, 200, await hesapBilgisi(user)),
+      // Paket satın alma: PayTR güvenli ödeme sayfasının adresi döner. Kontör yalnız PayTR bildiriminde eklenir.
+      "POST /api/kontor/yukle": async () => {
+        const body = await readJson(request);
+        if (body?.onay !== true) throw Object.assign(new Error("Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi onaylanmalı."), { status: 400 });
+        sendJson(response, 200, await Odeme.odemeBaslat(request, user, Number(body?.tutar)));
+      },
+      "POST /api/kontor/kupon": async () => {
+        const body = await readJson(request);
+        sendJson(response, 200, await Kupon.kullan(user, body?.kod, kontor));
+      },
     };
     const handler = routes[`${request.method} ${url.pathname}`];
     if (!handler) {
@@ -88,6 +119,7 @@ function createHandler({ dataDir, currentUser }) {
       .then(handler)
       .catch((error) => {
         if (response.headersSent) return response.destroy();
+        if (error.status && error.status < 500 || error.status === 502 || error.status === 503) return sendJson(response, error.status, { error: error.message });
         console.error("Arşiv:", error);
         sendJson(response, 500, { error: "Bir sorun oluştu. Lütfen tekrar deneyin." });
       });

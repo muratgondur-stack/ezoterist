@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=14" />
-    <link rel="stylesheet" href="/yonetim.css?v=7" />
+    <link rel="stylesheet" href="/yonetim.css?v=8" />
   </head>
   <body>
     <header class="topbar">
@@ -34,6 +34,7 @@
         <button type="button" data-tab="ayarlar" aria-selected="false">⚙️ Ayarlar</button>
         <button type="button" data-tab="kullanicilar" aria-selected="false">👥 Kullanıcılar</button>
         <button type="button" data-tab="fiyatlar" aria-selected="false">💰 Fiyatlar</button>
+        <button type="button" data-tab="odeme" aria-selected="false">💳 Ödeme ve kupon</button>
         <button type="button" data-tab="anahtarlar" aria-selected="false">🔑 API anahtarları</button>
         <button type="button" data-tab="gecmis" aria-selected="false">🕓 Değişiklik geçmişi</button>
       </nav>
@@ -92,6 +93,62 @@
         </div>
       </section>
 
+      <section class="panel" id="tab-odeme" hidden>
+        <div class="card">
+          <h2>PayTR mağaza bilgileri</h2>
+          <p class="section-note">PayTR Mağaza Paneli → Bilgi sayfasındaki değerler. Sunucuda saklanır; parola ve gizli anahtarın burada yalnız son 3 karakteri görünür. Test modunda yalnız sen (yönetici) satın alabilirsin ve kartından para çekilmez; canlıya alınca herkes kontör paketi alabilir.</p>
+          <div class="pay-state" id="payState"></div>
+          <div class="pay-form">
+            <label>Mağaza no <input id="payId" inputmode="numeric" autocomplete="off" spellcheck="false" /></label>
+            <label>Mağaza parola (merchant_key) <input id="payKey" type="password" autocomplete="off" spellcheck="false" /></label>
+            <label>Mağaza gizli anahtar (merchant_salt) <input id="paySalt" type="password" autocomplete="off" spellcheck="false" /></label>
+            <label>Mod
+              <select id="payMode"><option value="test">Test (para çekilmez)</option><option value="canli">Canlı</option></select>
+            </label>
+          </div>
+          <div class="key-actions">
+            <button type="button" class="btn btn-primary" id="paySave">Kaydet</button>
+            <button type="button" class="btn btn-ghost" id="payTest">Bağlantıyı test et</button>
+            <button type="button" class="btn btn-ghost" id="payClear">Bilgileri sil</button>
+          </div>
+          <p class="key-result" id="payResult"></p>
+          <p class="section-note small">PayTR panelinde <b>Bildirim URL</b> olarak şu adres girilmeli: <code id="payNotify"></code></p>
+        </div>
+
+        <div class="card">
+          <h2>Kuponlar</h2>
+          <p class="section-note">Kupon kodu girene kupon değeri kadar kontör yüklenir; her kod tek kullanımlık. Kullanıcı kodu Kişisel Arşiv → Kontörüm'de girer (ya da <code>ezoter.ist/arsiv?kupon=KOD</code> bağlantısıyla gelir).</p>
+          <div class="pay-form coupon-form">
+            <label>Değer (kontör) <input id="cpValue" type="number" min="1" max="10000" value="50" /></label>
+            <label>Adet <input id="cpCount" type="number" min="1" max="500" value="1" /></label>
+            <label class="genis">Not (kimin için, hangi kampanya) <input id="cpNote" maxlength="120" autocomplete="off" /></label>
+            <button type="button" class="btn btn-primary" id="cpMake">Kupon üret</button>
+          </div>
+          <div class="cp-new" id="cpNew" hidden>
+            <p><b id="cpNewTitle"></b> <button type="button" class="btn btn-ghost" id="cpCopy">Kodları kopyala</button></p>
+            <textarea id="cpCodes" rows="4" readonly></textarea>
+          </div>
+          <div class="table-wrap">
+            <table class="grid-table" id="cpTable">
+              <thead><tr><th>Kod</th><th class="num">Kontör</th><th>Not</th><th>Üretildi</th><th>Kullanan</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="section-note" id="cpEmpty" hidden>Henüz kupon yok.</p>
+        </div>
+
+        <div class="card">
+          <h2>Ödemeler</h2>
+          <div class="table-wrap">
+            <table class="grid-table" id="payTable">
+              <thead><tr><th>Tarih</th><th>Kullanıcı</th><th class="num">Tutar</th><th class="num">Kontör</th><th>Mod</th><th>Durum</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="section-note" id="payEmpty" hidden>Henüz ödeme yok.</p>
+        </div>
+      </section>
+
       <section class="panel" id="tab-anahtarlar" hidden>
         <div class="card">
           <h2>API anahtarları</h2>
@@ -121,7 +178,7 @@
 
     <audio id="sample" preload="none"></audio>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-    <script src="/yonetim-sayfa.js?v=8"></script>
-    <script src="/ust-cubuk.js?v=9" defer></script>
+    <script src="/yonetim-sayfa.js?v=9"></script>
+    <script src="/ust-cubuk.js?v=10" defer></script>
 </body>
 </html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist kontör paketleri ve hizmet fiyatları." />
+    <title>Fiyatlar · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=14" />
+    <link rel="stylesheet" href="/hukuk.css?v=2" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/" aria-label="Ana menü" title="Ana menü">←</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><picture><source media="(orientation: portrait) and (max-width: 600px)" srcset="/logo/ezo_E.png?v=1" width="1247" height="216" /><img src="/logo/ezo_D.png?v=1" alt="Ezoter.ist" width="1247" height="77" /></picture></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page hukuk">
+      <article class="card">
+        <h1>Fiyatlar</h1>
+        <p class="hukuk-tarih">Ezoter.ist · Fiyatlara KDV dahildir</p>
+        <p class="fiyat-tanitim" id="tanitim" hidden>🎁 Tanıtım dönemi: şu an bütün hizmetler <b>ücretsiz</b>. Aşağıdaki fiyatlar tanıtım dönemi bittiğinde geçerli olacak.</p>
+        <h2>Kontör paketleri</h2>
+        <p>Ezoter.ist'te ücretli işlemler kontörle yapılır. <b>1 kontör = <span id="kontorTL">1</span> ₺</b>. Kontörler süresizdir.</p>
+        <div class="fiyat-paketler" id="paketler"></div>
+        <p><a href="/arsiv#kontor">Kontör yükle →</a> (üye girişi gerekir)</p>
+        <h2>Hizmetler</h2>
+        <div class="table-wrap">
+          <table class="fiyat-tablo" id="tablo">
+            <thead><tr><th>Bölüm</th><th class="num">Bir işlem</th><th class="num">Uzman değerlendirmesi</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="hukuk-tarih">Günlük ücretsiz haklar bölüm sayfalarında gösterilir. Kontör harcayan her işlemden önce fiyatı gösteren bir onay penceresi açılır.</p>
+        <h2>Ödeme ve iade</h2>
+        <p>Ödemeler PayTR güvencesiyle kartla tek çekim alınır; kart bilgileriniz Ezoter.ist'e gelmez. Ayrıntılar: <a href="/on-bilgilendirme">Ön Bilgilendirme Formu</a> · <a href="/mesafeli-satis">Mesafeli Satış Sözleşmesi</a> · <a href="/iptal-iade">İptal ve İade Koşulları</a>.</p>
+      </article>
+    </main>
+    <script src="/fiyatlar-sayfa.js?v=1" defer></script>
+    <script src="/ust-cubuk.js?v=10" defer></script>
+  </body>
+</html>

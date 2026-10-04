@@ -33,6 +33,7 @@ function sekme(ad) {
   history.replaceState(null, "", `#${ad}`);
   if (ad === "kullanicilar" && !kullanicilar.length) kullanicilariYukle();
   if (ad === "anahtarlar") anahtarlariYukle();
+  if (ad === "odeme") odemeYukle();
   if (ad === "fiyatlar") maliyetYukle();
 }
 document.querySelectorAll(".tabs button").forEach((b) => b.addEventListener("click", () => sekme(b.dataset.tab)));
@@ -386,6 +387,130 @@ function renderAnahtarlar(liste) {
   }));
 }
 
+// --- Ödeme (PayTR) ve kuponlar ---
+
+const SIPARIS_DURUM = { basladi: "Başladı", bekliyor: "Ödeme sayfasında", acilamadi: "Açılamadı", basarisiz: "Başarısız", odendi: "Ödendi ✓" };
+
+async function odemeYukle() {
+  try {
+    renderOdeme(await api("/api/yonetim/odeme"));
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+function renderPaytr(p) {
+  $("payState").className = `pay-state ${p.hazir ? (p.mod === "canli" ? "canli" : "test") : ""}`;
+  $("payState").textContent = p.hazir
+    ? `${p.mod === "canli" ? "● CANLI — herkes kontör alabilir" : "● TEST modu — yalnız sen deneyebilirsin, para çekilmez"} · Mağaza ${p.magazaNo} · parola …${p.parolaSon} · gizli anahtar …${p.gizliSon}`
+    : "Ödeme kapalı: mağaza bilgileri eksik. Kullanıcılar paketleri görür ama satın alamaz.";
+  $("payId").value = p.magazaNo || "";
+  $("payKey").value = "";
+  $("paySalt").value = "";
+  $("payKey").placeholder = p.parolaSon ? `kayıtlı (…${p.parolaSon}) — değiştirmek için yapıştır` : "";
+  $("paySalt").placeholder = p.gizliSon ? `kayıtlı (…${p.gizliSon}) — değiştirmek için yapıştır` : "";
+  $("payMode").value = p.mod;
+  $("payNotify").textContent = p.bildirimAdresi;
+  $("payTest").disabled = !p.hazir;
+  $("payClear").hidden = !p.magazaNo && !p.parolaSon;
+}
+
+function renderKuponlar(liste) {
+  $("cpTable").querySelector("tbody").replaceChildren(...liste.map((k) => {
+    const sil = el("button", { type: "button", className: "btn btn-ghost btn-sm", textContent: "Sil", hidden: Boolean(k.kullanan) });
+    sil.addEventListener("click", async () => {
+      if (!confirm(`${k.kod} kuponu silinsin mi?`)) return;
+      try { renderKuponlar((await api("/api/yonetim/kupon-sil", { kod: k.kod })).kuponlar); } catch (error) { toast(error.message); }
+    });
+    return el("tr", {},
+      el("td", {}, el("code", { textContent: k.kod })),
+      el("td", { className: "num", textContent: sayi(k.kontor) }),
+      el("td", { textContent: k.notu || "—" }),
+      el("td", { textContent: tarih(k.olusturma) }),
+      el("td", { className: k.kullanan ? "" : "muted", textContent: k.kullanan ? `${k.kullanan.eposta} · ${tarih(k.kullanma)}` : "Kullanılmadı" }),
+      el("td", {}, sil));
+  }));
+  $("cpTable").hidden = !liste.length;
+  $("cpEmpty").hidden = Boolean(liste.length);
+}
+
+function renderOdeme(d) {
+  renderPaytr(d.paytr);
+  renderKuponlar(d.kuponlar);
+  $("payTable").querySelector("tbody").replaceChildren(...d.siparisler.map((s) => el("tr", {},
+    el("td", { textContent: tarih(s.tarih) }),
+    el("td", { textContent: s.eposta }),
+    el("td", { className: "num", textContent: `${sayi(s.tutar)} ₺` }),
+    el("td", { className: "num", textContent: sayi(s.kontor) }),
+    el("td", { textContent: s.mod === "canli" ? "Canlı" : "Test" }),
+    el("td", { className: s.durum === "odendi" ? "ok" : ["acilamadi", "basarisiz"].includes(s.durum) ? "bad" : "", textContent: SIPARIS_DURUM[s.durum] || s.durum, title: s.hata || "" }))));
+  $("payTable").hidden = !d.siparisler.length;
+  $("payEmpty").hidden = Boolean(d.siparisler.length);
+}
+
+$("paySave").addEventListener("click", async () => {
+  const mod = $("payMode").value;
+  if (mod === "canli" && !confirm("Canlı moda geçilsin mi? Kullanıcıların kartından gerçek ödeme alınır.")) return;
+  $("paySave").disabled = true;
+  try {
+    const r = await api("/api/yonetim/paytr", { magazaNo: $("payId").value, parola: $("payKey").value, gizli: $("paySalt").value, mod });
+    renderPaytr(r.paytr);
+    $("payResult").textContent = "";
+    toast(r.paytr.hazir ? "PayTR bilgileri kaydedildi. Şimdi bağlantıyı test edebilirsin." : "Kaydedildi. Eksik bilgi var.");
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    $("paySave").disabled = false;
+  }
+});
+$("payTest").addEventListener("click", async () => {
+  $("payTest").disabled = true;
+  $("payResult").className = "key-result";
+  $("payResult").textContent = "Test ediliyor…";
+  try {
+    const r = await api("/api/yonetim/paytr-test", {});
+    $("payResult").className = `key-result ${r.ok ? "ok" : "bad"}`;
+    $("payResult").textContent = `${r.ok ? "✓" : "✗"} ${r.mesaj}`;
+  } catch (error) {
+    $("payResult").className = "key-result bad";
+    $("payResult").textContent = error.message;
+  } finally {
+    $("payTest").disabled = false;
+  }
+});
+$("payClear").addEventListener("click", async () => {
+  if (!confirm("PayTR mağaza bilgileri silinsin mi? Ödeme kapanır.")) return;
+  try {
+    renderPaytr((await api("/api/yonetim/paytr", { temizle: true })).paytr);
+    toast("Mağaza bilgileri silindi; ödeme kapalı.");
+  } catch (error) {
+    toast(error.message);
+  }
+});
+$("cpMake").addEventListener("click", async () => {
+  $("cpMake").disabled = true;
+  try {
+    const r = await api("/api/yonetim/kupon-uret", { kontor: Number($("cpValue").value), adet: Number($("cpCount").value), notu: $("cpNote").value });
+    renderKuponlar(r.kuponlar);
+    $("cpNewTitle").textContent = `${r.kodlar.length} yeni kupon · ${sayi(r.kontor)} kontör`;
+    $("cpCodes").value = r.kodlar.join("\n");
+    $("cpNew").hidden = false;
+    $("cpNote").value = "";
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    $("cpMake").disabled = false;
+  }
+});
+$("cpCopy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText($("cpCodes").value);
+    toast("Kodlar kopyalandı.");
+  } catch {
+    $("cpCodes").select();
+  }
+});
+
 // --- Başlangıç ---
 
 async function yukle() {
@@ -415,5 +540,5 @@ window.addEventListener("beforeunload", (e) => { if (Object.keys(taslak).length)
     return;
   }
   const hedef = location.hash.slice(1);
-  if (["ozet", "ayarlar", "kullanicilar", "fiyatlar", "anahtarlar", "gecmis"].includes(hedef)) sekme(hedef);
+  if (["ozet", "ayarlar", "kullanicilar", "fiyatlar", "odeme", "anahtarlar", "gecmis"].includes(hedef)) sekme(hedef);
 })();

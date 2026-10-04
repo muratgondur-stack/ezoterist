@@ -166,6 +166,10 @@ const pageRoutes = {
   "/yuz-muzigi": "yuz-muzigi.html",
   "/gizlilik": "gizlilik.html",
   "/kullanim-kosullari": "kullanim-kosullari.html",
+  "/fiyatlar": "fiyatlar.html",
+  "/on-bilgilendirme": "on-bilgilendirme.html",
+  "/mesafeli-satis": "mesafeli-satis.html",
+  "/iptal-iade": "iptal-iade.html",
 };
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });

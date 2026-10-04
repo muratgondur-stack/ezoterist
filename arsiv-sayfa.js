@@ -113,7 +113,7 @@ function renderWallet() {
   const k = arsiv.kontor;
   $("balanceBig").textContent = sayi(k.bakiye);
   $("balanceTop").textContent = sayi(k.bakiye);
-  $("loadButton").disabled = !k.yuklemeAcik;
+  renderPacks();
   const tbody = $("moves").querySelector("tbody");
   tbody.replaceChildren(...k.hareketler.map((h) => {
     const tr = document.createElement("tr");
@@ -135,9 +135,89 @@ function renderWallet() {
   $("movesEmpty").hidden = Boolean(k.hareketler.length);
 }
 
-$("loadButton").addEventListener("click", async () => {
-  try { await post("/api/kontor/yukle", {}); } catch (error) { toast(error.message); }
+const tl = (n) => `${new Intl.NumberFormat("tr-TR").format(n)} ₺`;
+
+function renderPacks() {
+  const k = arsiv.kontor;
+  const paketler = k.paketler || [];
+  if (paketler.length) $("kontorTL").textContent = new Intl.NumberFormat("tr-TR").format(paketler[0].tutar / paketler[0].kontor);
+  $("packs").replaceChildren(...paketler.map((p, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = `pack${i === 1 ? " pack-pop" : ""}`;
+    b.disabled = !k.yuklemeAcik;
+    b.innerHTML = `<span class="pack-coin" aria-hidden="true">🪙</span><b></b><small>kontör</small><span class="pack-price"></span>`;
+    b.querySelector("b").textContent = sayi(p.kontor);
+    b.querySelector(".pack-price").textContent = tl(p.tutar);
+    b.addEventListener("click", () => paketAl(p, b));
+    return b;
+  }));
+  $("payConsent").disabled = !k.yuklemeAcik;
+  $("payNote").textContent = k.yuklemeAcik
+    ? (k.odemeModu === "test" ? "TEST modu: ödeme PayTR test ortamında yapılır, karttan para çekilmez (yalnız yönetici görür)." : "Paketi seçince PayTR'nin güvenli ödeme sayfasına yönlendirilirsin. Ödeme onaylanınca kontör bakiyene eklenir.")
+    : "Kontör satışı çok yakında açılacak. Şu an bütün bölümler ücretsiz kullanılabiliyor.";
+}
+
+async function paketAl(p, b) {
+  if (!$("payConsent").checked) {
+    toast("Önce Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi onayını işaretle.");
+    $("payConsent").focus();
+    return;
+  }
+  b.disabled = true;
+  try {
+    const r = await post("/api/kontor/yukle", { tutar: p.tutar, onay: true });
+    window.location.href = r.odemeAdresi;
+  } catch (error) {
+    toast(error.message);
+    b.disabled = false;
+  }
+}
+
+$("couponForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const kod = $("couponCode").value.trim();
+  if (!kod) { $("couponCode").focus(); return; }
+  $("couponButton").disabled = true;
+  try {
+    const r = await post("/api/kontor/kupon", { kod });
+    $("couponCode").value = "";
+    toast(`🎉 ${sayi(r.kontor)} kontör yüklendi! Yeni bakiyen: ${sayi(r.bakiye)}`);
+    const k = await fetch("/api/kontor", { credentials: "same-origin" }).then((x) => x.json());
+    arsiv.kontor = k;
+    renderWallet();
+  } catch (error) {
+    toast(error.message);
+  } finally {
+    $("couponButton").disabled = false;
+  }
 });
+
+// PayTR'den dönüş: kontör bildirimle eklenir, birkaç saniye gecikebilir.
+async function odemeDonusu() {
+  const q = new URLSearchParams(window.location.search);
+  const durum = q.get("odeme");
+  const kupon = q.get("kupon");
+  if (kupon) { $("couponCode").value = kupon; sekmeAc("kontor"); }
+  if (!durum) return;
+  sekmeAc("kontor");
+  const banner = $("payBanner");
+  banner.hidden = false;
+  if (durum !== "basarili") {
+    banner.className = "pay-banner bad";
+    banner.textContent = "Ödeme tamamlanmadı. Kartından para çekilmedi; istersen tekrar deneyebilirsin.";
+  } else {
+    banner.className = "pay-banner ok";
+    banner.textContent = "✓ Ödemen alındı. Kontörün birkaç saniye içinde bakiyene eklenir.";
+    const ilk = arsiv.kontor.bakiye;
+    for (let i = 0; i < 8; i++) {
+      await new Promise((r) => setTimeout(r, 2500));
+      const k = await fetch("/api/kontor", { credentials: "same-origin" }).then((x) => x.json()).catch(() => null);
+      if (k && k.bakiye !== ilk) { arsiv.kontor = k; renderWallet(); banner.textContent = `✓ Ödemen alındı, kontörün yüklendi. Yeni bakiyen: ${sayi(k.bakiye)}`; break; }
+    }
+  }
+  history.replaceState(null, "", "/arsiv#kontor");
+}
 
 // --- Analizler ---
 
@@ -252,7 +332,7 @@ $("logoutButton").addEventListener("click", async () => {
 async function init() {
   const data = await fetch("/api/me", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (!data?.user) {
-    window.location.replace(`/login?next=${encodeURIComponent("/arsiv")}`);
+    window.location.replace(`/login?next=${encodeURIComponent(`/arsiv${window.location.search}${window.location.hash}`)}`);
     return;
   }
   me = data.user;
@@ -267,6 +347,7 @@ async function init() {
   renderPasswordForm();
   const hedef = window.location.hash.slice(1);
   if (["profil", "kontor", "analizler", "guvenlik"].includes(hedef)) sekmeAc(hedef, false);
+  odemeDonusu();
 }
 
 fillCities();

@@ -8,6 +8,8 @@ const { yardimci } = require("./astroloji-api");
 const { kontorDefteri } = require("./kontor");
 const Anahtarlar = require("./anahtarlar");
 const Olcum = require("./olcum");
+const Odeme = require("./odeme");
+const Kupon = require("./kupon");
 
 // --- Maliyet hesabı (Murat 2026-10-04): hizmet kendi Gemma/TTS/resim motorumuzla verilir; burada dış API'lerden
 // (OpenAI gpt-4.1-mini, Google standart TTS, OpenAI görsel) alınsaydı bir işlemin kaça mal olacağı hesaplanır.
@@ -152,6 +154,20 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
       });
       return true;
     }
+    // Herkese açık fiyat listesi (/fiyatlar sayfası): kontör paketleri ve hizmetlerin kontör karşılıkları.
+    if (url.pathname === "/api/fiyatlar" && request.method === "GET") {
+      sendJson(response, 200, {
+        paketler: Odeme.paketler(),
+        kontorTL: Ayarlar.get("fiyat.kontorTL"),
+        tanitim: Ayarlar.get("fiyat.tanitim"),
+        bolumler: Ayarlar.BOLUMLER.filter((b) => Ayarlar.bolumAcik(b.id)).map((b) => ({
+          ad: b.id === "asistan" ? `${b.ad} (soru + cevap)` : b.ad, sayfa: b.sayfa,
+          islem: Ayarlar.get(`fiyat.${b.id}`) || 0,
+          uzman: Ayarlar.SEMA[`fiyat.${b.id}.uzman`] ? Ayarlar.get(`fiyat.${b.id}.uzman`) || 0 : null,
+        })),
+      });
+      return true;
+    }
     if (!url.pathname.startsWith("/api/yonetim/")) return false;
     const user = currentUser(request);
     // Yönetici olmayan için uç yokmuş gibi davranılır.
@@ -230,6 +246,30 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
         const simdi = Anahtarlar.ozet().find((a) => a.id === saglayici);
         await gecmiseYaz(user, { [`anahtar.${saglayici}`]: simdi.var ? `…${simdi.son4}` : "(silindi)" }, { [`anahtar.${saglayici}`]: onceki?.var ? `…${onceki.son4}` : "(yok)" });
         sendJson(response, 200, { anahtarlar: Anahtarlar.ozet() });
+      },
+      // Ödeme (PayTR) ve kuponlar. Parola / gizli anahtar panele hiç dönmez; geçmişe yalnız son 3 karakter yazılır.
+      "GET /api/yonetim/odeme": async () => sendJson(response, 200, {
+        paytr: Odeme.ayarOzeti(Odeme.siteTabani(request)), paketler: Odeme.paketler(), siparisler: Odeme.sonSiparisler(), kuponlar: Kupon.liste(),
+      }),
+      "POST /api/yonetim/paytr": async () => {
+        const body = await readJson(request);
+        const onceki = Odeme.ayarOzeti("");
+        await Odeme.ayarKaydet({ magazaNo: body?.magazaNo, parola: body?.parola, gizli: body?.gizli, mod: body?.mod, temizle: body?.temizle === true });
+        const simdi = Odeme.ayarOzeti(Odeme.siteTabani(request));
+        const yaz = (o) => `${o.magazaNo || "—"} · …${o.parolaSon || "—"} · …${o.gizliSon || "—"} · ${o.mod}`;
+        await gecmiseYaz(user, { "odeme.paytr": yaz(simdi) }, { "odeme.paytr": yaz(onceki) });
+        sendJson(response, 200, { paytr: simdi });
+      },
+      "POST /api/yonetim/paytr-test": async () => sendJson(response, 200, await Odeme.baglantiTesti(request, user)),
+      "POST /api/yonetim/kupon-uret": async () => {
+        const body = await readJson(request);
+        const sonuc = await Kupon.uret({ kontor: body?.kontor, adet: body?.adet, notu: body?.notu, olusturan: user.email });
+        sendJson(response, 200, { ...sonuc, kuponlar: Kupon.liste() });
+      },
+      "POST /api/yonetim/kupon-sil": async () => {
+        const body = await readJson(request);
+        await Kupon.sil(body?.kod);
+        sendJson(response, 200, { kuponlar: Kupon.liste() });
       },
       "POST /api/yonetim/anahtar-test": async () => {
         const body = await readJson(request);

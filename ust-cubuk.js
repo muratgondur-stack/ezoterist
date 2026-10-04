@@ -82,7 +82,7 @@
   const alt = document.createElement("footer");
   alt.className = "alt-satir";
   alt.innerHTML = `
-    <p class="alt-baglantilar"><span>Tüm hakları saklıdır © 2026</span><a href="/gizlilik">Gizlilik Politikası</a><a href="/kullanim-kosullari">Kullanım Koşulları</a><button type="button" aria-haspopup="dialog">İletişim</button></p>
+    <p class="alt-baglantilar"><span>Tüm hakları saklıdır © 2026</span><a href="/gizlilik">Gizlilik Politikası</a><a href="/kullanim-kosullari">Kullanım Koşulları</a><a href="/fiyatlar">Fiyatlar</a><a href="/mesafeli-satis">Mesafeli Satış</a><a href="/iptal-iade">İptal ve İade</a><button type="button" aria-haspopup="dialog">İletişim</button></p>
     <p class="alt-ai" aria-label="Kullandığımız yapay zekâlar"><span>GEMMA4</span><span>OpenAI</span><span>Claude</span><span>Grok</span><span>RAZECE.AI</span></p>`;
   const pencere = document.createElement("dialog");
   pencere.className = "alt-iletisim";

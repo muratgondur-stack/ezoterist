@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=14" />
-    <link rel="stylesheet" href="/arsiv.css?v=2" />
+    <link rel="stylesheet" href="/arsiv.css?v=3" />
   </head>
   <body>
     <header class="topbar">
@@ -73,10 +73,27 @@
             </div>
           </div>
           <div class="wallet-load">
-            <button type="button" class="btn btn-primary" id="loadButton" disabled>Kontör yükle</button>
-            <span class="badge soon">Yakında</span>
-            <p class="section-note">Kontör paketleri ve güvenli ödeme çok yakında burada olacak. Şu an bütün bölümler günlük ücretsiz haklarla kullanılabiliyor.</p>
+            <p class="sky-label">1 kontör = <span id="kontorTL">1</span> ₺ · <a href="/fiyatlar">Hizmet fiyatları</a></p>
           </div>
+        </div>
+        <div class="card">
+          <h2>Kontör yükle</h2>
+          <p class="pay-banner" id="payBanner" hidden></p>
+          <div class="packs" id="packs"></div>
+          <label class="pay-consent">
+            <input type="checkbox" id="payConsent" />
+            <span><a href="/on-bilgilendirme" target="_blank">Ön Bilgilendirme Formu</a>'nu ve <a href="/mesafeli-satis" target="_blank">Mesafeli Satış Sözleşmesi</a>'ni okudum, onaylıyorum. Kontörün dijital hizmet olarak hemen hesabıma tanımlanacağını biliyorum (<a href="/iptal-iade" target="_blank">İptal ve İade Koşulları</a>).</span>
+          </label>
+          <p class="section-note" id="payNote"></p>
+          <p class="pay-secure">🔒 Ödemeler PayTR güvencesiyle; kart bilgilerin Ezoter.ist'e gelmez.</p>
+        </div>
+        <div class="card">
+          <h2>Kupon kodu</h2>
+          <form class="coupon" id="couponForm">
+            <input id="couponCode" placeholder="AB2C-DE3F-GH4J" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kupon kodu" />
+            <button type="submit" class="btn btn-primary" id="couponButton">Kuponu kullan</button>
+          </form>
+          <p class="section-note">Elindeki kupon kodunu gir; kupon değeri kadar kontör bakiyene eklenir.</p>
         </div>
         <div class="card">
           <h2>Kontör hareketlerim</h2>
@@ -136,7 +153,7 @@
 
     <script src="/astroloji-veri.js?v=1"></script>
     <script src="/uzmanlar.js?v=3"></script>
-    <script src="/arsiv-sayfa.js?v=1"></script>
-    <script src="/ust-cubuk.js?v=9" defer></script>
+    <script src="/arsiv-sayfa.js?v=2"></script>
+    <script src="/ust-cubuk.js?v=10" defer></script>
 </body>
 </html>

@@ -1,15 +1,22 @@
 // Kontör defteri: her kullanıcının bakiyesi ve hareketleri DATA_DIR/kontor/<userId>.json dosyasında tutulur.
 // Bütün değişiklikler kullanıcı başına sıraya alınır; bakiye hiçbir zaman eksiye düşmez.
-// Şimdilik yalnızca okunuyor; yükleme (ödeme) ve harcama bağlandığında hareketEkle kullanılacak.
+// Yükleme PayTR bildiriminden (odeme.js), kupon kupon.js'ten, hediye yönetim panelinden gelir; harcama henüz bağlı değil.
 const crypto = require("node:crypto");
 const path = require("node:path");
 const { yardimci } = require("./astroloji-api");
 
 const { readCache, writeCache } = yardimci;
 
-const TURLER = { yukleme: "Kontör yükleme", harcama: "Harcama", hediye: "Hediye", iade: "İade" };
+const TURLER = { yukleme: "Kontör yükleme", kupon: "Kupon", harcama: "Harcama", hediye: "Hediye", iade: "İade" };
 
+// Aynı klasör için tek defter: arşiv, yönetim ve ödeme aynı kuyruğu paylaşır.
+const defterler = new Map();
 function kontorDefteri(dataDir) {
+  if (!defterler.has(dataDir)) defterler.set(dataDir, yeniDefter(dataDir));
+  return defterler.get(dataDir);
+}
+
+function yeniDefter(dataDir) {
   const dosya = (userId) => path.join(dataDir, "kontor", `${String(userId).replace(/[^a-zA-Z0-9-]/g, "")}.json`);
   const kuyruk = new Map();
 
