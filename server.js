@@ -201,7 +201,28 @@ function istekBolumu(adres) {
 
 const server = http.createServer((request, response) => Olcum.calistir(istekBolumu(request.url), () => anaIsleyici(request, response)));
 
+// Yapay zekâ işlemleri en az 8 saniyede cevaplanır (Murat 2026-10-04): yorum önbellekten hemen hazır olsa da
+// başarılı cevap 8 sn dolmadan gönderilmez. Hata cevapları (eksik bilgi, günlük hak vb.) bekletilmez.
+const YAPAY_ZEKA_ISLEMI = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|tarot\/cek|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|melek\/yorum|iching\/yorum|run\/cek|ay\/rehber|cakra\/test|kristal\/oner|sembol\/sor|ruhsal\/(yansima|ozet)|asistan\/mesaj|dizim\/(analiz|karsilastir))$/;
+const EN_AZ_SURE = 8000;
+function enAzBeklet(response) {
+  const bitis = Date.now() + EN_AZ_SURE;
+  const asilHead = response.writeHead.bind(response);
+  const asilEnd = response.end.bind(response);
+  let bas = null;
+  response.writeHead = (...a) => { bas = a; return response; };
+  response.end = (...a) => {
+    const kod = bas ? Number(bas[0]) : response.statusCode;
+    const gonder = () => { if (bas) asilHead(...bas); asilEnd(...a); };
+    const kalan = bitis - Date.now();
+    if (kod < 400 && kalan > 0) setTimeout(gonder, kalan);
+    else gonder();
+    return response;
+  };
+}
+
 function anaIsleyici(request, response) {
+  if (request.method === "POST" && YAPAY_ZEKA_ISLEMI.test(String(request.url || "").split("?")[0])) enAzBeklet(response);
   let url;
   let requestPath;
   try {
