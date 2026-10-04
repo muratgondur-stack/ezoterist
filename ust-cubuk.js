@@ -309,7 +309,7 @@ const bilgilendirmeKontrol = (user) => {
         b.innerHTML = '<img alt="" loading="lazy" /><b></b>';
         b.querySelector("img").src = u.resim;
         b.querySelector("b").textContent = u.ad;
-        b.addEventListener("click", () => { secili = u.id; yaz(); ciz(); rozetleriYerlestir(); });
+        b.addEventListener("click", () => { secili = u.id; yaz(); ciz(); duyur(); rozetleriYerlestir(); });
         return b;
       }));
       const u = liste.find((x) => x.id === secili);
@@ -320,6 +320,20 @@ const bilgilendirmeKontrol = (user) => {
 
     // Yorum sonuçlarında, "sesli dinle" düğmelerinin yanında yorumu yazan/okuyan sanal uzmanın resmi (orta boy);
     // okurken resim ışıldar. Gerçek uzman cevaplarına (uzman kartı) eklenmez.
+    // Seçili yorumcu sayfanın kendi koduna da duyurulur; büyük okuyucu figürü (tarot, numeroloji) onun resmini alır.
+    function duyur() {
+      const u = liste.find((x) => x.id === secili);
+      window.SeciliYorumcu = u;
+      const fig = document.getElementById("numerolog");
+      if (fig) {
+        const img = fig.querySelector("img");
+        if (img && img.getAttribute("src") !== u.resim) { img.src = u.resim; img.alt = u.ad; img.hidden = false; img.style.objectFit = "cover"; img.style.objectPosition = "50% 8%"; }
+        const b = fig.querySelector("figcaption b");
+        if (b) b.textContent = `${u.ad}${u.unvan ? ` · ${u.unvan}` : ""}`;
+      }
+      document.dispatchEvent(new CustomEvent("yorumcu-degisti", { detail: u }));
+    }
+    duyur();
     const rozetIcerik = (r) => {
       const u = liste.find((x) => x.id === secili);
       if (r.dataset.yorumcu === u.id) return; // yalnız değişince yaz (gözlemci döngüye girmesin)

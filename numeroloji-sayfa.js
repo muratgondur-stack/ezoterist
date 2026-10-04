@@ -12,7 +12,7 @@ const toast = (text) => {
 };
 const shortDate = (ms) => new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long" }).format(new Date(ms));
 
-// --- Ses: baş numeroloğumuz Burcu konuşurken videosu oynar ---
+// --- Ses: yorumcu konuşurken figürü ışıldar (resim ve ad ust-cubuk.js seçimine göre) ---
 
 const voice = $("voice");
 const numerologVideo = $("numerologVideo");
@@ -21,8 +21,7 @@ let activeListen = null;
 function konusuyor(evet) {
   $("numerolog").classList.toggle("is-speaking", evet);
   $("numerologCaption").textContent = evet ? "Şu an seninle konuşuyor…" : "Yorumlarını sesli dinlediğinde seninle konuşur.";
-  if (evet) numerologVideo.play().catch(() => {});
-  else numerologVideo.pause();
+  if (numerologVideo) { if (evet) numerologVideo.play().catch(() => {}); else numerologVideo.pause(); }
 }
 
 function stopVoice() {
@@ -45,7 +44,7 @@ function bindListen(button, getUrl) {
     activeListen = button;
     button.disabled = true;
     button.textContent = "⏳ Ses hazırlanıyor…";
-    numerologVideo.preload = "auto";
+    if (numerologVideo) numerologVideo.preload = "auto";
     voice.src = getUrl();
     voice.play().catch(() => {
       toast("Ses çalınamadı. Lütfen tekrar deneyin.");

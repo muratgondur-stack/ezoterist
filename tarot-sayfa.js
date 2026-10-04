@@ -16,7 +16,7 @@ const toast = (text) => {
 const tarih = (ms) => new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" }).format(new Date(ms));
 const bekle = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// --- Ses: Feryal konuşurken videosu oynar ---
+// --- Ses: yorumcu konuşurken figürü ışıldar (resim ve ad ust-cubuk.js seçimine göre) ---
 
 const voice = $("voice");
 const video = $("numerologVideo");
@@ -25,8 +25,7 @@ let activeListen = null;
 function konusuyor(evet) {
   $("numerolog").classList.toggle("is-speaking", evet);
   $("numerologCaption").textContent = evet ? "Şu an kartlarını anlatıyor…" : "Yorumunu sesli dinlediğinde seninle konuşur.";
-  if (evet) video.play().catch(() => {});
-  else video.pause();
+  if (video) { if (evet) video.play().catch(() => {}); else video.pause(); }
 }
 
 function stopVoice() {
@@ -49,7 +48,7 @@ function bindListen(button, getUrl) {
     activeListen = button;
     button.disabled = true;
     button.textContent = "⏳ Ses hazırlanıyor…";
-    video.preload = "auto";
+    if (video) video.preload = "auto";
     voice.src = getUrl();
     voice.play().catch(() => { toast("Ses çalınamadı."); stopVoice(); });
   };
@@ -203,7 +202,7 @@ $("revealButton").addEventListener("click", async () => {
   masaKilitli = true;
   const button = $("revealButton");
   button.disabled = true;
-  button.textContent = "🔮 Feryal kartlarına bakıyor…";
+  button.textContent = `🔮 ${window.SeciliYorumcu?.ad || "Okuyucumuz"} kartlarına bakıyor…`;
   try {
     const response = await fetch("/api/tarot/cek", {
       method: "POST",
@@ -259,7 +258,7 @@ function showReading(kayit, kaydir = false) {
   $("sonuc").hidden = false;
   $("readingMeta").textContent = `${tarih(kayit.tarih)} · ${a.ad}${kayit.soru ? ` · “${kayit.soru}”` : ""}`;
   $("readingTitle").textContent = kayit.yorum.baslik;
-  $("readingBadge").textContent = kayit.kaynak === "ai" ? "✨ Feryal'in yorumu" : "📖 Kartların anlamı";
+  $("readingBadge").textContent = kayit.kaynak === "ai" ? `✨ ${window.SeciliYorumcu?.ad || "Okuyucumuzun"} yorumu` : "📖 Kartların anlamı";
   $("cardReadings").replaceChildren(...kayit.kartlar.map((c, i) => {
     const k = kartBul(c.id);
     const li = document.createElement("li");
