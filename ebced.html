@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070914" />
+    <meta name="description" content="Ezoter.ist Ebced: ismini Arap harflerine ayır, ebced değerini, unsur dengeni, isim burcunu ve vefkini öğren, yorumunu sesli dinle." />
+    <title>Ebced · Ezoter.ist</title>
+    <link rel="icon" href="/favicon.png?v=1" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/astroloji.css?v=15" />
+    <link rel="stylesheet" href="/ebced-cifir.css?v=2" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="topbar-back" href="/" aria-label="Ana menü" title="Ana menü">←</a>
+      <a class="topbar-logo" href="/" aria-label="Ezoter.ist ana sayfa"><picture><source media="(orientation: portrait) and (max-width: 600px)" srcset="/logo/ezo_E.png?v=1" width="1247" height="216" /><img src="/logo/ezo_D.png?v=1" alt="Ezoter.ist" width="1247" height="77" /></picture></a>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <main class="page">
+      <section class="ec-hero">
+        <div class="hero-text">
+          <p class="eyebrow">Ezoter.ist · Ebced</p>
+          <h1>Harflerin<br /><em>sayısal sırrı</em></h1>
+          <p class="lead">Ebced, Arap alfabesinin her harfine bir sayı veren kadim bir hesaptır: Elif 1, Be 2, Cim 3… Gayın 1000. Asırlarca isimlere anlam vermek, tarih düşürmek ve vefk çizmek için kullanıldı. İsmini yaz; harflerine ayrılsın, sayısı, unsur dengesi, isim burcu ve vefki çıksın, yorumunu sesli dinle.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#hesapla">İsmimi hesapla</a>
+            <a class="btn btn-ghost" href="#tablo">Ebced tablosu</a>
+          </div>
+        </div>
+        <div class="ec-hero-art">
+          <img src="/ebced/hero-ebced.webp?v=1" alt="Altın harflerle süslü eski bir hat sayfası" width="1536" height="1024" />
+          <div class="ec-yuzen" id="yuzen" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section id="hesapla" aria-labelledby="hesapBaslik">
+        <div class="section-head">
+          <h2 id="hesapBaslik">İsmini harflerine ayır</h2>
+          <p class="section-note ec-kota" id="kota"></p>
+        </div>
+        <form class="card ec-form" id="ebcedForm">
+          <div class="ec-satir">
+            <label>İsim ya da kelime
+              <input id="metin" maxlength="60" autocomplete="off" placeholder="Ör. Zeynep, Murat, Aşk" required />
+            </label>
+            <label>Arap harfleriyle yazılışı
+              <input id="arapca" class="ar" dir="rtl" maxlength="80" autocomplete="off" spellcheck="false" />
+              <span class="ec-ipucu">Otomatik çevrilir; Osmanlıca yazılışı farklıysa harf klavyesiyle düzelt (ör. Murat → مراد).</span>
+            </label>
+          </div>
+          <details>
+            <summary class="ec-ipucu">⌨️ Harf klavyesiyle düzelt</summary>
+            <div class="ec-klavye" id="klavye"></div>
+          </details>
+          <div class="ec-karolar" id="canliKarolar" aria-live="polite"></div>
+          <div class="ec-toplam"><small>Ebced değeri</small><b id="canliToplam">0</b></div>
+          <div class="ec-satir">
+            <label>Anne adı (isteğe bağlı)
+              <input id="anne" maxlength="40" autocomplete="off" placeholder="İsim burcu için geleneksel hesap" />
+            </label>
+            <label>Annenin adı Arap harfleriyle
+              <input id="anneArapca" class="ar" dir="rtl" maxlength="60" autocomplete="off" spellcheck="false" />
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary" id="ebcedSubmit">✨ Ebced yorumumu çıkar</button>
+        </form>
+      </section>
+
+      <section id="sonuc" class="ec-sonuc" hidden>
+        <div class="card">
+          <div class="reading-head">
+            <div>
+              <p class="eyebrow" id="sonucUst"></p>
+              <h2 class="ar" id="sonucArapca" style="font-size:2.6rem;margin:0;color:var(--altin)"></h2>
+            </div>
+            <button type="button" class="listen" id="dinle">🔊 Sesli dinle</button>
+          </div>
+          <div class="ec-karolar" id="sonucKarolar"></div>
+          <div class="ec-toplam"><small>Ebced değeri</small><b id="sonucToplam"></b></div>
+          <div class="ec-bilgiler" id="sonucBilgiler"></div>
+        </div>
+        <div class="card">
+          <h3>Unsur dengen</h3>
+          <div class="ec-unsurlar" id="unsurlar"></div>
+        </div>
+        <div class="card ec-vefk-kutu">
+          <div class="ec-vefk" id="vefk"></div>
+          <p class="ec-vefk-not" id="vefkNot"></p>
+        </div>
+        <article class="card ec-yorum" id="yorum"></article>
+        <div class="card expert" id="expertCard" hidden>
+          <div class="reading-head">
+            <h3>İstersen uzmanımıza da yorumlat</h3>
+            <span class="badge">48 saat</span>
+          </div>
+          <p class="expert-lead">Dilersen uzmanlarımızdan birini seç; isminin ebcedini kendi gözüyle de yorumlasın.</p>
+          <div class="expert-status" id="expertStatus" hidden></div>
+          <ul class="expert-grid" id="expertGrid"></ul>
+          <form class="expert-form" id="expertForm">
+            <label>
+              <span>Uzmanına notun (isteğe bağlı)</span>
+              <textarea name="soru" maxlength="600" rows="3"></textarea>
+            </label>
+            <button type="submit" class="btn btn-ghost">Uzman yorumu iste</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="tablo" aria-labelledby="tabloBaslik">
+        <div class="section-head">
+          <h2 id="tabloBaslik">Ebced tablosu</h2>
+          <p class="section-note">28 harf, ebced sırasıyla. Noktalar harfin unsurunu gösterir: 🔴 ateş · 🔵 hava · 🟢 su · 🟩 toprak.</p>
+        </div>
+        <div class="card"><div class="ec-tablo" id="ebcedTablo"></div></div>
+      </section>
+
+      <section id="gunluk" aria-labelledby="gunlukBaslik">
+        <div class="section-head">
+          <h2 id="gunlukBaslik">Ebced defterim</h2>
+          <p class="section-note">Hesapladığın isimler burada saklanır.</p>
+        </div>
+        <ul class="ec-gunluk" id="gunlukListe"></ul>
+      </section>
+
+      <p class="disclaimer">Ebced, harflere sayı veren geleneksel bir hesaptır; buradaki yorumlar eğlence ve kişisel farkındalık içindir, dini ya da kesin bir hüküm taşımaz.</p>
+    </main>
+
+    <audio id="voice" preload="none"></audio>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/ebced-veri.js?v=1"></script>
+    <script src="/ebced-cifir-ortak.js?v=1"></script>
+    <script src="/uzmanlar.js?v=4"></script>
+    <script src="/uzman-kart.js?v=4"></script>
+    <script src="/ebced-sayfa.js?v=1"></script>
+    <script src="/ust-cubuk.js?v=12" defer></script>
+  </body>
+</html>

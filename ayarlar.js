@@ -37,6 +37,8 @@ const BOLUMLER = [
   { id: "asistan", ad: "Ezoterik Asistan", sayfa: "/asistan", api: "/api/asistan/", dizin: "asistan", sinir: 30 },
   { id: "dizim", ad: "Taşlarla Dizim", sayfa: "/taslarla-dizim", api: "/api/dizim/", dizin: "dizim", sinir: 5 },
   { id: "yuz-muzigi", ad: "Yüz Müziği", sayfa: "/yuz-muzigi", api: "/api/yuz-muzigi/", dizin: "yuz-muzigi", sinir: null },
+  { id: "ebced", ad: "Ebced", sayfa: "/ebced", api: "/api/ebced/", dizin: "ebced", sinir: 5 },
+  { id: "cifir", ad: "Cifir", sayfa: "/cifir", api: "/api/cifir/", dizin: "cifir", sinir: 3 },
 ];
 
 const listeOrtam = (ad) => String(process.env[ad] || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
@@ -71,7 +73,7 @@ const SEMA = {
   "maliyet.gorsel": { grup: "Maliyet", ad: "OpenAI görsel (gpt-image, 1024×1024)", tur: "sayi", min: 0, max: 5, adim: 0.001, vars: 0.011, birim: "$ / görsel" },
 };
 // "Uzmanımıza da yorumlat" seçeneği olan bölümler (uzman-api.js BOLUMLER ile aynı küme).
-const UZMANLI = ["astroloji", "numeroloji", "ruya", "kahve-fali", "el-fali", "tarot", "yuz-okuma", "fotograf-analizi", "ask-uyumu", "melek-sayilari", "iching", "run-taslari", "ay-takvimi", "cakralar", "kristaller", "semboller", "dizim"];
+const UZMANLI = ["astroloji", "numeroloji", "ruya", "kahve-fali", "el-fali", "tarot", "yuz-okuma", "fotograf-analizi", "ask-uyumu", "melek-sayilari", "iching", "run-taslari", "ay-takvimi", "cakralar", "kristaller", "semboller", "dizim", "ebced", "cifir"];
 BOLUMLER.forEach((b) => {
   SEMA[`bolum.${b.id}.acik`] = { grup: "Bölümler", ad: b.ad, tur: "bool", vars: true };
   SEMA[`bolum.${b.id}.ses`] = { grup: "Bölüm sesleri", ad: b.ad, tur: "secim", secenekler: ["", ...SESLER], vars: "", aciklama: "boş = varsayılan ses" };

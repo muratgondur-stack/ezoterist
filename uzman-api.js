@@ -29,6 +29,7 @@ const KristalVeri = require("./kristal-veri");
 const { sembolKaydiOku } = require("./sembol-api");
 const { dizimKaydiOku, gorselYolu: dizimGorselYolu } = require("./dizim-api");
 const TarotVeri = require("./tarot-veri");
+const { ebcedKaydiOku, cifirKaydiOku } = require("./ebced-cifir-api");
 
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
 const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu, "yuz-okuma": yuzFotoYolu, "fotograf-analizi": analizFotoYolu, dizim: (dataDir, userId, kayitId) => dizimGorselYolu(dataDir, userId, kayitId) };
@@ -280,6 +281,28 @@ const BOLUMLER = {
       ].filter(Boolean).join(" — "),
       kayitId: k.id,
       fotoSayisi: k.gorsel ? 1 : 0,
+    }),
+  },
+  ebced: {
+    ad: "ebced hesabı",
+    link: "/ebced#gunluk",
+    yukle: (dataDir, userId, body) => ebcedKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: `${k.girdi.metin} · ${k.hesap.toplam} · ${k.yorum.baslik}`,
+      girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} · ${k.girdi.metin} (${k.girdi.arapca})${k.girdi.anne ? ` · anne: ${k.girdi.anne}` : ""}`,
+      ozet: `Ebced ${k.hesap.toplam} · harfler: ${k.hesap.harfler.map((x) => `${x.ad} ${x.d}`).join(", ")} · baskın unsur ${k.hesap.baskin} · isim burcu ${k.hesap.burc.ad}`,
+      kayitId: k.id,
+    }),
+  },
+  cifir: {
+    ad: "cifir açılımı",
+    link: "/cifir#gunluk",
+    yukle: (dataDir, userId, body) => cifirKaydiOku(dataDir, userId, String(body?.kayitId || "").replace(/[^0-9a-f]/g, "")),
+    kaynak: (k) => ({
+      baslik: `${k.hesap.egilim.ad} · ${k.yorum.baslik}`,
+      girdiMetni: `${new Date(k.tarih).toLocaleDateString("tr-TR")} · ${k.girdi.isim}${k.girdi.anne ? ` (anne: ${k.girdi.anne})` : ""}`,
+      ozet: `Sorusu: ${k.girdi.soru} · toplam ${k.hesap.toplam} · cevap harfleri ${k.hesap.cevapHarfleri.map((x) => x.ad).join(", ")} · eğilim ${k.hesap.egilim.ad} · ${k.hesap.gezegen.ad}`,
+      kayitId: k.id,
     }),
   },
 };

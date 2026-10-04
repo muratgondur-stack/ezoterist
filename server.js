@@ -27,6 +27,7 @@ const { createHandler: createSembolHandler } = require("./sembol-api");
 const { createHandler: createAsistanHandler } = require("./asistan-api");
 const { createHandler: createDizimHandler } = require("./dizim-api");
 const { createHandler: createYuzMuzigiHandler } = require("./yuz-muzigi-api");
+const { createHandler: createEbcedCifirHandler } = require("./ebced-cifir-api");
 
 const configuredPort = Number.parseInt(process.env.PORT || "", 10);
 const port = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -164,6 +165,8 @@ const pageRoutes = {
   "/asistan": "asistan.html",
   "/taslarla-dizim": "dizim.html",
   "/yuz-muzigi": "yuz-muzigi.html",
+  "/ebced": "ebced.html",
+  "/cifir": "cifir.html",
   "/gizlilik": "gizlilik.html",
   "/kullanim-kosullari": "kullanim-kosullari.html",
   "/fiyatlar": "fiyatlar.html",
@@ -195,6 +198,7 @@ const handleSembolRequest = createSembolHandler({ dataDir, currentUser, sendFile
 const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser, sendFile });
 const handleDizimRequest = createDizimHandler({ dataDir, currentUser, sendFile });
 const handleYuzMuzigiRequest = createYuzMuzigiHandler({ dataDir, currentUser });
+const handleEbcedCifirRequest = createEbcedCifirHandler({ dataDir, currentUser, sendFile });
 const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi });
 
 // Her istek ait olduğu bölümün etiketiyle çalışır; yapay zekâ/ses kullanımı o bölüme yazılır (olcum.js).
@@ -208,9 +212,9 @@ const server = http.createServer((request, response) => Olcum.calistir(istekBolu
 
 // Yapay zekâ işlemleri en az belli bir sürede cevaplanır (Murat 2026-10-04; varsayılan 8 sn, asistan 2 sn): yorum
 // önbellekten hemen hazır olsa da başarılı cevap bu süre dolmadan gönderilmez. Hata cevapları (eksik bilgi, günlük hak vb.) bekletilmez.
-const YAPAY_ZEKA_ISLEMI = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|tarot\/cek|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|melek\/yorum|iching\/yorum|run\/cek|ay\/rehber|cakra\/test|kristal\/oner|sembol\/sor|ruhsal\/(yansima|ozet)|asistan\/mesaj|dizim\/(analiz|karsilastir))$/;
+const YAPAY_ZEKA_ISLEMI = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|tarot\/cek|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|melek\/yorum|iching\/yorum|run\/cek|ay\/rehber|cakra\/test|kristal\/oner|sembol\/sor|ruhsal\/(yansima|ozet)|asistan\/mesaj|dizim\/(analiz|karsilastir)|ebced\/yorum|cifir\/yorum)$/;
 // Derin raporlar daha uzun bekler (Süreler → "derin raporlar"); geri kalan yapay zekâ işleri "hafif işler".
-const DERIN_RAPOR = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|ay\/rehber|ruhsal\/ozet|dizim\/(analiz|karsilastir))$/;
+const DERIN_RAPOR = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|ay\/rehber|ruhsal\/ozet|dizim\/(analiz|karsilastir)|cifir\/yorum)$/;
 // Süreler yönetim panelinden (Süreler → "en az bekleme"); asistanın kendi süresi var.
 function enAzBeklet(response, sn) {
   const bitis = Date.now() + sn * 1000;
@@ -294,6 +298,7 @@ function anaIsleyici(request, response) {
   if (handleAsistanRequest(request, response, url)) return;
   if (handleDizimRequest(request, response, url)) return;
   if (handleYuzMuzigiRequest(request, response, url)) return;
+  if (handleEbcedCifirRequest(request, response, url)) return;
   if (handleAuthRequest(request, response, url)) return;
 
   if (request.method !== "GET" && request.method !== "HEAD") {

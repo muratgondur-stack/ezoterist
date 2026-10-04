@@ -25,7 +25,9 @@ const GUNLUKLER = [
   { dizin: "run", ad: "Rün Taşları", link: "/run-taslari#gunluk", ikon: "ᚱ" },
   { dizin: "cakra", ad: "Çakra Testi", link: "/cakralar#gunluk", ikon: "🌈" },
   { dizin: "kristal", ad: "Kristal Önerisi", link: "/kristaller#gunluk", ikon: "💎" },
-  { dizin: "dizim", ad: "Taşlarla Dizim", link: "/tas#gunluk", ikon: "🪨" },
+  { dizin: "dizim", ad: "Taşlarla Dizim", link: "/taslarla-dizim#gunluk", ikon: "🪨" },
+  { dizin: "ebced", ad: "Ebced", link: "/ebced#gunluk", ikon: "🔤", baslik: (k) => `${k.girdi?.metin} · ${k.hesap?.toplam} · ${k.yorum?.baslik || ""}` },
+  { dizin: "cifir", ad: "Cifir", link: "/cifir#gunluk", ikon: "🔯", baslik: (k) => `${k.girdi?.soru?.slice(0, 50)} · ${k.yorum?.baslik || ""}` },
   { dizin: "semboller", ad: "Semboller", link: "/semboller#gunluk", ikon: "🔯", baslik: (k) => `${k.yorum?.sembol} · ${k.yorum?.baslik || ""}` },
 ];
 

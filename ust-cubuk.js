@@ -133,6 +133,8 @@ const bilgilendirmeKontrol = (user) => {
     "/api/yuz-okuma/bak": ["Yüz haritan çıkarılıyor…", "Oranların ölçülüyor…", "Yüz hatların okunuyor…", "Yorumun yazılıyor…"],
     "/api/fotograf-analizi/bak": ["Fotoğrafın inceleniyor…", "Renkler ve semboller okunuyor…", "Enerji ve atmosfer değerlendiriliyor…", "Analizin yazılıyor…"],
     "/api/ask-uyumu/hesapla": ["İki doğum haritası hesaplanıyor…", "Güneş, Ay ve Venüs uyumu karşılaştırılıyor…", "İsimlerin sayıları eşleştiriliyor…", "Uyum yorumunuz yazılıyor…"],
+    "/api/ebced/yorum": ["Harfler Osmanlı imlâsına çevriliyor…", "Ebced değerleri toplanıyor…", "Unsur dengen ve isim burcun bulunuyor…", "Vefkin çiziliyor…", "Yorumun yazılıyor…"],
+    "/api/cifir/yorum": ["İsmin, anne adın ve sorun harflere ayrılıyor…", "Ebced toplamı hesaplanıyor…", "Tarh yapılıyor: 28, 12, 7 ve 4…", "Cevap harfleri çıkıyor…", "Vefk kuruluyor…", "Cifir yorumun yazılıyor…"],
     "/api/melek/yorum": ["Sayının titreşimi okunuyor…", "Melek mesajı dinleniyor…", "Mesajın yazılıyor…"],
     "/api/iching/yorum": ["Altıgram kuruluyor…", "Değişen çizgiler okunuyor…", "Kitabın bilgeliği yorumlanıyor…"],
     "/api/run/cek": ["Rünler torbadan çekiliyor…", "Taşların anlamları okunuyor…", "Açılımın yorumlanıyor…"],
@@ -242,6 +244,8 @@ const bilgilendirmeKontrol = (user) => {
     "/asistan": "#sendButton",
     "/taslarla-dizim": "#analyzeButton",
     "/yuz-muzigi": "#playButton",
+    "/ebced": "#ebcedSubmit",
+    "/cifir": "#cifirSubmit",
   };
   // Her zaman ücretsiz olanlar (fiyatı yok): günlük burç yorumu herkes için ortak üretilir.
   const HEP_UCRETSIZ = { "/astroloji": 'a.btn[href="#burclar"]' };
