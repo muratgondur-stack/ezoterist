@@ -169,7 +169,7 @@
   // Kontör rozetleri (Murat 2026-10-04): ücretli işlemi başlatan düğmenin ve "Uzman yorumu iste" düğmesinin sağ üst
   // köşesinde, yönetim panelinde girilen kontör sayısı; fiyat 0 ise "Ücretsiz". Yalnız gösterim; kontör düşülmez.
   const ISLEM_DUGMESI = {
-    "/astroloji": 'form button.btn-primary[type="submit"]',
+    "/astroloji": 'form button.btn-primary[type="submit"], a.btn[href="#harita"]',
     "/dogum-haritasi": "#readingButton",
     "/numeroloji": 'form button.btn-primary[type="submit"]',
     "/ruya": "#dreamSubmit",
