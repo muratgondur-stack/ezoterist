@@ -103,6 +103,36 @@
 
   // Yapay zekâ bekleme animasyonu (Murat 2026-10-03): /api/ isteği 0,7 sn'den uzun sürerse ortada göz-gezegenler
   // görseli ve etrafında dönen çark gösterilir. Kısa işler (giriş, liste, silme, kayıt) hariç; sayfayı kilitlemez.
+  // Genel ayarlar (fiyat rozetleri ve bekleme süreleri) tek istekle alınır.
+  const genelAyarlar = fetch("/api/ayarlar/genel", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  let beklemeSn = { hafif: 8, derin: 12 };
+  genelAyarlar.then((d) => { if (d?.bekleme) beklemeSn = d.bekleme; });
+  // Aşamalı bekleme yazıları (Murat 2026-10-04): her işlemin gerçekte yaptığı adımlar, bekleme süresine yayılarak.
+  const ASAMALAR = {
+    "/api/astroloji/harita": ["Doğum anındaki gökyüzü hesaplanıyor…", "Gezegenlerin burçları bulunuyor…", "Yükselen burcun belirleniyor…", "Haritan yorumlanıyor…"],
+    "/api/dogum-haritasi/yorum": ["Gezegen konumların okunuyor…", "Evler ve açılar inceleniyor…", "Haritanın ana temaları çıkarılıyor…", "Derin yorumun yazılıyor…"],
+    "/api/numeroloji/profil": ["Adının harfleri sayılara çevriliyor…", "Yaşam yolu sayın hesaplanıyor…", "Ruh ve kader sayıların bulunuyor…", "Sayıların yorumlanıyor…"],
+    "/api/ruya/yorum": ["Rüyan okunuyor…", "Semboller ayıklanıyor…", "Duygular ve temalar eşleştiriliyor…", "Rüya yorumun yazılıyor…"],
+    "/api/tarot/cek": ["Kartlar karıştırılıyor…", "Seçtiğin kartlar açılıyor…", "Açılımdaki yerleri okunuyor…", "Okuman yazılıyor…"],
+    "/api/fal/bak": ["Fincan fotoğrafın inceleniyor…", "Telvedeki şekiller seçiliyor…", "Semboller yorumlanıyor…", "Falın yazılıyor…"],
+    "/api/el-fali/bak": ["Avucunun hatları bulunuyor…", "Çizgilerin ölçülüyor…", "Tepeler ve el tipin inceleniyor…", "Falın yazılıyor…"],
+    "/api/yuz-okuma/bak": ["Yüz haritan çıkarılıyor…", "Oranların ölçülüyor…", "Yüz hatların okunuyor…", "Yorumun yazılıyor…"],
+    "/api/fotograf-analizi/bak": ["Fotoğrafın inceleniyor…", "Renkler ve semboller okunuyor…", "Enerji ve atmosfer değerlendiriliyor…", "Analizin yazılıyor…"],
+    "/api/ask-uyumu/hesapla": ["İki doğum haritası hesaplanıyor…", "Güneş, Ay ve Venüs uyumu karşılaştırılıyor…", "İsimlerin sayıları eşleştiriliyor…", "Uyum yorumunuz yazılıyor…"],
+    "/api/melek/yorum": ["Sayının titreşimi okunuyor…", "Melek mesajı dinleniyor…", "Mesajın yazılıyor…"],
+    "/api/iching/yorum": ["Altıgram kuruluyor…", "Değişen çizgiler okunuyor…", "Kitabın bilgeliği yorumlanıyor…"],
+    "/api/run/cek": ["Rünler torbadan çekiliyor…", "Taşların anlamları okunuyor…", "Açılımın yorumlanıyor…"],
+    "/api/ay/rehber": ["Ay'ın evresi ve burcu hesaplanıyor…", "Döngünün enerjisi okunuyor…", "Sana özel rehberin hazırlanıyor…"],
+    "/api/cakra/test": ["Cevapların değerlendiriliyor…", "Çakra dengen hesaplanıyor…", "Denge planın hazırlanıyor…"],
+    "/api/kristal/oner": ["İhtiyacın dinleniyor…", "Kristaller taranıyor…", "Sana uygun taşlar seçiliyor…"],
+    "/api/sembol/sor": ["Sembol arşivde aranıyor…", "Kültürlerdeki anlamları derleniyor…", "Sana özel anlamı yazılıyor…"],
+    "/api/ruhsal/yansima": ["Sayfan okunuyor…", "Duygular ve temalar fark ediliyor…", "Yansıman yazılıyor…"],
+    "/api/ruhsal/ozet": ["Haftanın sayfaları okunuyor…", "Tekrar eden temalar bulunuyor…", "Haftalık özetin yazılıyor…"],
+    "/api/dizim/analiz": ["Taşların konumları ölçülüyor…", "Mesafeler ve gruplar hesaplanıyor…", "Dizimin bütünü okunuyor…", "Yansıman yazılıyor…"],
+    "/api/dizim/karsilastir": ["İki dizim yan yana konuyor…", "Değişen mesafeler ölçülüyor…", "Karşılaştırman yazılıyor…"],
+  };
+  const DERIN = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|ay\/rehber|ruhsal\/ozet|dizim\/(analiz|karsilastir))$/;
+  let aktifYol = "";
   const HARIC = /^\/api\/(me|logout|login|profil|sifre|ayarlar|yonetim|arsiv|kontor)\b|\/(gunluk|durum|sil|liste|niyet-sil|niyet-durum|gorsel|panel|kayit)(\/|$)/;
   const bekleme = document.createElement("div");
   bekleme.className = "ai-bekleme";
@@ -124,27 +154,35 @@
       <svg class="ai-cark ic" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="74" stroke-dasharray="3 7" />${noktalar}</svg>
       <img src="/bekleme/goz-gezegenler.webp?v=1" alt="" width="340" height="370" />
     </div>
-    <p class="ai-bekleme-yazi">Yapay zekâ hazırlıyor<span class="ai-sure"></span></p>`;
+    <p class="ai-bekleme-yazi">Yapay zekâ hazırlıyor…</p>`;
   document.body.append(bekleme);
   let bekleyen = 0;
-  let gosterZamani = null;
-  let sayac = null;
-  const sure = bekleme.querySelector(".ai-sure");
+  let asamaZamanlayici = null;
+  const yazi = bekleme.querySelector(".ai-bekleme-yazi");
   const guncelle = () => {
     if (bekleyen > 0) {
       if (bekleme.hidden) {
         bekleme.hidden = false;
-        const bas = Date.now();
-        sure.textContent = "…";
-        clearInterval(sayac);
-        sayac = setInterval(() => {
-          const sn = Math.round((Date.now() - bas) / 1000) + 1;
-          sure.textContent = sn >= 3 ? `… ${sn} sn` : "…";
-        }, 1000);
+        // Aşamalar bekleme süresine yayılır (gösterim 0,7 sn sonra başladığı için süreden düşülür); son aşamada kalır.
+        const liste = ASAMALAR[aktifYol] || ["Yapay zekâ hazırlıyor…"];
+        const toplam = Math.max(3, (DERIN.test(aktifYol) ? beklemeSn.derin : beklemeSn.hafif) - 0.7);
+        let i = 0;
+        yazi.textContent = liste[0];
+        clearInterval(asamaZamanlayici);
+        if (liste.length > 1) {
+          asamaZamanlayici = setInterval(() => {
+            i += 1;
+            if (i >= liste.length) { clearInterval(asamaZamanlayici); return; }
+            yazi.classList.remove("ai-asama");
+            void yazi.offsetWidth; // geçiş animasyonunu yeniden başlat
+            yazi.classList.add("ai-asama");
+            yazi.textContent = liste[i];
+          }, (toplam * 1000) / liste.length);
+        }
       }
     } else {
       bekleme.hidden = true;
-      clearInterval(sayac);
+      clearInterval(asamaZamanlayici);
     }
   };
   const asilFetch = window.fetch.bind(window);
@@ -156,7 +194,7 @@
     const istek = asilFetch(girdi, ayar);
     if (!izle) return istek;
     let sayildi = false;
-    const zamanlayici = setTimeout(() => { sayildi = true; bekleyen += 1; guncelle(); }, 700);
+    const zamanlayici = setTimeout(() => { sayildi = true; aktifYol = yol; bekleyen += 1; guncelle(); }, 700);
     const bitti = () => {
       clearTimeout(zamanlayici);
       if (sayildi) { bekleyen = Math.max(0, bekleyen - 1); guncelle(); }
@@ -194,9 +232,7 @@
   // Her zaman ücretsiz olanlar (fiyatı yok): günlük burç yorumu herkes için ortak üretilir.
   const HEP_UCRETSIZ = { "/astroloji": 'a.btn[href="#burclar"]' };
   const UZMAN_DUGMESI = '#expertForm button[type="submit"]';
-  fetch("/api/ayarlar/genel", { credentials: "same-origin" })
-    .then((r) => (r.ok ? r.json() : null))
-    .catch(() => null)
+  genelAyarlar
     .then((d) => {
       const f = d?.fiyatlar?.[location.pathname];
       const yol = location.pathname;

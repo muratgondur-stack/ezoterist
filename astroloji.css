@@ -750,6 +750,8 @@ section { padding-top: 56px; scroll-margin-top: 64px; }
 .ai-cark.ic circle + circle, .ai-cark.ic circle ~ circle { fill: #f3c26b; stroke: none; }
 .ai-bekleme-yazi { margin: 0; padding: 8px 20px; font-size: 1.1rem; border-radius: 999px; color: #fff6e0; background: rgba(0, 0, 0, 0.45); font-weight: 700; letter-spacing: 0.04em; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); }
 @keyframes aiDon { to { transform: rotate(360deg); } }
+.ai-bekleme-yazi.ai-asama { animation: aiAsama 0.5s ease both; }
+@keyframes aiAsama { from { opacity: 0; transform: translateY(6px); } }
 @keyframes aiNabiz { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 @keyframes aiBelir { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .ai-cark, .ai-bekleme-kutu img { animation: none; } }

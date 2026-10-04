@@ -141,6 +141,8 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
       sendJson(response, 200, {
         muzik: Ayarlar.get("genel.muzik"),
         kapali: Ayarlar.BOLUMLER.filter((b) => !Ayarlar.bolumAcik(b.id)).map((b) => b.sayfa),
+        // Bekleme çarkındaki aşamalı yazıların hızı için (sn).
+        bekleme: { hafif: Ayarlar.get("sure.enAzBekleme"), derin: Ayarlar.get("sure.derinBekleme") },
         // Düğmelerdeki kontör rozetleri için (sayfa yolu → işlem ve uzman değerlendirmesi fiyatı). Yalnız gösterim.
         fiyatlar: Object.fromEntries(Ayarlar.BOLUMLER.map((b) => [b.sayfa, {
           islem: Ayarlar.get(`fiyat.${b.id}`) || 0,

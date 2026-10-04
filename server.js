@@ -204,6 +204,8 @@ const server = http.createServer((request, response) => Olcum.calistir(istekBolu
 // Yapay zekâ işlemleri en az belli bir sürede cevaplanır (Murat 2026-10-04; varsayılan 8 sn, asistan 2 sn): yorum
 // önbellekten hemen hazır olsa da başarılı cevap bu süre dolmadan gönderilmez. Hata cevapları (eksik bilgi, günlük hak vb.) bekletilmez.
 const YAPAY_ZEKA_ISLEMI = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|tarot\/cek|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|melek\/yorum|iching\/yorum|run\/cek|ay\/rehber|cakra\/test|kristal\/oner|sembol\/sor|ruhsal\/(yansima|ozet)|asistan\/mesaj|dizim\/(analiz|karsilastir))$/;
+// Derin raporlar daha uzun bekler (Süreler → "derin raporlar"); geri kalan yapay zekâ işleri "hafif işler".
+const DERIN_RAPOR = /^\/api\/(astroloji\/harita|dogum-haritasi\/yorum|numeroloji\/profil|ruya\/yorum|(fal|el-fali|yuz-okuma|fotograf-analizi)\/bak|ask-uyumu\/hesapla|ay\/rehber|ruhsal\/ozet|dizim\/(analiz|karsilastir))$/;
 // Süreler yönetim panelinden (Süreler → "en az bekleme"); asistanın kendi süresi var.
 function enAzBeklet(response, sn) {
   const bitis = Date.now() + sn * 1000;
@@ -224,7 +226,7 @@ function enAzBeklet(response, sn) {
 function anaIsleyici(request, response) {
   const istekYolu = String(request.url || "").split("?")[0];
   if (request.method === "POST" && YAPAY_ZEKA_ISLEMI.test(istekYolu)) {
-    const sn = Ayarlar.get(istekYolu === "/api/asistan/mesaj" ? "sure.asistanBekleme" : "sure.enAzBekleme");
+    const sn = Ayarlar.get(istekYolu === "/api/asistan/mesaj" ? "sure.asistanBekleme" : DERIN_RAPOR.test(istekYolu) ? "sure.derinBekleme" : "sure.enAzBekleme");
     if (sn > 0) enAzBeklet(response, sn);
   }
   let url;
