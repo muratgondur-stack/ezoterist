@@ -113,3 +113,7 @@
 .cost-table .bolum-ad { font-weight: 700; white-space: nowrap; }
 .cost-table .fiyat-kutu { display: inline-flex; align-items: center; gap: 8px; }
 .cost-table .fiyat-kutu small { min-width: 64px; color: var(--muted); font-size: 0.78rem; text-align: left; }
+.tanitim-kutu { grid-column: 1 / -1; padding: 12px 14px; border: 1px dashed rgba(143, 227, 165, 0.5); border-radius: 14px; background: rgba(143, 227, 165, 0.06); }
+.tanitim-kutu.acik { border-style: solid; background: rgba(143, 227, 165, 0.12); }
+.tanitim-kutu span { display: flex; align-items: center; gap: 10px; font-size: 1rem; }
+.tanitim-kutu input { width: 20px; height: 20px; accent-color: #3fbf6f; }

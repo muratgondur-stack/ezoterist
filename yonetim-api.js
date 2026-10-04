@@ -76,7 +76,7 @@ async function maliyetTablosu() {
   };
   return {
     kur, kurKaynagi: elle > 0 ? "elle" : otomatik ? `TCMB ${otomatik.tarih}` : "alınamadı",
-    tcmb: otomatik?.deger || null, birim, kontorTL, olcumBaslangic: olcum.baslangic,
+    tcmb: otomatik?.deger || null, birim, kontorTL, tanitim: Ayarlar.get("fiyat.tanitim"), olcumBaslangic: olcum.baslangic,
     // Asistanda fiyat ve maliyet her soru + cevap içindir (Murat 2026-10-04); sesle sorma (Whisper) hesaba katılmaz.
     bolumler: Ayarlar.BOLUMLER.map((b) => satir(b.id, b.id === "asistan" ? `${b.ad} (her soru + cevap)` : b.ad, true)),
   };
@@ -141,6 +141,7 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
       sendJson(response, 200, {
         muzik: Ayarlar.get("genel.muzik"),
         kapali: Ayarlar.BOLUMLER.filter((b) => !Ayarlar.bolumAcik(b.id)).map((b) => b.sayfa),
+        tanitim: Ayarlar.get("fiyat.tanitim"),
         // Bekleme çarkındaki aşamalı yazıların hızı için (sn).
         bekleme: { hafif: Ayarlar.get("sure.enAzBekleme"), derin: Ayarlar.get("sure.derinBekleme") },
         // Düğmelerdeki kontör rozetleri için (sayfa yolu → işlem ve uzman değerlendirmesi fiyatı). Yalnız gösterim.

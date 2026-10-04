@@ -236,6 +236,7 @@
     .then((d) => {
       const f = d?.fiyatlar?.[location.pathname];
       const yol = location.pathname;
+      const tanitim = Boolean(d?.tanitim);
       const ucretli = [];
       const ucretsiz = [];
       const kurallar = [];
@@ -244,7 +245,10 @@
         const tek = secici.split(",").map((x) => x.trim());
         kurallar.push(`${tek.join(", ")} { position: relative; overflow: visible; }`);
         const sonra = tek.map((x) => `${x}::after`).join(", ");
-        if (sayi > 0) {
+        if (sayi > 0 && tanitim) {
+          kurallar.push(`${sonra} { content: "Ücretsiz Tanıtım"; }`);
+          ucretsiz.push(sonra);
+        } else if (sayi > 0) {
           kurallar.push(`${sonra} { content: "${Number(sayi)}"; }`);
           ucretli.push(sonra);
         } else {
@@ -269,4 +273,82 @@
         ${ucretsiz.length ? `${ucretsiz.join(", ")} { background: #8fe3a5; font-size: 0.66rem; right: -12px; }` : ""}`;
       document.head.append(stil);
     });
+
+  // Onay penceresi (Murat 2026-10-04): ücretli işlem düğmesine basınca kaç kontör olduğu gösterilip onay alınır.
+  // "Bir daha sorma" bu tarayıcıda o işlem ve o fiyat için hatırlanır (fiyat değişirse yeniden sorar).
+  // Tanıtım dönemi açıksa ya da fiyat 0 ise pencere açılmaz. Yalnız onay; kontör düşülmez.
+  genelAyarlar.then((d) => {
+    const yol = location.pathname;
+    const f = d?.fiyatlar?.[yol];
+    if (!f || d?.tanitim) return;
+    // Yalnız gerçek işlem düğmeleri (sayfa içi bağlantılar, ör. "Doğum haritamı çıkar", onay istemez).
+    const islemSecici = (ISLEM_DUGMESI[yol] || "").split(",").map((x) => x.trim()).filter((x) => x && !x.includes("href")).join(", ");
+    const BOLUM_ADI = document.title.split("·")[0].trim();
+    const anahtar = (tur) => `ezo-onay:${yol}:${tur}`;
+    const hatirla = (tur, fiyat) => { try { return localStorage.getItem(anahtar(tur)) === String(fiyat); } catch { return false; } };
+    const sakla = (tur, fiyat) => { try { localStorage.setItem(anahtar(tur), String(fiyat)); } catch { /* depolama kapalı */ } };
+
+    const pencere = document.createElement("dialog");
+    pencere.className = "onay-pencere";
+    pencere.innerHTML = `
+      <div class="onay-isik" aria-hidden="true"></div>
+      <svg class="onay-jeton" viewBox="0 0 120 120" aria-hidden="true">
+        <defs>
+          <radialGradient id="jetonYuz" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#fff3c8"/><stop offset="0.45" stop-color="#f3c26b"/><stop offset="1" stop-color="#a86a12"/></radialGradient>
+          <linearGradient id="jetonKenar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe7a3"/><stop offset="1" stop-color="#7a4a08"/></linearGradient>
+        </defs>
+        <circle cx="60" cy="60" r="54" fill="url(#jetonKenar)"/>
+        <circle cx="60" cy="60" r="46" fill="url(#jetonYuz)"/>
+        <circle cx="60" cy="60" r="38" fill="none" stroke="#7a4a08" stroke-width="2" stroke-dasharray="2 5" opacity="0.6"/>
+        <path d="M60 30 L65 52 L88 52 L69 65 L76 88 L60 74 L44 88 L51 65 L32 52 L55 52 Z" fill="#8a5410" opacity="0.85"/>
+      </svg>
+      <p class="onay-ust">Ücretli işlem</p>
+      <h2 class="onay-baslik"></h2>
+      <p class="onay-fiyat"><b class="onay-sayi"></b> <span>kontör</span></p>
+      <p class="onay-not">Bu işlem için hesabından <b class="onay-sayi2"></b> kontör kullanılacak. Onaylıyor musun?</p>
+      <label class="onay-sorma"><input type="checkbox" /> <span>Bu işlem için bir daha sorma</span></label>
+      <div class="onay-dugmeler">
+        <button type="button" class="btn btn-ghost onay-vazgec">Vazgeç</button>
+        <button type="button" class="btn btn-primary onay-tamam">Onayla</button>
+      </div>`;
+    document.body.append(pencere);
+    let bekleyenDugme = null;
+    let bekleyenTur = "";
+    let bekleyenFiyat = 0;
+    const kapat = () => { pencere.close(); bekleyenDugme = null; };
+    pencere.querySelector(".onay-vazgec").addEventListener("click", kapat);
+    pencere.addEventListener("click", (e) => { if (e.target === pencere) kapat(); });
+    pencere.querySelector(".onay-tamam").addEventListener("click", () => {
+      const dugme = bekleyenDugme;
+      if (pencere.querySelector(".onay-sorma input").checked) sakla(bekleyenTur, bekleyenFiyat);
+      kapat();
+      if (dugme) { dugme.dataset.onaylandi = "1"; dugme.click(); }
+    });
+
+    document.addEventListener("click", (e) => {
+      const hedef = e.target instanceof Element ? e.target : null;
+      if (!hedef) return;
+      const uzman = hedef.closest(UZMAN_DUGMESI);
+      const islem = islemSecici ? hedef.closest(islemSecici) : null;
+      const dugme = uzman || islem;
+      if (!dugme || dugme.disabled) return;
+      if (dugme.dataset.onaylandi === "1") { delete dugme.dataset.onaylandi; return; }
+      if (dugme.getAttribute("aria-label") === "Duraklat") return; // çalarken duraklatma ücretsiz
+      const tur = uzman ? "uzman" : "islem";
+      const fiyat = Number(uzman ? f.uzman : f.islem) || 0;
+      if (!(fiyat > 0) || hatirla(tur, fiyat)) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      bekleyenDugme = dugme;
+      bekleyenTur = tur;
+      bekleyenFiyat = fiyat;
+      const ad = (dugme.textContent || dugme.getAttribute("aria-label") || "").replace(/[^\p{L}\p{N}\s·'’-]/gu, "").trim();
+      pencere.querySelector(".onay-baslik").textContent = uzman ? `${BOLUM_ADI} · Uzman değerlendirmesi` : `${BOLUM_ADI}${ad ? ` · ${ad}` : ""}`;
+      pencere.querySelector(".onay-sayi").textContent = fiyat;
+      pencere.querySelector(".onay-sayi2").textContent = fiyat;
+      pencere.querySelector(".onay-tamam").textContent = `Onayla · ${fiyat} kontör`;
+      pencere.querySelector(".onay-sorma input").checked = false;
+      pencere.showModal();
+    }, true);
+  });
 })();

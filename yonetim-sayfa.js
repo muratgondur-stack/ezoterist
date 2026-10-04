@@ -296,7 +296,12 @@ async function maliyetYukle() {
   let m;
   try { m = await api("/api/yonetim/maliyet"); } catch (error) { toast(error.message); return; }
   const kutu = (etiket, girdi, not) => el("label", { className: "cost-input" }, el("span", { textContent: etiket }), girdi, not ? el("small", { textContent: not }) : "");
+  const tanitim = el("input", { type: "checkbox", checked: Boolean(m.tanitim) });
+  tanitim.addEventListener("change", () => tekAyarKaydet("fiyat.tanitim", tanitim.checked));
   $("costInputs").replaceChildren(
+    el("label", { className: `cost-input tanitim-kutu${m.tanitim ? " acik" : ""}` },
+      el("span", {}, tanitim, " 🎁 Tanıtım dönemi: her şey ücretsiz"),
+      el("small", { textContent: "Açıkken onay penceresi açılmaz, fiyat rozetleri 'Ücretsiz Tanıtım' görünür. Kapatınca ücretli işlemlerde kontör onayı istenir." })),
     kutu("Dolar kuru (USD/TRY)", sayiGirdisi("maliyet.usdTry", veri.degerler["maliyet.usdTry"]), `Kullanılan: ${m.kur ? m.kur.toFixed(4) : "—"} (${m.kurKaynagi})${m.tcmb ? ` · TCMB: ${m.tcmb}` : ""} · 0 = otomatik`),
     kutu("1 kontör =", sayiGirdisi("fiyat.kontorTL", m.kontorTL), "TL"),
     kutu("gpt-4.1-mini girdi", sayiGirdisi("maliyet.metinGiris", m.birim.giris), "$ / 1M token"),
