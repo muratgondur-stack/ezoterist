@@ -178,3 +178,5 @@
 .uz-ses-kutu { display: flex; gap: 6px; align-items: center; }
 .uz-ses-kutu select { flex: 1; min-width: 0; padding: 7px 9px; border: 1px solid var(--card-border); border-radius: 9px; color: #fff; background: rgba(0, 0, 0, 0.35); font: inherit; font-size: 0.86rem; }
 .uz-ses-kutu select option { color: #000; }
+.uz-prompt-kutu summary { cursor: pointer; color: var(--gold); font-size: 0.8rem; font-weight: 700; }
+.uz-prompt-kutu textarea { margin: 6px 0; font-size: 0.82rem !important; line-height: 1.5; }

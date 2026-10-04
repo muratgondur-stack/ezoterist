@@ -10,6 +10,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const { dataDir, SESLER } = require("./ayarlar");
+const Promptlar = require("./uzman-promptlari");
 
 const dizin = path.join(dataDir, "uzman");
 const dosya = path.join(dizin, "uzmanlar.json");
@@ -29,6 +30,16 @@ function hepsi() {
       }
     }
     bellek.forEach((u) => { u.tip ||= "gercek"; });
+    // Hazır karakterlerin boş alanları resme uygun varsayılanlarla doldurulur (elle girilenlere dokunulmaz).
+    bellek.filter((u) => u.tip === "sanal" && u.hazirResim).forEach((u) => {
+      const k = Promptlar.varsayilanKimlik(u.hazirResim);
+      if (u.prompt === undefined) u.prompt = Promptlar.varsayilanPrompt(u.hazirResim);
+      if (!k) return;
+      if (!u.ad) u.ad = k.ad;
+      if (!u.unvan) u.unvan = k.unvan;
+      if (!u.bolumler.length) u.bolumler = [...k.bolumler];
+      if (u.ses === undefined) u.ses = k.ses;
+    });
   }
   return bellek;
 }
@@ -98,6 +109,8 @@ function yoneticiGuncelle(id, g, gecerliBolumler) {
     if (g.aktif !== undefined) u.aktif = Boolean(g.aktif);
     // Yazılı cevabın seslendirileceği ses (karakterin cinsiyetine uygun); boş = bölümün sesi.
     if (g.ses !== undefined) u.ses = SESLER.includes(g.ses) ? g.ses : "";
+    // Karakter promptu: boş gönderilirse resmin varsayılanına döner.
+    if (u.tip === "sanal" && g.prompt !== undefined) u.prompt = String(g.prompt || "").replace(/[\u0000-\u0008]/g, "").trim().slice(0, 2500) || Promptlar.varsayilanPrompt(u.hazirResim);
     if (Array.isArray(g.bolumler)) u.bolumler = g.bolumler.filter((b) => gecerliBolumler.includes(b));
     if (u.tip === "gercek" && g.oran !== undefined) u.oran = Math.min(100, Math.max(0, Number(g.oran) || 0));
     if (u.tip === "sanal" && g.sabitUzman !== undefined) {

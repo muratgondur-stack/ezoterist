@@ -471,13 +471,16 @@ function renderSanal() {
       ...gercekler.map((g) => el("option", { value: g.id, textContent: `Yalnız ${g.ad} (${g.email})`, selected: g.id === u.sabitUzman })));
     const sira = el("input", { type: "number", min: 1, max: 99, value: u.sira || 1, className: "uz-sira" });
     const ses = sesSecici(u);
+    const prompt = el("textarea", { value: u.prompt || "", maxLength: 2500, rows: 5, className: "uz-prompt", placeholder: "Karakterin kişiliği, konuşma üslubu, uzmanlık alanı… {ad} yazdığın yere karakterin adı gelir." });
+    const promptSifirla = el("button", { type: "button", className: "btn btn-ghost btn-sm", textContent: "↺ Varsayılan prompt" });
+    promptSifirla.addEventListener("click", () => { if (confirm("Prompt varsayılana dönsün mü? (Kaydet'e basınca uygulanır)")) prompt.value = ""; });
     const acik = el("input", { type: "checkbox", checked: u.aktif });
     const kaydet = el("button", { type: "button", className: "btn btn-primary btn-sm", textContent: "Kaydet" });
     const sil = el("button", { type: "button", className: "btn btn-ghost btn-sm", textContent: "Sil" });
     kaydet.addEventListener("click", async () => {
       kaydet.disabled = true;
       try {
-        await api("/api/yonetim/uzman-guncelle", { id: u.id, ad: ad.value, unvan: unvan.value, tanitim: tanitim.value, bolumler: bolumler.secilenler(), sabitUzman: sabit.value, sira: Number(sira.value), aktif: acik.checked, ses: ses.deger() });
+        await api("/api/yonetim/uzman-guncelle", { id: u.id, ad: ad.value, unvan: unvan.value, tanitim: tanitim.value, bolumler: bolumler.secilenler(), sabitUzman: sabit.value, sira: Number(sira.value), aktif: acik.checked, ses: ses.deger(), prompt: prompt.value });
         toast(`${ad.value || "Karakter"} kaydedildi.`);
         uzmanlariYukle();
       } catch (error) { toast(error.message); kaydet.disabled = false; }
@@ -493,6 +496,7 @@ function renderSanal() {
         ad, unvan, tanitim,
         el("small", { className: "uz-etiket", textContent: "Görüneceği bölümler" }), bolumler,
         el("small", { className: "uz-etiket", textContent: "Yazılı cevabı okuyacak ses" }), ses,
+        el("details", { className: "uz-prompt-kutu" }, el("summary", { textContent: "🎭 Karakter promptu (taslakları bu üslupla yazar)" }), prompt, promptSifirla),
         el("small", { className: "uz-etiket", textContent: "Talepler kime gitsin" }), sabit,
         el("div", { className: "sn-alt" }, el("label", { className: "uz-acik" }, acik, " Açık"), el("label", { className: "uz-acik" }, "Sıra ", sira), fotoDugmesi(u.id), sil, kaydet)));
   }));

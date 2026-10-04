@@ -34,7 +34,8 @@ const { ebcedKaydiOku, cifirKaydiOku } = require("./ebced-cifir-api");
 // Fotoğraflı bölümlerde uzman fotoğrafları da görür (/api/uzman/foto).
 const FOTO_YOLLARI = { "kahve-fali": kahveFotoYolu, "el-fali": elFotoYolu, "yuz-okuma": yuzFotoYolu, "fotograf-analizi": analizFotoYolu, dizim: (dataDir, userId, kayitId) => dizimGorselYolu(dataDir, userId, kayitId) };
 
-const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri } = yardimci;
+const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, kullaniciDosyasi, setup, Veri, askLlm, llmEnabled } = yardimci;
+const Promptlar = require("./uzman-promptlari");
 
 // Uzman yanıt süresi yönetim panelinden (saat).
 const teslimSuresi = () => Ayarlar.get("sure.uzmanSaat") * 60 * 60 * 1000;
@@ -525,6 +526,25 @@ function createHandler({ dataDir, currentUser, sendFile }) {
           bolumListesi: BOLUM_LISTESI(),
           hakedis: ben ? { toplam, odenen, kalan: toplam - odenen, adet: benimkiler.length, oran: ben.oran } : null,
         });
+      },
+      // Karakterin ağzından taslak: seçilen kartın promptuyla yapay zekâ bir taslak yazar; uzman düzeltip teslim eder.
+      "POST /api/uzman/panel/taslak": async () => {
+        sadeceUzman();
+        if (!llmEnabled) throw hata("Yapay zekâ şu an bağlı değil.", 503);
+        const body = await readJson(request);
+        const talep = await yetkiliTalep(user, body?.id);
+        const kart = UzmanKayit.bul(talep.uzman) || { ad: "Uzmanımız", prompt: "" };
+        const k = talepKaynagi(talep);
+        const bolum = (BOLUMLER[talep.bolum] || BOLUMLER["astroloji-harita"]).ad;
+        const kullanici =
+          `<girdi>Danışan: ${talep.userName || "danışan"}. Konu: ${bolum}. ${k.girdiMetni || ""}\n` +
+          `Analiz özeti: ${k.ozet || ""}\n${talep.soru ? `Danışanın uzmana notu: ${talep.soru}\n` : ""}` +
+          `Yapay zekânın ilk yorumu (yalnızca kaynak olarak kullan, kopyalama): ${String(k.aiMetin || "").slice(0, 3000)}</girdi>\n` +
+          `Bu analizi ${kart.ad || "uzman"} olarak, kendi üslubunla ve danışana doğrudan hitap ederek 3-5 paragrafta yorumla. ` +
+          (talep.soru ? "Danışanın notuna mutlaka cevap ver. " : "") + "Yalnızca yorum metnini yaz.";
+        const metin = String(await askLlm(Promptlar.sistemPromptu(kart), kullanici, { maxTokens: 1400, temperature: 0.8 }) || "").trim().slice(0, 6000);
+        if (metin.length < 40) throw hata("Taslak üretilemedi, tekrar dene.", 502);
+        sendJson(response, 200, { metin, kart: kart.ad });
       },
       // Havuzdaki talebi üstlenme: ilk gelen alır.
       "POST /api/uzman/panel/ustlen": async () => {

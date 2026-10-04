@@ -8,7 +8,7 @@ COPY kupon ./kupon
 COPY index.html styles.css app.js login.html login.css login.js favicon.svg favicon.png apple-touch-icon.png ezoterist-bg.png ezoterist-bg-landscape.png ezoterist-bg-portrait.mp4 ezoterist-bg-landscape.mp4 README.md ./
 
 COPY astro.js astroloji-veri.js astroloji-api.js astroloji.html astroloji.css astroloji-sayfa.js ./
-COPY uzman-api.js uzman-kayit.js uzman-kaydedici.js uzman-kart.js uzman.html uzman.css uzman.js ./
+COPY uzman-api.js uzman-kayit.js uzman-promptlari.js uzman-kaydedici.js uzman-kart.js uzman.html uzman.css uzman.js ./
 COPY numeroloji-hesap.js numeroloji-veri.js numeroloji-api.js numeroloji.html numeroloji.css numeroloji-sayfa.js ./
 COPY numeroloji ./numeroloji
 COPY ruya-veri.js ruya-api.js ruya.html ruya.css ruya-sayfa.js ./

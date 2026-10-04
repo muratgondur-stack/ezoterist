@@ -281,7 +281,7 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
         sendJson(response, 200, {
           uzmanlar: UzmanKayit.hepsi().map((u) => ({
             ...UzmanKayit.herkeseAcik(u), userId: u.userId || null, email: u.email || null, oran: u.oran ?? null, vitrinde: Boolean(u.vitrinde),
-            sabitUzman: u.sabitUzman || null, sira: u.sira || null, ses: u.ses || "", olusturma: u.olusturma, gorunuyor: UzmanKayit.vitrindeMi(u),
+            sabitUzman: u.sabitUzman || null, sira: u.sira || null, ses: u.ses || "", prompt: u.prompt || "", olusturma: u.olusturma, gorunuyor: UzmanKayit.vitrindeMi(u),
             hakedis: ozet.find((o) => o.uzmanId === u.id) || null,
           })),
           bolumListesi: BOLUM_LISTESI(),

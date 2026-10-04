@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/astroloji.css?v=15" />
-    <link rel="stylesheet" href="/uzman.css?v=4" />
+    <link rel="stylesheet" href="/uzman.css?v=5" />
   </head>
   <body>
     <header class="topbar">
@@ -105,7 +105,10 @@
       <div class="panel-block">
         <div class="reading-head">
           <h4>Yapay zekâ yorumu</h4>
-          <button type="button" class="listen" data-f="taslak">↓ Taslak olarak kullan</button>
+          <span class="taslak-dugmeler">
+            <button type="button" class="listen" data-f="karakterTaslak">✨ Karakterin ağzından taslak</button>
+            <button type="button" class="listen" data-f="taslak">↓ Taslak olarak kullan</button>
+          </span>
         </div>
         <p class="reading-text panel-ai" data-f="ai"></p>
       </div>
@@ -144,7 +147,7 @@
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="/uzman-kaydedici.js?v=1"></script>
-    <script src="/uzman.js?v=6"></script>
+    <script src="/uzman.js?v=7"></script>
     <script src="/ust-cubuk.js?v=12" defer></script>
 </body>
 </html>
