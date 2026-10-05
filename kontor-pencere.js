@@ -79,25 +79,35 @@
   let pencere = null;
   async function ac(sekme = "yukle") {
     if (!document.head.contains(stil)) document.head.append(stil);
+    // Üye değilse de paketler görünür (misafir modu); satın almak ve kupon için giriş istenir.
     const r = await fetch("/api/kontor", { credentials: "same-origin" });
-    if (r.status === 401) { location.href = `/login?next=${encodeURIComponent(location.pathname + "#kontor-yukle")}`; return; }
-    const d = await r.json().catch(() => null);
-    if (!d) return;
+    let d;
+    if (r.status === 401) {
+      const p = await fetch("/api/kontor/paketler").then((x) => x.json()).catch(() => null);
+      if (!p) return;
+      d = { misafir: true, paketler: p.paketler, yuklemeAcik: false, satisAcik: p.satisAcik, bakiye: 0, hareketler: [], turler: {} };
+    } else {
+      d = await r.json().catch(() => null);
+      if (!d) return;
+    }
+    const girisAdresi = `/login?next=${encodeURIComponent(location.pathname + "#kontor-yukle")}`;
     pencere?.remove();
     pencere = el("dialog", { className: "kp-pencere" });
     pencere.setAttribute("aria-label", "Kontör yükle");
     const mesaj = el("p", { className: "kp-mesaj", hidden: true });
     const goster = (metin, iyi) => { mesaj.hidden = false; mesaj.className = `kp-mesaj ${iyi ? "iyi" : "kotu"}`; mesaj.textContent = metin; };
-    const onay = el("input", { type: "checkbox", disabled: !d.yuklemeAcik });
+    const onay = el("input", { type: "checkbox" });
     const bakiye = el("b", { textContent: sayi(d.bakiye) });
 
     const paketler = (d.paketler || []).map((p, i, hepsi) => {
-      const b = el("button", { type: "button", className: `kp-paket${i === Math.floor(hepsi.length / 2) ? " populer" : ""}`, disabled: !d.yuklemeAcik },
+      const b = el("button", { type: "button", className: `kp-paket${i === Math.floor(hepsi.length / 2) ? " populer" : ""}` },
         el("img", { src: RESIM[p.tutar] || RESIM[200], alt: "", loading: "lazy" }),
         el("small", { textContent: AD[p.tutar] || "Kontör paketi" }),
         el("b", { textContent: sayi(p.kontor) }), el("span", { className: "birim", textContent: "KONTÖR" }),
         el("span", { className: "fiyat", textContent: `${sayi(p.tutar)} ₺` }));
       b.addEventListener("click", async () => {
+        if (d.misafir) { goster("Kontör yüklemek için üye girişi yap; ücretsiz üye olabilirsin. Yönlendiriliyorsun…", true); setTimeout(() => { location.href = girisAdresi; }, 1200); return; }
+        if (!d.yuklemeAcik) { goster(`${sayi(p.tutar)} ₺ = ${sayi(p.kontor)} kontör. Kontör satışı çok yakında açılıyor; şimdilik bütün bölümler ücretsiz.`, true); return; }
         if (!onay.checked) { goster("Önce Ön Bilgilendirme Formu ve Mesafeli Satış Sözleşmesi onayını işaretle.", false); onay.focus(); return; }
         b.disabled = true;
         try {
@@ -136,9 +146,11 @@
     pencere.addEventListener("click", (e) => { if (e.target === pencere) pencere.close(); });
     pencere.addEventListener("close", () => { if (location.hash === "#kontor-yukle") history.replaceState(null, "", location.pathname + location.search); });
 
-    const durumNotu = d.yuklemeAcik
-      ? (d.odemeModu === "test" ? "TEST modu: ödeme PayTR test ortamında yapılır, karttan para çekilmez (yalnız yönetici görür)." : "")
-      : "Kontör satışı çok yakında açılıyor. Şu an bütün bölümler ücretsiz kullanılabiliyor; kupon kodun varsa hemen kullanabilirsin.";
+    const durumNotu = d.misafir
+      ? "Paketi seçip satın almak için üye girişi yapman gerekir. Ödemeler PayTR güvenli ödeme sayfasında, kartla tek çekim alınır."
+      : d.yuklemeAcik
+        ? (d.odemeModu === "test" ? "TEST modu: ödeme PayTR test ortamında yapılır, karttan para çekilmez (yalnız yönetici görür)." : "")
+        : "Kontör satışı çok yakında açılıyor. Şu an bütün bölümler ücretsiz kullanılabiliyor; kupon kodun varsa hemen kullanabilirsin.";
 
     // Sekmeler: yükleme ve hareketler.
     const yukleBolumu = el("div");
@@ -163,8 +175,7 @@
       el("div", { className: "kp-kapak" }, kapat),
       el("div", { className: "kp-baslik" }, baslik,
         el("p", { textContent: "Kontörünle uzman yorumları, fallar ve derin raporlar için yol açılır. 1 kontör = 1 ₺, süresizdir." })),
-      el("div", { className: "kp-bakiye" }, el("i", { textContent: "🪙" }), "Bakiyen", bakiye),
-      sekmeler,
+      ...(d.misafir ? [] : [el("div", { className: "kp-bakiye" }, el("i", { textContent: "🪙" }), "Bakiyen", bakiye), sekmeler]),
       yukleBolumu,
       hareketBolumu,
     ));
@@ -177,7 +188,7 @@
           el("a", { href: "/mesafeli-satis", target: "_blank", textContent: "Mesafeli Satış Sözleşmesi" }), "'ni okudum, onaylıyorum. Kontörün dijital hizmet olarak hemen hesabıma tanımlanacağını biliyorum (",
           el("a", { href: "/iptal-iade", target: "_blank", textContent: "İptal ve İade" }), ").")),
         mesaj,
-        el("div", { className: "kp-kupon" }, el("span", { textContent: "🎟️ Kupon kodun mu var?" }), kod, kuponDugme),
+        ...(d.misafir ? [el("a", { href: girisAdresi, textContent: "Üye girişi / ücretsiz üye ol →" })] : [el("div", { className: "kp-kupon" }, el("span", { textContent: "🎟️ Kupon kodun mu var?" }), kod, kuponDugme)]),
         el("div", { className: "kp-guven" }, el("span", { textContent: "🔒 Ödemeler PayTR güvencesiyle; kart bilgilerin bize gelmez." }),
           el("a", { href: "/fiyatlar", textContent: "Hizmet fiyatları" }))),
     );

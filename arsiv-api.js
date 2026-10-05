@@ -126,6 +126,11 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         return true;
       }
     }
+    // Kontör paketleri herkese açık (PayTR incelemesi ve üye olmayan ziyaretçiler görsün; satın almak giriş ister).
+    if (url.pathname === "/api/kontor/paketler" && request.method === "GET") {
+      sendJson(response, 200, { paketler: Odeme.paketler(), satisAcik: Odeme.hazir() && Odeme.ayar().mod === "canli" });
+      return true;
+    }
     if (url.pathname !== "/api/arsiv" && !url.pathname.startsWith("/api/kontor")) return false;
     const user = currentUser(request);
     if (!user) {

@@ -1,3 +1,9 @@
+// Kontör paketleri penceresi her sayfada (üye olmayanlar dahil) hazır olsun: #kontor-yukle bağlantıları onu açar.
+if (!document.querySelector('script[src^="/kontor-pencere.js"]')) {
+  const kp = document.createElement("script");
+  kp.src = "/kontor-pencere.js?v=2";
+  document.head.append(kp);
+}
 // Bilgilendirme onayı (bilgilendirme-metin.js): onaylamamış üyeye pencere açılır. Yasal metin sayfalarında açılmaz
 // (penceredeki bağlantılar onları yeni sekmede açar, okunabilsinler).
 const bilgilendirmeKontrol = (user) => {
@@ -46,7 +52,7 @@ const bilgilendirmeKontrol = (user) => {
       const kontorYukle = () => {
         if (window.kontorPenceresi) return window.kontorPenceresi();
         const s = document.createElement("script");
-        s.src = "/kontor-pencere.js?v=1";
+        s.src = "/kontor-pencere.js?v=2";
         s.onload = () => { if (location.hash !== "#kontor-yukle") window.kontorPenceresi?.(); };
         document.head.append(s);
       };
@@ -107,7 +113,7 @@ const bilgilendirmeKontrol = (user) => {
   const alt = document.createElement("footer");
   alt.className = "alt-satir";
   alt.innerHTML = `
-    <p class="alt-baglantilar"><span>Tüm hakları saklıdır © 2026</span><a href="/gizlilik">Gizlilik Politikası</a><a href="/kullanim-kosullari">Kullanım Koşulları</a><a href="/fiyatlar">Fiyatlar</a><a href="/mesafeli-satis">Mesafeli Satış</a><a href="/iptal-iade">İptal ve İade</a><button type="button" aria-haspopup="dialog">İletişim</button></p>
+    <p class="alt-baglantilar"><span>Tüm hakları saklıdır © 2026</span><a href="/gizlilik">Gizlilik Politikası</a><a href="/kullanim-kosullari">Kullanım Koşulları</a><a href="#kontor-yukle">Kontör paketleri</a><a href="/fiyatlar">Fiyatlar</a><a href="/mesafeli-satis">Mesafeli Satış</a><a href="/iptal-iade">İptal ve İade</a><button type="button" aria-haspopup="dialog">İletişim</button></p>
     <p class="alt-ai" aria-label="Kullandığımız yapay zekâlar"><span>GEMMA4</span><span>OpenAI</span><span>Claude</span><span>Grok</span><span>RAZECE.AI</span></p>`;
   const pencere = document.createElement("dialog");
   pencere.className = "alt-iletisim";
