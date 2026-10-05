@@ -1,7 +1,7 @@
 // Kontör paketleri penceresi her sayfada (üye olmayanlar dahil) hazır olsun: #kontor-yukle bağlantıları onu açar.
 if (!document.querySelector('script[src^="/kontor-pencere.js"]')) {
   const kp = document.createElement("script");
-  kp.src = "/kontor-pencere.js?v=2";
+  kp.src = "/kontor-pencere.js?v=3";
   document.head.append(kp);
 }
 // Bilgilendirme onayı (bilgilendirme-metin.js): onaylamamış üyeye pencere açılır. Yasal metin sayfalarında açılmaz
@@ -52,7 +52,7 @@ const bilgilendirmeKontrol = (user) => {
       const kontorYukle = () => {
         if (window.kontorPenceresi) return window.kontorPenceresi();
         const s = document.createElement("script");
-        s.src = "/kontor-pencere.js?v=2";
+        s.src = "/kontor-pencere.js?v=3";
         s.onload = () => { if (location.hash !== "#kontor-yukle") window.kontorPenceresi?.(); };
         document.head.append(s);
       };

@@ -12,8 +12,13 @@
     .kp-pencere { width: min(860px, calc(100vw - 20px)); max-height: calc(100dvh - 20px); padding: 0; border: 1px solid rgba(243,194,107,.45); border-radius: 26px; color: #f4efe6; background: #0b0d1c; box-shadow: 0 30px 90px rgba(0,0,0,.7), 0 0 60px rgba(243,194,107,.12); overflow: hidden; }
     .kp-pencere::backdrop { background: rgba(4,5,14,.78); backdrop-filter: blur(5px); }
     .kp-ic { max-height: calc(100dvh - 22px); overflow-y: auto; overscroll-behavior: contain; font-family: Manrope, system-ui, sans-serif; }
-    .kp-kapak { position: relative; height: 210px; background: #120d22 url(/kontor/hero.webp?v=1) center 60%/cover; }
+    .kp-kapak { position: relative; height: 230px; background: #120d22 url(/kontor/hero.webp?v=1) center 60%/cover; }
     .kp-kapak::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,13,28,.05) 30%, #0b0d1c 98%); }
+    .kp-logo { position: absolute; z-index: 1; left: 50%; top: 42%; width: min(62%, 440px); transform: translate(-50%, -50%); filter: drop-shadow(0 0 18px rgba(0,0,0,.95)) drop-shadow(0 0 28px rgba(243,194,107,.55)); pointer-events: none; }
+    .kp-kapak::before { content: ""; position: absolute; z-index: 1; left: 50%; top: 42%; width: 70%; height: 70%; transform: translate(-50%, -50%); background: radial-gradient(ellipse, rgba(7,9,20,.72), transparent 70%); pointer-events: none; }
+    .kp-hesap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 26px 0; padding: 10px 14px; border: 1px dashed rgba(143,227,165,.45); border-radius: 14px; background: rgba(143,227,165,.06); font-size: .86rem; }
+    .kp-hesap b { color: #8fe3a5; }
+    .kp-hesap span { color: rgba(255,255,255,.7); }
     .kp-kapat { position: absolute; top: 12px; right: 12px; z-index: 2; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; color: #fff; background: rgba(0,0,0,.45); font-size: 1.1rem; cursor: pointer; }
     .kp-baslik { position: relative; z-index: 1; margin: -64px 0 0; padding: 0 26px; }
     .kp-baslik h2 { margin: 0; color: #f3c26b; font: 700 clamp(1.9rem, 5vw, 2.6rem)/1.05 "Cormorant Garamond", Georgia, serif; text-shadow: 0 2px 18px rgba(0,0,0,.8); }
@@ -91,6 +96,8 @@
       if (!d) return;
     }
     const girisAdresi = `/login?next=${encodeURIComponent(location.pathname + "#kontor-yukle")}`;
+    // Kontörün yükleneceği hesap (giriş yapmış üye).
+    const ben = d.misafir ? null : (await fetch("/api/me", { credentials: "same-origin" }).then((x) => (x.ok ? x.json() : null)).catch(() => null))?.user;
     pencere?.remove();
     pencere = el("dialog", { className: "kp-pencere" });
     pencere.setAttribute("aria-label", "Kontör yükle");
@@ -172,10 +179,14 @@
     });
 
     pencere.append(el("div", { className: "kp-ic" },
-      el("div", { className: "kp-kapak" }, kapat),
+      el("div", { className: "kp-kapak" }, el("img", { className: "kp-logo", src: "/kupon/logo.png?v=1", alt: "Ezoter.ist" }), kapat),
       el("div", { className: "kp-baslik" }, baslik,
         el("p", { textContent: "Kontörünle uzman yorumları, fallar ve derin raporlar için yol açılır. 1 kontör = 1 ₺, süresizdir." })),
-      ...(d.misafir ? [] : [el("div", { className: "kp-bakiye" }, el("i", { textContent: "🪙" }), "Bakiyen", bakiye), sekmeler]),
+      ...(d.misafir ? [] : [el("div", { className: "kp-bakiye" }, el("i", { textContent: "🪙" }), "Bakiyen", bakiye)]),
+      el("div", { className: "kp-hesap" }, ...(ben
+        ? ["🔐 Kontör bu hesaba yüklenecek:", el("b", { textContent: ben.name || ben.email }), el("span", { textContent: ben.name ? ben.email : "" })]
+        : ["🔐 Kontör, satın alırken giriş yaptığın Ezoter.ist hesabına yüklenir.", el("a", { href: girisAdresi, textContent: "Giriş yap" })])),
+      ...(d.misafir ? [] : [sekmeler]),
       yukleBolumu,
       hareketBolumu,
     ));
