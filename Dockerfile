@@ -40,6 +40,8 @@ COPY ayarlar.js yonetim-api.js yonetim.html yonetim.css yonetim-sayfa.js ./
 COPY dizim-hesap.js dizim-api.js dizim.html dizim.css dizim-sayfa.js ./
 COPY yuz-muzigi-api.js yuz-muzigi.html yuz-muzigi.css yuz-muzigi-ses.js yuz-muzigi-sayfa.js ./
 COPY ebced-veri.js ebced-cifir-api.js ebced-cifir-ortak.js ebced-cifir.css ebced.html ebced-sayfa.js cifir.html cifir-sayfa.js ./
+COPY kontor-pencere.js ./
+COPY kontor ./kontor
 COPY ebced ./ebced
 COPY dizim ./dizim
 COPY bekleme ./bekleme

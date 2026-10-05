@@ -190,6 +190,16 @@ currentUser.then((user) => {
 
   // Kullanıcı simgesi bir menü açar: arşiv, profil, (yöneticiye) yönetim paneli ve çıkış (Murat 2026-10-03).
   bilgilendirmeKontrol(user);
+  // Kontör yükleme penceresi (kontor-pencere.js): menüden ve #kontor-yukle adresinden açılır.
+  const kontorYukle = () => {
+    if (window.kontorPenceresi) return window.kontorPenceresi();
+    const s = document.createElement("script");
+    s.src = "/kontor-pencere.js?v=1";
+    s.onload = () => { if (location.hash !== "#kontor-yukle") window.kontorPenceresi?.(); };
+    document.head.append(s);
+  };
+  const kontorOgesi = (a) => { a.addEventListener("click", (e) => { e.preventDefault(); kontorYukle(); }); return a; };
+  if (location.hash === "#kontor-yukle") kontorYukle();
   const kim = user.name || user.email;
   const name = document.createElement("button");
   name.type = "button";
@@ -228,7 +238,7 @@ currentUser.then((user) => {
       .finally(() => window.location.reload());
   });
   menu.append(baslik, oge("🗂️ Kişisel arşivim", "/arsiv"), oge("👤 Profilim", "/arsiv#profil"),
-    oge("🎁 Hediye kupon", "/arsiv#hediye"), oge("📜 Bilgilendirme", "/bilgilendirme"),
+    kontorOgesi(oge("🪙 Kontör yükle", "#kontor-yukle")), oge("🎁 Hediye kupon", "/arsiv#hediye"), oge("📜 Bilgilendirme", "/bilgilendirme"),
     ...(user.uzman || user.yonetici ? [oge("🧙 Uzman paneli", "/uzman")] : []),
     ...(user.yonetici ? [oge("⚙️ Yönetim paneli", "/yonetim")] : []), cikis);
 

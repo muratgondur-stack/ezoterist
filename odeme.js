@@ -19,7 +19,7 @@ const TOKEN_URL = "https://www.paytr.com/odeme/api/get-token";
 const ODEME_SAYFASI = "https://www.paytr.com/odeme/guvenli/";
 const BILDIRIM_YOLU = "/api/odeme/paytr/bildirim";
 // Kontör paketleri (TL). Kontör miktarı = tutar / "1 kontörün TL değeri" (Fiyatlar).
-const PAKETLER = [50, 100, 250, 500];
+const PAKETLER = [100, 200, 500]; // Murat 2026-10-05
 
 const paketKontoru = (tutar) => Math.round(tutar / (Ayarlar.get("fiyat.kontorTL") || 1));
 const paketler = () => PAKETLER.map((tutar) => ({ tutar, kontor: paketKontoru(tutar) }));
