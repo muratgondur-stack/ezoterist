@@ -1,6 +1,7 @@
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
+require("./bellek-fs"); // ziyaretçi verisi diske yazılmaz, yalnız bellekte durur
 const { handleAuthRequest, dataDir, currentUser, kullaniciListesi, kullaniciSil } = require("./auth");
 const Ayarlar = require("./ayarlar");
 const Olcum = require("./olcum");
@@ -178,29 +179,44 @@ const pageRoutes = {
   "/bilgilendirme": "bilgilendirme.html",
 };
 
-const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser, sendFile });
+// --- Üyeliksiz ziyaretçi (Murat 2026-10-07): üyelik ve tahsilat kaldırıldı. Her tarayıcıya bir ziyaretçi kimliği
+// (çerez ezo_z; ileride tarayıcı başına günlük sınır için) verilir; bölümler bu kimlikle çalışır. Ziyaretçinin
+// yorumları ve fotoğrafları diske hiç yazılmaz: bellek-fs.js "z-" kimlikli yolları bellekte tutar. Yönetici normal girişle çalışır.
+const crypto = require("node:crypto");
+const ziyaretciKimligi = (request) => /(?:^|;\s*)ezo_z=([a-f0-9]{16})(?:;|$)/.exec(request.headers.cookie || "")?.[1] || null;
+function kullaniciVeyaZiyaretci(request) {
+  const user = currentUser(request);
+  if (user && Ayarlar.yoneticiMi(user)) return user; // eski üye oturumları da ziyaretçi sayılır
+  const id = ziyaretciKimligi(request);
+  return id ? { id: `z-${id}`, email: "", name: "", profil: {}, anonim: true } : null;
+}
+// Kaldırılan özellikler (tahsilat, üyelik, arşiv, harici uzman, ruhsal günlük): yönetici dışındakilere kapalı.
+const KAPALI_API = /^\/api\/(kontor|arsiv|odeme|kupon|uzman|ruhsal|register|forgot-password|reset-password|profil|sifre)(\/|$)/;
+const KAPALI_SAYFA = /^\/(arsiv|uzman|fiyatlar|mesafeli-satis|on-bilgilendirme|iptal-iade|ruhsal-gunluk|register|forgot-password|kupon\/[A-Za-z0-9-]+)$/; // kupon/ altındaki resimler (logo) açık kalır
+
+const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
 const handleUzmanRequest = createUzmanHandler({ dataDir, currentUser, sendFile });
-const handleNumerolojiRequest = createNumerolojiHandler({ dataDir, currentUser, sendFile });
-const handleRuyaRequest = createRuyaHandler({ dataDir, currentUser, sendFile });
-const handleFalRequest = createFalHandler({ dataDir, currentUser, sendFile });
-const handleElFaliRequest = createElFaliHandler({ dataDir, currentUser, sendFile });
-const handleTarotRequest = createTarotHandler({ dataDir, currentUser, sendFile });
-const handleYuzRequest = createYuzHandler({ dataDir, currentUser, sendFile });
-const handleAnalizRequest = createAnalizHandler({ dataDir, currentUser, sendFile });
-const handleAskRequest = createAskHandler({ dataDir, currentUser, sendFile });
-const handleDogumRequest = createDogumHandler({ dataDir, currentUser, sendFile });
-const handleMelekRequest = createMelekHandler({ dataDir, currentUser, sendFile });
-const handleIChingRequest = createIChingHandler({ dataDir, currentUser, sendFile });
-const handleRunRequest = createRunHandler({ dataDir, currentUser, sendFile });
-const handleAyRequest = createAyHandler({ dataDir, currentUser, sendFile });
-const handleCakraKristalRequest = createCakraKristalHandler({ dataDir, currentUser, sendFile });
+const handleNumerolojiRequest = createNumerolojiHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleRuyaRequest = createRuyaHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleFalRequest = createFalHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleElFaliRequest = createElFaliHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleTarotRequest = createTarotHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleYuzRequest = createYuzHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleAnalizRequest = createAnalizHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleAskRequest = createAskHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleDogumRequest = createDogumHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleMelekRequest = createMelekHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleIChingRequest = createIChingHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleRunRequest = createRunHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleAyRequest = createAyHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleCakraKristalRequest = createCakraKristalHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
 const handleArsivRequest = createArsivHandler({ dataDir, currentUser, sendFile });
-const handleRuhsalRequest = createRuhsalHandler({ dataDir, currentUser, sendFile });
-const handleSembolRequest = createSembolHandler({ dataDir, currentUser, sendFile });
-const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser, sendFile });
-const handleDizimRequest = createDizimHandler({ dataDir, currentUser, sendFile });
-const handleYuzMuzigiRequest = createYuzMuzigiHandler({ dataDir, currentUser });
-const handleEbcedCifirRequest = createEbcedCifirHandler({ dataDir, currentUser, sendFile });
+const handleRuhsalRequest = createRuhsalHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleSembolRequest = createSembolHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleDizimRequest = createDizimHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
+const handleYuzMuzigiRequest = createYuzMuzigiHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci });
+const handleEbcedCifirRequest = createEbcedCifirHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
 const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil });
 
 // Her istek ait olduğu bölümün etiketiyle çalışır; yapay zekâ/ses kullanımı o bölüme yazılır (olcum.js).
@@ -259,6 +275,25 @@ function enAzBeklet(response, sn) {
 
 function anaIsleyici(request, response) {
   const istekYolu = String(request.url || "").split("?")[0];
+  const oturum = currentUser(request);
+  if (!Ayarlar.yoneticiMi(oturum)) {
+    if (KAPALI_API.test(istekYolu)) {
+      response.writeHead(404, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+      response.end(JSON.stringify({ error: "Bu özellik kaldırıldı." }));
+      return;
+    }
+    if (KAPALI_SAYFA.test(istekYolu)) {
+      response.writeHead(302, { Location: "/", "Cache-Control": "no-store" });
+      response.end();
+      return;
+    }
+  }
+  if (!Ayarlar.yoneticiMi(oturum) && !ziyaretciKimligi(request)) {
+    const id = crypto.randomBytes(8).toString("hex");
+    request.headers.cookie = `${request.headers.cookie ? `${request.headers.cookie}; ` : ""}ezo_z=${id}`;
+    const guvenli = String(request.headers["x-forwarded-proto"] || "").includes("https") ? "; Secure" : "";
+    response.setHeader("Set-Cookie", `ezo_z=${id}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${guvenli}`);
+  }
   if (request.method === "POST" && YAPAY_ZEKA_ISLEMI.test(istekYolu)) {
     const sn = Ayarlar.get(istekYolu === "/api/asistan/mesaj" ? "sure.asistanBekleme" : DERIN_RAPOR.test(istekYolu) ? "sure.derinBekleme" : "sure.enAzBekleme");
     if (sn > 0) enAzBeklet(response, sn);

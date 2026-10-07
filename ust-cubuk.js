@@ -1,17 +1,15 @@
-// Kontör paketleri penceresi her sayfada (üye olmayanlar dahil) hazır olsun: #kontor-yukle bağlantıları onu açar.
-if (!document.querySelector('script[src^="/kontor-pencere.js"]')) {
-  const kp = document.createElement("script");
-  kp.src = "/kontor-pencere.js?v=3";
-  document.head.append(kp);
-}
-// Bilgilendirme onayı (bilgilendirme-metin.js): onaylamamış üyeye pencere açılır. Yasal metin sayfalarında açılmaz
+// Bilgilendirme onayı (bilgilendirme-metin.js): ziyaretçiye siteye her girişte (tarayıcı sekmesi başına bir kez,
+// sessionStorage) açılır ve onaylatılır; onaylamamış üyeye de. Yasal metin sayfalarında açılmaz
 // (penceredeki bağlantılar onları yeni sekmede açar, okunabilsinler).
 const bilgilendirmeKontrol = (user) => {
-  if (!user?.bilgilendirmeGerekli || /^\/(gizlilik|kullanim-kosullari|on-bilgilendirme|mesafeli-satis|iptal-iade|fiyatlar)$/.test(location.pathname)) return;
-  const ac = () => window.Bilgilendirme?.onayIste();
+  if (/^\/(gizlilik|kullanim-kosullari|bilgilendirme)$/.test(location.pathname)) return;
+  if (user?.anonim) {
+    try { if (sessionStorage.getItem("ezo-bilgi") === user.bilgilendirmeSurumu) return; } catch { /* depolama kapalı: her sayfada sorulur */ }
+  } else if (!user?.bilgilendirmeGerekli) return;
+  const ac = () => window.Bilgilendirme?.onayIste(user);
   if (window.Bilgilendirme) return ac();
   const s = document.createElement("script");
-  s.src = "/bilgilendirme-metin.js?v=2";
+  s.src = "/bilgilendirme-metin.js?v=3";
   s.onload = ac;
   document.head.append(s);
 };
@@ -29,6 +27,11 @@ const bilgilendirmeKontrol = (user) => {
   cubuk.querySelector(".topbar-logo img")?.addEventListener("load", yukseklikYaz);
   if (window.ResizeObserver) new ResizeObserver(yukseklikYaz).observe(cubuk, { box: "border-box" });
 
+  // Geçmiş saklanmıyor, harici uzman yok (2026-10-07): bölümlerdeki defter/günlük listesi ve uzman kartı gizlenir.
+  const gizle = document.createElement("style");
+  gizle.textContent = 'section#gunluk, a[href="#gunluk"], #expertCard, .uzman-kart { display: none !important; }';
+  document.head.append(gizle);
+
   // Kullanıcı menüsü: sayfanın eski ad alanı (#topbarUser) gizli kalır, yerine bu kutu konur.
   const kutu = document.createElement("div");
   kutu.className = "ust-hesap";
@@ -39,25 +42,9 @@ const bilgilendirmeKontrol = (user) => {
     .catch(() => null)
     .then((data) => {
       const user = data?.user;
-      if (!user) {
-        const giris = document.createElement("a");
-        giris.className = "ust-hesap-dugme ust-giris";
-        giris.href = `/login?next=${encodeURIComponent(location.pathname)}`;
-        giris.textContent = "Giriş";
-        kutu.replaceChildren(giris);
-        return;
-      }
       bilgilendirmeKontrol(user);
-      // Kontör yükleme penceresi (kontor-pencere.js): menüden ve #kontor-yukle adresinden açılır.
-      const kontorYukle = () => {
-        if (window.kontorPenceresi) return window.kontorPenceresi();
-        const s = document.createElement("script");
-        s.src = "/kontor-pencere.js?v=3";
-        s.onload = () => { if (location.hash !== "#kontor-yukle") window.kontorPenceresi?.(); };
-        document.head.append(s);
-      };
-      const kontorOgesi = (a) => { a.addEventListener("click", (e) => { e.preventDefault(); kontorYukle(); }); return a; };
-      if (location.hash === "#kontor-yukle") kontorYukle();
+      // Üyelik yok (2026-10-07): ziyaretçiye giriş düğmesi ya da menü gösterilmez; menü yalnız giriş yapmış yöneticide.
+      if (!user || user.anonim) return;
       const kim = user.name || user.email;
       const dugme = document.createElement("button");
       dugme.type = "button";
@@ -94,9 +81,7 @@ const bilgilendirmeKontrol = (user) => {
       cikis.addEventListener("click", () => {
         fetch("/api/logout", { method: "POST", credentials: "same-origin" }).finally(() => window.location.assign("/"));
       });
-      menu.append(baslik, oge("🏠 Ana menü", "/"), oge("🗂️ Kişisel arşivim", "/arsiv"), oge("👤 Profilim", "/arsiv#profil"),
-        kontorOgesi(oge("🪙 Kontör yükle", "#kontor-yukle")), oge("🎁 Hediye kupon", "/arsiv#hediye"), oge("📜 Bilgilendirme", "/bilgilendirme"),
-        ...(user.uzman || user.yonetici ? [oge("🧙 Uzman paneli", "/uzman")] : []),
+      menu.append(baslik, oge("🏠 Ana menü", "/"), oge("📜 Bilgilendirme", "/bilgilendirme"),
         ...(user.yonetici ? [oge("⚙️ Yönetim paneli", "/yonetim")] : []), cikis);
 
       const ac = (acik) => {
@@ -113,7 +98,7 @@ const bilgilendirmeKontrol = (user) => {
   const alt = document.createElement("footer");
   alt.className = "alt-satir";
   alt.innerHTML = `
-    <p class="alt-baglantilar"><span>Tüm hakları saklıdır © 2026</span><a href="/gizlilik">Gizlilik Politikası</a><a href="/kullanim-kosullari">Kullanım Koşulları</a><a href="#kontor-yukle">Kontör paketleri</a><a href="/fiyatlar">Fiyatlar</a><a href="/mesafeli-satis">Mesafeli Satış</a><a href="/iptal-iade">İptal ve İade</a><button type="button" aria-haspopup="dialog">İletişim</button></p>
+    <p class="alt-baglantilar"><span>Tüm hakları saklıdır © 2026</span><a href="/gizlilik">Gizlilik Politikası</a><a href="/kullanim-kosullari">Kullanım Koşulları</a><a href="/bilgilendirme">Bilgilendirme</a><button type="button" aria-haspopup="dialog">İletişim</button></p>
     <p class="alt-ai" aria-label="Kullandığımız yapay zekâlar"><span>GEMMA4</span><span>OpenAI</span><span>Claude</span><span>Grok</span><span>RAZECE.AI</span></p>`;
   const pencere = document.createElement("dialog");
   pencere.className = "alt-iletisim";
@@ -271,7 +256,7 @@ const bilgilendirmeKontrol = (user) => {
   window.yorumcuGoster = (k) => { bekleyenKayit = k; };
 
   // "Yorumunu kim yapsın?" (Murat 2026-10-04): bölümün yorum düğmesinin üstünde sanal uzman seçimi. Seçilen uzman yorumu
-  // kendi promptundaki üslupla yazar ve kendi sesiyle okur (sunucu çerezden okur: ezoy_<bölüm>). Seçim tarayıcıda hatırlanır.
+  // kendi promptundaki üslupla yazar (sunucu çerezden okur: ezoy_<bölüm>). Seçim tarayıcıda hatırlanır.
   (async () => {
     const secici = ISLEM_DUGMESI[location.pathname];
     const dugme = secici && document.querySelector(secici.split(",")[0]);
@@ -334,7 +319,7 @@ const bilgilendirmeKontrol = (user) => {
         return b;
       }));
       const u = liste.find((x) => x.id === secili);
-      not.textContent = `${u.ad}${u.unvan ? ` · ${u.unvan}` : ""}: yorumunu kendi üslubuyla yazar ve kendi sesiyle okur.`;
+      not.textContent = `${u.ad}${u.unvan ? ` · ${u.unvan}` : ""}: yorumunu kendi üslubuyla yazar.`;
     };
     ciz();
     dugme.insertAdjacentElement("beforebegin", kutu);
@@ -365,7 +350,7 @@ const bilgilendirmeKontrol = (user) => {
       r.dataset.yorumcu = u.id;
       r.querySelector("img").src = u.resim;
       r.querySelector("b").textContent = u.ad;
-      r.querySelector("small").textContent = `${u.unvan ? `${u.unvan} · ` : ""}yorumunu o yazdı, sesli dinlersen o okur`;
+      r.querySelector("small").textContent = `${u.unvan ? `${u.unvan} · ` : ""}yorumunu o yazdı`;
       r.querySelector("img").hidden = !u.resim;
     };
     function rozetleriYerlestir() {

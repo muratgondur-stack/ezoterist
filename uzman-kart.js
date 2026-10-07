@@ -4,6 +4,8 @@
 // Sayfada #expertCard, #expertGrid, #expertForm ve #expertStatus öğeleri bulunur. ekVeri: talebe eklenecek bölüme
 // özel bilgi (ör. rüyada hangi kayıt).
 window.UzmanKarti = function UzmanKarti({ bolum, bindListen, toast, ekVeri }) {
+  // Harici uzman bölümü kaldırıldı (2026-10-07): kart hiç kurulmaz, sayfalar çağırsa da bir şey yapmaz.
+  if (!window.UZMAN_KARTI_ACIK) return { goster() {}, async yukle() {}, gizle() {} };
   const $ = (id) => document.getElementById(id);
   const HAVUZ = "havuz";
   let talep = null; // gösterilen son cevap

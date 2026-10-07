@@ -145,19 +145,14 @@ function createHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil })
       sendJson(response, 200, {
         muzik: Ayarlar.get("genel.muzik"),
         kapali: Ayarlar.BOLUMLER.filter((b) => !Ayarlar.bolumAcik(b.id)).map((b) => b.sayfa),
-        tanitim: Ayarlar.get("fiyat.tanitim"),
         // Bekleme çarkındaki aşamalı yazıların hızı için (sn).
         bekleme: { hafif: Ayarlar.get("sure.enAzBekleme"), derin: Ayarlar.get("sure.derinBekleme") },
-        // Düğmelerdeki kontör rozetleri için (sayfa yolu → işlem ve uzman değerlendirmesi fiyatı). Yalnız gösterim.
-        fiyatlar: Object.fromEntries(Ayarlar.BOLUMLER.map((b) => [b.sayfa, {
-          islem: Ayarlar.get(`fiyat.${b.id}`) || 0,
-          uzman: Ayarlar.SEMA[`fiyat.${b.id}.uzman`] ? Ayarlar.get(`fiyat.${b.id}.uzman`) || 0 : 0,
-        }])),
+        // Fiyat/kontör bilgisi gönderilmez (2026-10-07: ücretli hizmet yok); düğmelerde rozet ve onay penceresi çıkmaz.
       });
       return true;
     }
     // Herkese açık fiyat listesi (/fiyatlar sayfası): kontör paketleri ve hizmetlerin kontör karşılıkları.
-    if (url.pathname === "/api/fiyatlar" && request.method === "GET") {
+    if (url.pathname === "/api/fiyatlar" && request.method === "GET" && Ayarlar.yoneticiMi(currentUser(request))) {
       sendJson(response, 200, {
         paketler: Odeme.paketler(),
         kontorTL: Ayarlar.get("fiyat.kontorTL"),

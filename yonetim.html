@@ -32,10 +32,10 @@
       <nav class="tabs" role="tablist">
         <button type="button" data-tab="ozet" aria-selected="true">📊 Özet</button>
         <button type="button" data-tab="ayarlar" aria-selected="false">⚙️ Ayarlar</button>
-        <button type="button" data-tab="kullanicilar" aria-selected="false">👥 Kullanıcılar</button>
-        <button type="button" data-tab="fiyatlar" aria-selected="false">💰 Fiyatlar</button>
+        <button type="button" data-tab="kullanicilar" aria-selected="false" hidden>👥 Kullanıcılar</button>
+        <button type="button" data-tab="fiyatlar" aria-selected="false" hidden>💰 Fiyatlar</button>
         <button type="button" data-tab="uzmanlar" aria-selected="false">🧙 Uzmanlar</button>
-        <button type="button" data-tab="odeme" aria-selected="false">💳 Ödeme ve kupon</button>
+        <button type="button" data-tab="odeme" aria-selected="false" hidden>💳 Ödeme ve kupon</button>
         <button type="button" data-tab="anahtarlar" aria-selected="false">🔑 API anahtarları</button>
         <button type="button" data-tab="gecmis" aria-selected="false">🕓 Değişiklik geçmişi</button>
       </nav>
@@ -104,7 +104,7 @@
           <div class="sn-grid" id="snGrid"></div>
         </div>
 
-        <div class="card">
+        <div class="card" hidden>
           <h2>Gerçek uzmanlar</h2>
           <p class="section-note">Üyeler arasından uzman yap. Uzman hangi bölümlere yorum yazacağını, fotoğrafını ve tanıtımını kendi panelinden (/uzman → Profilim) seçer; burada sen de değiştirebilirsin. Hakediş = bölümün uzman fiyatı × 1 kontörün TL değeri × oran.</p>
           <form class="pay-form uz-ekle" id="uzEkle">
@@ -204,6 +204,6 @@
     <audio id="sample" preload="none"></audio>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
     <script src="/yonetim-sayfa.js?v=15"></script>
-    <script src="/ust-cubuk.js?v=21" defer></script>
+    <script src="/ust-cubuk.js?v=22" defer></script>
 </body>
 </html>

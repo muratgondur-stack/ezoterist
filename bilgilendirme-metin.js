@@ -1,4 +1,4 @@
-// "Hoş Geldiniz" bilgilendirme metni (Murat 2026-10-04): her üyeye bir kez gösterilir ve onayı alınır; sonradan
+// "Hoş Geldiniz" bilgilendirme metni (Murat 2026-10-04): ziyaretçiye siteye her girişte (2026-10-07) gösterilir ve onayı alınır; sonradan
 // kullanıcı menüsünden (/bilgilendirme) okunabilir. Metin değişirse auth.js'teki BILGILENDIRME_SURUMU artırılır.
 // ust-cubuk.js ve app.js, /api/me "bilgilendirmeGerekli" derse bu dosyayı yükleyip onay penceresini açar.
 (() => {
@@ -16,8 +16,8 @@
     },
     {
       ikon: ikon('<circle cx="24" cy="17" r="5"/><circle cx="12" cy="20" r="4"/><circle cx="36" cy="20" r="4"/><path d="M15 36c0-6 4-10 9-10s9 4 9 10"/><path d="M5 35c0-5 3-8 7-8 2 0 3 .5 4 1.5"/><path d="M43 35c0-5-3-8-7-8-2 0-3 .5-4 1.5"/>'),
-      baslik: "Yorumlar bağımsız uzmanlar tarafından hazırlanır",
-      metin: "Platformda yer alan bazı değerlendirmeler, bağımsız içerik üreticileri ve danışmanlar tarafından, bize ilettiğiniz bilgiler doğrultusunda hazırlanır. Bu kişiler platform çalışanı değildir ve paylaştıkları görüşler tamamen kendi bakış açılarını yansıtır. Yapay zekâ ile üretilen yorumlar da hata içerebilir.",
+      baslik: "Yorumlar yapay zekâ ile üretilir, ücretsizdir",
+      metin: "Sitedeki yorumlar, bize ilettiğiniz bilgiler doğrultusunda yapay zekâ ile otomatik olarak hazırlanır; arkasında bir falcı ya da danışman yoktur ve hiçbir hizmet karşılığında ücret alınmaz. Yapay zekâ yorumları hata içerebilir. Girdiğiniz bilgiler ve fotoğraflar kaydedilmez; yorum yalnızca sayfayı kullandığınız sürece görüntülenir.",
     },
     {
       ikon: ikon('<path d="M24 38S9 29 9 19a7.5 7.5 0 0 1 15-2 7.5 7.5 0 0 1 15 2c0 10-15 19-15 19z"/>'),
@@ -68,7 +68,9 @@
   }
 
   // Onay penceresi: kapatılamaz; onaylamak ya da çıkış yapmak gerekir.
-  function onayIste() {
+  // user.anonim ise onay sunucuya değil bu tarayıcı sekmesine yazılır (sessionStorage): her girişte yeniden sorulur.
+  function onayIste(user) {
+    const anonim = Boolean(user?.anonim);
     if (document.querySelector(".bilgi-pencere")) return;
     stilEkle();
     const pencere = document.createElement("dialog");
@@ -81,7 +83,7 @@
       <p class="bilgi-ipucu" aria-live="polite"></p>
       <label><input type="checkbox" required disabled /> <span>Bu bilgilendirmeyi okudum ve anladım; içeriklerin eğlence ve kişisel farkındalık amaçlı olduğunu, danışmanlık yerine geçmediğini ve kararlarımın sorumluluğunun bana ait olduğunu kabul ediyorum. Ayrıca <a href="/kullanim-kosullari" target="_blank">Kullanım Koşulları</a>'nı ve <a href="/gizlilik" target="_blank">Gizlilik Politikası</a>'nı okudum.</span></label>
       <div class="bilgi-dugmeler">
-        <button type="button" class="bilgi-cikis">Çıkış yap</button>
+        <button type="button" class="bilgi-cikis">${anonim ? "Vazgeç" : "Çıkış yap"}</button>
         <button type="submit" class="bilgi-kabul" disabled>Kabul ediyorum, devam et</button>
       </div>
       <p class="bilgi-hata" hidden></p>`;
@@ -105,14 +107,19 @@
       if (girdiler.some((g) => g.isIntersecting)) { sonaGelindi = true; gozcu.disconnect(); durumYaz(); }
     }, { root: null, threshold: 1 }).observe(govde.querySelector(".bilgi-alt"));
     alt.querySelector(".bilgi-cikis").addEventListener("click", () => {
+      if (anonim) { window.location.replace("about:blank"); return; }
       fetch("/api/logout", { method: "POST", credentials: "same-origin" }).finally(() => window.location.assign("/"));
     });
     alt.addEventListener("submit", async (e) => {
       e.preventDefault();
       kabul.disabled = true;
       try {
+        if (anonim) {
+          try { sessionStorage.setItem("ezo-bilgi", user.bilgilendirmeSurumu); } catch { /* depolama kapalı */ }
+        } else {
         const r = await fetch("/api/bilgilendirme-onay", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ kabul: true }) });
         if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Kaydedilemedi, tekrar dene.");
+        }
         pencere.close();
         pencere.remove();
         document.documentElement.classList.remove("bilgi-acik");

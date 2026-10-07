@@ -71,7 +71,7 @@ const findUserByEmail = (email) => users.find((user) => user.email === email);
 const findUserById = (id) => users.find((user) => user.id === id);
 // Üyelere bir kez gösterilip onayı alınan bilgilendirme metni (bilgilendirme-metin.js). Metin değişirse sürüm
 // artırılır; herkes yeni metni bir kez daha onaylar. Onay tarihi ve IP users.json'da saklanır.
-const BILGILENDIRME_SURUMU = "2026-10-04";
+const BILGILENDIRME_SURUMU = "2026-10-07";
 const publicUser = (user) => ({
   id: user.id,
   email: user.email,
@@ -398,7 +398,8 @@ async function handleLogin(request, response) {
     sendJson(response, 400, { error: "Bu hesap Google ile oluşturulmuş. Lütfen \"Google ile devam et\" seçeneğini kullanın." });
     return;
   }
-  if (!user || !(await verifyPassword(password, user.passwordHash))) {
+  // Üyelik kaldırıldı (2026-10-07): yalnız yönetici giriş yapar.
+  if (!user || !Ayarlar.yoneticiMi(user) || !(await verifyPassword(password, user.passwordHash))) {
     sendJson(response, 401, { error: "E-posta adresi veya şifre hatalı." });
     return;
   }
@@ -575,8 +576,10 @@ function handleLogout(request, response) {
 
 function handleMe(request, response) {
   const user = currentUser(request);
-  if (!user) {
-    sendJson(response, 401, { user: null });
+  if (!user || !Ayarlar.yoneticiMi(user)) {
+    // Üyeliksiz ziyaretçi (2026-10-07): sayfalar girişe yönlendirmeden çalışsın. Bilgilendirme onayı tarayıcıda,
+    // siteye her girişte (sekme başına) alınır; sunucuda hiçbir şey saklanmaz.
+    sendJson(response, 200, { user: { id: "ziyaretci", email: "", name: "", anonim: true, bilgilendirmeGerekli: true, bilgilendirmeSurumu: BILGILENDIRME_SURUMU } });
     return;
   }
   sendJson(response, 200, { user: publicUser(user) });
@@ -654,6 +657,8 @@ async function handleGoogleCallback(request, response, url) {
 
     let user = users.find((candidate) => candidate.googleId === profile.sub) || findUserByEmail(email);
     if (!user) {
+      // Üyelik kaldırıldı (2026-10-07): Google ile yeni hesap açılmaz; yalnız yönetici girebilir.
+      if (!Ayarlar.yoneticiMi({ email })) return fail("google");
       user = await createUser({ email, name: profile.name, googleId: profile.sub });
     } else if (!user.googleId) {
       user.googleId = profile.sub;

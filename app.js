@@ -1,9 +1,3 @@
-// Kontör paketleri penceresi her sayfada (üye olmayanlar dahil) hazır olsun: #kontor-yukle bağlantıları onu açar.
-if (!document.querySelector('script[src^="/kontor-pencere.js"]')) {
-  const kp = document.createElement("script");
-  kp.src = "/kontor-pencere.js?v=3";
-  document.head.append(kp);
-}
 const toast = document.getElementById("toast");
 
 const mobilePortrait = window.matchMedia("(orientation: portrait) and (max-width: 600px)");
@@ -105,19 +99,21 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
   .catch(() => null);
 
 // Hazır olan bölümlerin kendi sayfaları var; diğerleri "çok yakında" der.
-// Bilgilendirme onayı (bilgilendirme-metin.js): onaylamamış üyeye pencere açılır. Yasal metin sayfalarında açılmaz
-// (penceredeki bağlantılar onları yeni sekmede açar, okunabilsinler).
+// Bilgilendirme onayı (bilgilendirme-metin.js): ziyaretçiye siteye her girişte (sekme başına, sessionStorage)
+// açılır ve onaylatılır; onaylamamış yöneticiye de.
 const bilgilendirmeKontrol = (user) => {
-  if (!user?.bilgilendirmeGerekli || /^\/(gizlilik|kullanim-kosullari|on-bilgilendirme|mesafeli-satis|iptal-iade|fiyatlar)$/.test(location.pathname)) return;
-  const ac = () => window.Bilgilendirme?.onayIste();
+  if (user?.anonim) {
+    try { if (sessionStorage.getItem("ezo-bilgi") === user.bilgilendirmeSurumu) return; } catch { /* depolama kapalı */ }
+  } else if (!user?.bilgilendirmeGerekli) return;
+  const ac = () => window.Bilgilendirme?.onayIste(user);
   if (window.Bilgilendirme) return ac();
   const s = document.createElement("script");
-  s.src = "/bilgilendirme-metin.js?v=2";
+  s.src = "/bilgilendirme-metin.js?v=3";
   s.onload = ac;
   document.head.append(s);
 };
 
-const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji", "#ruya-yorumu": "/ruya", "#kahve-fali": "/kahve-fali", "#el-fali": "/el-fali", "#tarot": "/tarot", "#yuz-okuma": "/yuz-okuma", "#fotograf-analizi": "/fotograf-analizi", "#ask-uyumu": "/ask-uyumu", "#dogum-haritasi": "/dogum-haritasi", "#melek-sayilari": "/melek-sayilari", "#i-ching": "/iching", "#run-taslari": "/run-taslari", "#ay-takvimi": "/ay-takvimi", "#cakralar": "/cakralar", "#kristaller": "/kristaller", "#kisisel-arsiv": "/arsiv", "#ruhsal-gunluk": "/ruhsal-gunluk", "#semboller": "/semboller", "#ezoterik-asistan": "/asistan", "#taslarla-dizim": "/taslarla-dizim", "#yuz-muzigi": "/yuz-muzigi", "#ebced": "/ebced", "#cifir": "/cifir" };
+const SECTION_PAGES = { "#astroloji": "/astroloji", "#numeroloji": "/numeroloji", "#ruya-yorumu": "/ruya", "#kahve-fali": "/kahve-fali", "#el-fali": "/el-fali", "#tarot": "/tarot", "#yuz-okuma": "/yuz-okuma", "#fotograf-analizi": "/fotograf-analizi", "#ask-uyumu": "/ask-uyumu", "#dogum-haritasi": "/dogum-haritasi", "#melek-sayilari": "/melek-sayilari", "#i-ching": "/iching", "#run-taslari": "/run-taslari", "#ay-takvimi": "/ay-takvimi", "#cakralar": "/cakralar", "#kristaller": "/kristaller", "#semboller": "/semboller", "#ezoterik-asistan": "/asistan", "#taslarla-dizim": "/taslarla-dizim", "#yuz-muzigi": "/yuz-muzigi", "#ebced": "/ebced", "#cifir": "/cifir" };
 
 // Yönetim panelinden gelen genel ayarlar: kapatılan bölümler ve müzik seviyesi.
 let genelAyarlar = { kapali: [], muzik: 0.1 };
@@ -192,20 +188,11 @@ if (returnedTo) {
 }
 
 currentUser.then((user) => {
-  if (!user || !authBar) return;
-
-  // Kullanıcı simgesi bir menü açar: arşiv, profil, (yöneticiye) yönetim paneli ve çıkış (Murat 2026-10-03).
   bilgilendirmeKontrol(user);
-  // Kontör yükleme penceresi (kontor-pencere.js): menüden ve #kontor-yukle adresinden açılır.
-  const kontorYukle = () => {
-    if (window.kontorPenceresi) return window.kontorPenceresi();
-    const s = document.createElement("script");
-    s.src = "/kontor-pencere.js?v=3";
-    s.onload = () => { if (location.hash !== "#kontor-yukle") window.kontorPenceresi?.(); };
-    document.head.append(s);
-  };
-  const kontorOgesi = (a) => { a.addEventListener("click", (e) => { e.preventDefault(); kontorYukle(); }); return a; };
-  if (location.hash === "#kontor-yukle") kontorYukle();
+  // Üyelik yok (2026-10-07): ziyaretçiye giriş düğmesi ya da menü gösterilmez; menü yalnız giriş yapmış yöneticide.
+  if (!user || user.anonim || !authBar) return;
+
+  // Kullanıcı simgesi bir menü açar: bilgilendirme, yönetim paneli ve çıkış (Murat 2026-10-03).
   const kim = user.name || user.email;
   const name = document.createElement("button");
   name.type = "button";
@@ -243,9 +230,7 @@ currentUser.then((user) => {
     fetch("/api/logout", { method: "POST", credentials: "same-origin" })
       .finally(() => window.location.reload());
   });
-  menu.append(baslik, oge("🗂️ Kişisel arşivim", "/arsiv"), oge("👤 Profilim", "/arsiv#profil"),
-    kontorOgesi(oge("🪙 Kontör yükle", "#kontor-yukle")), oge("🎁 Hediye kupon", "/arsiv#hediye"), oge("📜 Bilgilendirme", "/bilgilendirme"),
-    ...(user.uzman || user.yonetici ? [oge("🧙 Uzman paneli", "/uzman")] : []),
+  menu.append(baslik, oge("📜 Bilgilendirme", "/bilgilendirme"),
     ...(user.yonetici ? [oge("⚙️ Yönetim paneli", "/yonetim")] : []), cikis);
 
   const menuyuAc = (acik) => {
