@@ -53,11 +53,9 @@ function renderOzet() {
     kart(sayi(h.tarayici), "ziyaretçi tarayıcı", `${sayi(h.ip)} farklı internet adresi`),
     kart(sayi(h.sinirda), "sınıra dayanan", sinir ? `günlük ${sinir} yorum hakkını bitiren tarayıcı` : "sınır kapalı (sınırsız)"),
     (() => {
-      const k = kart(o.servis.yapayZeka && ses.ok ? "✓" : "!", "servisler", "");
+      const k = kart(o.servis.yapayZeka ? "✓" : "!", "servisler", "");
       k.querySelector("p")?.remove();
-      k.append(el("p", {}, el("span", { className: o.servis.yapayZeka ? "ok" : "bad", textContent: `Yapay zekâ ${o.servis.yapayZeka ? "bağlı" : "yok"}` }), " · ",
-        el("span", { className: ses.ok ? "ok" : "bad", textContent: `Ses ${ses.ok ? "çalışıyor" : `sorunlu (${ses.hata || "?"})`}` })));
-      if (ses.yuklu?.length) k.append(el("p", { textContent: `Bellekteki sesler: ${ses.yuklu.join(", ")}` }));
+      k.append(el("p", {}, el("span", { className: o.servis.yapayZeka ? "ok" : "bad", textContent: `Yapay zekâ ${o.servis.yapayZeka ? "bağlı" : "yok"}` }), " · seslendirme yok"));
       return k;
     })(),
   );
@@ -141,8 +139,8 @@ const GRUP_IKON = { Genel: "🏠", Ses: "🔊", "Yapay zekâ": "🧠", Resim: "�
 
 function renderAyarlar() {
   const gruplar = new Map();
-  // Fiyat ve maliyet ayarları kendi sekmesinde ("Fiyatlar").
-  veri.sema.filter((s) => s.grup !== "Fiyatlar" && s.grup !== "Maliyet").forEach((s) => { if (!gruplar.has(s.grup)) gruplar.set(s.grup, []); gruplar.get(s.grup).push(s); });
+  // Fiyat ve maliyet ayarları kendi sekmesinde ("Fiyatlar"); ses grupları gizli (Piper yok, 2026-10-07).
+  veri.sema.filter((s) => s.grup !== "Fiyatlar" && s.grup !== "Maliyet" && s.grup !== "Ses" && s.grup !== "Bölüm sesleri").forEach((s) => { if (!gruplar.has(s.grup)) gruplar.set(s.grup, []); gruplar.get(s.grup).push(s); });
   const sira = ["Genel", "Reklam", "Günlük sınırlar", "Ses", "Bölüm sesleri", "Yapay zekâ", "Resim", "Süreler", "Bölümler", "İzinler"];
   $("settings").replaceChildren(...[...gruplar].sort((a, b) => sira.indexOf(a[0]) - sira.indexOf(b[0])).map(([grup, liste]) => {
     const kart = el("div", { className: "card group" }, el("h2", { textContent: `${GRUP_IKON[grup] || "•"} ${grup}` }));
@@ -455,7 +453,8 @@ function sesSecici(u) {
       await ornekSes.play();
     } catch (error) { toast(error.message); } finally { dinle.disabled = false; dinle.textContent = "▶ Dinle"; }
   });
-  const kutu = el("div", { className: "uz-ses-kutu" }, sec, dinle);
+  // Seslendirme yok (Piper kaldırıldı, 2026-10-07): ses seçimi gizli tutulur, kayıtlı değer korunur.
+  const kutu = el("div", { className: "uz-ses-kutu", hidden: true }, sec, dinle);
   kutu.deger = () => sec.value;
   return kutu;
 }

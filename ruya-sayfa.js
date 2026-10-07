@@ -364,7 +364,7 @@ async function init() {
     durum = { ...durum, ses: data.ses, stt: data.stt, kalan: data.kalan, sinir: data.sinir };
     kayitlar = data.kayitlar;
   }
-  $("micButton").hidden = !durum.stt;
+  $("micButton").hidden = true; // sesle anlatma kaldırıldı (Murat 2026-10-07)
   renderKota();
   await uzmanKarti.yukle();
   renderJournal();

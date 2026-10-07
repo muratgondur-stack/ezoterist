@@ -11,7 +11,8 @@ const Ayarlar = require("./ayarlar");
 const { sendJson, readJson, readCache, writeCache, sesDosyasi, sesVar, askLlm, bugun, llmEnabled } = yardimci;
 
 const GUNLUK_SINIR = () => Ayarlar.sinir("ruya"); // yönetim panelinden (0 = sınırsız)
-const STT_GUNLUK_SINIR = () => (Ayarlar.get("sinir.sesleAnlatma") || Infinity); // yönetim panelinden (0 = sınırsız)
+const STT_KALDIRILDI = true; // Murat 2026-10-07: sesle anlatma yok
+const STT_GUNLUK_SINIR = () => Infinity; // sesle anlatma kaldırıldı (2026-10-07); uç aşağıda kapalı
 const MAX_SES_BAYT = 12 * 1024 * 1024;
 
 // Resim: Acer FLUX (ücretsiz) → olmazsa quiz.ist/OpenAI (resim.js, motor yönetim panelinden).
@@ -249,7 +250,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         sendFile(request, response, await sesDosyasi(okunus(kayit.yorum), dizin(user.id), `${kayit.id}-ses`));
       },
       "POST /api/ruya/dinle": async () => {
-        if (!sttVar) throw hata("Sesle anlatma şu an kullanılamıyor.", 503);
+        if (STT_KALDIRILDI || !sttVar) throw hata("Sesle anlatma kaldırıldı; rüyanı yazarak anlatabilirsin.", 404);
         sendJson(response, 200, { metin: await sesiYaziyaCevir(user, request) });
       },
     };

@@ -64,7 +64,6 @@ const SEMA = {
   "reklam.rehber": { grup: "Reklam", ad: "Rehber (bilgi sayfaları)", tur: "bool", vars: true },
   "reklam.bolumler": { grup: "Reklam", ad: "Bölüm sayfaları (tarot, fal, astroloji…)", tur: "bool", vars: true },
   "reklam.sabit": { grup: "Reklam", ad: "Hakkımızda, İletişim, Gizlilik, Koşullar, Bilgilendirme", tur: "bool", vars: true },
-  "sinir.sesleAnlatma": { grup: "Günlük sınırlar", ad: "Sesle anlatma (yazıya çevirme)", tur: "tam", min: 0, max: 500, vars: 20, birim: "/gün", aciklama: "0 = sınırsız" },
   "izin.uzmanlar": { grup: "İzinler", ad: "Uzman e-postaları", tur: "epostalar", vars: listeOrtam("UZMAN_EPOSTA") },
   "elfali.cizgiOlcum": { grup: "Yapay zekâ", ad: "El falı çizgi ölçümü (V100 MediaPipe + U-Net)", tur: "bool", vars: true, aciklama: "Açıkken çizgiler avuca çizilir ve ölçülür; kapalıysa yalnız Gemma bakar" },
   // Resim motoru (Murat 2026-10-04): acer = evdeki Acer FLUX.2 klein, ücretsiz; kapalı/dolu/yavaşsa kendiliğinden OpenAI.

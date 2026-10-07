@@ -302,7 +302,7 @@ async function kayitBaslat() {
   $("micButton").textContent = "⏹";
   setTimeout(() => recorder?.stop(), 90000);
 }
-$("micButton").hidden = !(navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined");
+$("micButton").hidden = true; // sesle sorma kaldırıldı (Murat 2026-10-07)
 $("micButton").addEventListener("click", () => { if (recorder) recorder.stop(); else kayitBaslat(); });
 
 // --- Başlangıç ---

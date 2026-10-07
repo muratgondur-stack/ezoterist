@@ -177,7 +177,9 @@ function createHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil, h
       "GET /api/yonetim/durum": async () => {
         const kullanicilar = kullaniciListesi();
         const hafta = Date.now() - 7 * 86400000;
-        const [kullanim, uzman, ses] = await Promise.all([kullanimOzeti(dataDir), uzmanOzeti(dataDir), sesSaglik()]);
+        // Piper (seslendirme) kullanılmıyor (Murat 2026-10-07): sağlık sorgusu yapılmaz.
+        const [kullanim, uzman] = await Promise.all([kullanimOzeti(dataDir), uzmanOzeti(dataDir)]);
+        const ses = { ok: true, kapali: true };
         sendJson(response, 200, {
           sema: Object.entries(Ayarlar.SEMA).map(([anahtar, s]) => ({ anahtar, ...s })),
           degerler: Ayarlar.hepsi(),
@@ -211,6 +213,7 @@ function createHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil, h
         sendJson(response, 200, { degerler });
       },
       "POST /api/yonetim/ses-ornek": async () => {
+        throw hata("Seslendirme kaldırıldı (Piper yok).", 410);
         const body = await readJson(request);
         const ses = Ayarlar.SESLER.includes(body?.ses) ? body.ses : Ayarlar.get("ses.ses");
         const hiz = Math.min(1.6, Math.max(0.6, Number(body?.hiz) || 1));

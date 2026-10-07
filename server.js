@@ -262,7 +262,7 @@ function hakKullan(request, response, ziyaretci) {
 }
 
 // Kaldırılan özellikler (tahsilat, üyelik, arşiv, harici uzman, ruhsal günlük): yönetici dışındakilere kapalı.
-const KAPALI_API = /^\/api\/(kontor|arsiv|odeme|kupon|uzman|ruhsal|register|forgot-password|reset-password|profil|sifre)(\/|$)/;
+const KAPALI_API = /^\/api\/(kontor|arsiv|odeme|kupon|uzman|ruhsal|register|forgot-password|reset-password|profil|sifre|ruya\/dinle)(\/|$)/; // ruya/dinle: sesle anlatma (yazıya çevirme) kaldırıldı
 const KAPALI_SAYFA = /^\/(arsiv|uzman|fiyatlar|mesafeli-satis|on-bilgilendirme|iptal-iade|ruhsal-gunluk|register|forgot-password|kupon\/[A-Za-z0-9-]+)$/; // kupon/ altındaki resimler (logo) açık kalır
 
 const handleAstrolojiRequest = createAstrolojiHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
