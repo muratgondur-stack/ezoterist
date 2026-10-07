@@ -275,6 +275,21 @@ function enAzBeklet(response, sn) {
   };
 }
 
+// Sunucu tarafı modüller (require edilen ve hiçbir sayfanın /dosya.js diye yüklemediği dosyalar) ile paket
+// bilgileri dışarıya verilmez (2026-10-07). Tarayıcının da kullandığı veri dosyaları (*-veri.js) açık kalır.
+let sunucuDosyalari = null;
+function sunucuDosyasi(dosya) {
+  if (!sunucuDosyalari) {
+    const istemci = fs.readdirSync(root).filter((f) => /\.(html|js)$/.test(f) && !require.cache[path.join(root, f)])
+      .map((f) => fs.readFileSync(path.join(root, f), "utf8")).join("\n");
+    sunucuDosyalari = new Set([
+      ...Object.keys(require.cache).filter((f) => path.dirname(f) === root && !istemci.includes(`/${path.basename(f)}`)),
+      ...["package.json", "README.md", "Dockerfile", "Procfile", "railway.toml", "AGENTS.md", "CLAUDE.md"].map((f) => path.join(root, f)),
+    ]);
+  }
+  return sunucuDosyalari.has(dosya);
+}
+
 function anaIsleyici(request, response) {
   const istekYolu = String(request.url || "").split("?")[0];
   // Tek adres (arama motorları için): www.ezoter.ist → ezoter.ist
@@ -389,8 +404,9 @@ function anaIsleyici(request, response) {
     return;
   }
 
-  // Kullanıcı verisini ve gizli dosyaları asla statik olarak sunma.
+  // Kullanıcı verisini, gizli dosyaları ve sunucunun kendi program dosyalarını asla statik olarak sunma.
   const isPrivate =
+    sunucuDosyasi(requestedFile) ||
     requestedFile === dataDir ||
     requestedFile.startsWith(dataDir + path.sep) ||
     requestPath.split("/").some((segment) => segment.startsWith("."));
