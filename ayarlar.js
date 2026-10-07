@@ -58,6 +58,12 @@ const SEMA = {
   "sure.derinBekleme": { grup: "Süreler", ad: "Derin raporlar en az bekleme", tur: "tam", min: 0, max: 30, vars: 12, birim: "sn", aciklama: "doğum haritası, numeroloji, aşk uyumu, fotoğraflı fallar, rüya, Ay rehberi, taş dizimi, haftalık özet; 0 = bekletme" },
   "sure.asistanBekleme": { grup: "Süreler", ad: "Ezoterik Asistan en az bekleme", tur: "tam", min: 0, max: 30, vars: 2, birim: "sn", aciklama: "her soru + cevap için; 0 = bekletme" },
   "sure.oturumGun": { grup: "Süreler", ad: "\"Beni hatırla\" oturum süresi", tur: "tam", min: 1, max: 365, vars: 30, birim: "gün" },
+  "reklam.acik": { grup: "Reklam", ad: "Reklamlar açık", tur: "bool", vars: true, aciklama: "ana anahtar: kapalıysa hiçbir sayfada reklam kodu olmaz" },
+  "reklam.yayinci": { grup: "Reklam", ad: "AdSense yayıncı kimliği", tur: "metin", vars: "ca-pub-8608496252118049", desen: "^ca-pub-\\d{10,20}$", desenHata: "ca-pub- ve ardından rakamlar olmalı", aciklama: "ca-pub-… biçiminde; ads.txt buna göre kendiliğinden güncellenir" },
+  "reklam.anasayfa": { grup: "Reklam", ad: "Ana sayfa", tur: "bool", vars: true },
+  "reklam.rehber": { grup: "Reklam", ad: "Rehber (bilgi sayfaları)", tur: "bool", vars: true },
+  "reklam.bolumler": { grup: "Reklam", ad: "Bölüm sayfaları (tarot, fal, astroloji…)", tur: "bool", vars: true },
+  "reklam.sabit": { grup: "Reklam", ad: "Hakkımızda, İletişim, Gizlilik, Koşullar, Bilgilendirme", tur: "bool", vars: true },
   "sinir.sesleAnlatma": { grup: "Günlük sınırlar", ad: "Sesle anlatma (yazıya çevirme)", tur: "tam", min: 0, max: 500, vars: 20, birim: "/gün", aciklama: "0 = sınırsız" },
   "izin.uzmanlar": { grup: "İzinler", ad: "Uzman e-postaları", tur: "epostalar", vars: listeOrtam("UZMAN_EPOSTA") },
   "elfali.cizgiOlcum": { grup: "Yapay zekâ", ad: "El falı çizgi ölçümü (V100 MediaPipe + U-Net)", tur: "bool", vars: true, aciklama: "Açıkken çizgiler avuca çizilir ve ölçülür; kapalıysa yalnız Gemma bakar" },
@@ -127,6 +133,7 @@ function dogrula(anahtar, deger) {
     case "metin": {
       const t = String(deger || "").trim();
       if (!t || t.length > 120 || !/^[\w.:\-/]+$/.test(t)) hataVer("geçersiz değer");
+      if (s.desen && !new RegExp(s.desen).test(t)) hataVer(s.desenHata || "geçersiz biçim");
       return t;
     }
     case "epostalar": {

@@ -137,16 +137,17 @@ function kontrol(s) {
   return el("div", { className: "control" }, input);
 }
 
-const GRUP_IKON = { Genel: "🏠", Ses: "🔊", "Yapay zekâ": "🧠", Resim: "🖼️", Süreler: "⏱️", "Günlük sınırlar": "🎯", İzinler: "🔐", Bölümler: "🧭", "Bölüm sesleri": "🎙️" };
+const GRUP_IKON = { Genel: "🏠", Ses: "🔊", "Yapay zekâ": "🧠", Resim: "🖼️", Süreler: "⏱️", "Günlük sınırlar": "🎯", İzinler: "🔐", Bölümler: "🧭", "Bölüm sesleri": "🎙️", Reklam: "📢" };
 
 function renderAyarlar() {
   const gruplar = new Map();
   // Fiyat ve maliyet ayarları kendi sekmesinde ("Fiyatlar").
   veri.sema.filter((s) => s.grup !== "Fiyatlar" && s.grup !== "Maliyet").forEach((s) => { if (!gruplar.has(s.grup)) gruplar.set(s.grup, []); gruplar.get(s.grup).push(s); });
-  const sira = ["Genel", "Ses", "Bölüm sesleri", "Yapay zekâ", "Resim", "Günlük sınırlar", "Süreler", "Bölümler", "İzinler"];
+  const sira = ["Genel", "Reklam", "Günlük sınırlar", "Ses", "Bölüm sesleri", "Yapay zekâ", "Resim", "Süreler", "Bölümler", "İzinler"];
   $("settings").replaceChildren(...[...gruplar].sort((a, b) => sira.indexOf(a[0]) - sira.indexOf(b[0])).map(([grup, liste]) => {
     const kart = el("div", { className: "card group" }, el("h2", { textContent: `${GRUP_IKON[grup] || "•"} ${grup}` }));
     if (grup === "Bölümler") kart.append(el("p", { className: "section-note", textContent: "Kapalı bölüm menüde 'bakımda' görünür; sen yönetici olarak yine girebilirsin." }));
+    if (grup === "Reklam") kart.append(el("p", { className: "section-note", textContent: "Google AdSense kodu sunucuda, bu ayarlara göre sayfalara eklenir; değişiklik hemen geçerli olur. Bölge kapalıysa o sayfalarda reklam kodu hiç yer almaz. Yönetim ve giriş sayfalarında hiçbir zaman reklam yoktur." }));
     if (grup === "Günlük sınırlar") kart.append(el("p", { className: "section-note", textContent: "Kişi başı günlük hak. 0 = sınırsız." }));
     const rows = el("div", { className: "rows" });
     liste.forEach((s) => {

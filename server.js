@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 require("./bellek-fs"); // ziyaretçi verisi diske yazılmaz, yalnız bellekte durur
 const { handleRehberRequest } = require("./rehber");
+const { reklamEkle } = require("./reklam");
 const { handleAuthRequest, dataDir, currentUser, kullaniciListesi, kullaniciSil } = require("./auth");
 const Ayarlar = require("./ayarlar");
 const Olcum = require("./olcum");
@@ -84,7 +85,23 @@ function parseRange(header, size) {
   return { start, end };
 }
 
+// HTML sayfaları okunup reklam kodu (yönetim → Reklam ayarları) eklenerek gönderilir; değişiklik hemen geçerli olsun
+// diye 304 kullanılmaz (sayfalar küçük, zaten "no-cache").
+function sendHtml(request, response, filePath) {
+  fs.readFile(filePath, "utf8", (error, html) => {
+    if (error) {
+      response.writeHead(error.code === "ENOENT" ? 404 : 500, { "Content-Type": "text/plain; charset=utf-8" });
+      response.end(error.code === "ENOENT" ? "Not found" : "Server error");
+      return;
+    }
+    const govde = Buffer.from(reklamEkle(html, request.url));
+    response.writeHead(200, { "Content-Type": contentTypes[".html"], "Cache-Control": "no-cache", "Content-Length": govde.length });
+    response.end(request.method === "HEAD" ? undefined : govde);
+  });
+}
+
 function sendFile(request, response, filePath) {
+  if (path.extname(filePath) === ".html") return sendHtml(request, response, filePath);
   fs.stat(filePath, (error, stats) => {
     if (error || !stats.isFile()) {
       const notFound = !error || error.code === "ENOENT";

@@ -2,7 +2,7 @@ FROM node:20-alpine
 
 WORKDIR /app
 COPY package.json ./
-COPY ads.txt google217da1d348cd56fc.html rehber.js rehber.css server.js bellek-fs.js auth.js eposta.js anahtarlar.js olcum.js resim.js odeme.js kupon.js ust-cubuk.js gizlilik.html kullanim-kosullari.html hukuk.css ./
+COPY google217da1d348cd56fc.html reklam.js rehber.js rehber.css server.js bellek-fs.js auth.js eposta.js anahtarlar.js olcum.js resim.js odeme.js kupon.js ust-cubuk.js gizlilik.html kullanim-kosullari.html hukuk.css ./
 COPY fiyatlar.html fiyatlar-sayfa.js on-bilgilendirme.html mesafeli-satis.html iptal-iade.html kupon.html kupon-sayfa.js kupon-cizim.js bilgilendirme.html bilgilendirme.css bilgilendirme-metin.js ./
 COPY kupon ./kupon
 COPY index.html styles.css app.js login.html login.css login.js favicon.svg favicon.png apple-touch-icon.png ezoterist-bg.png ezoterist-bg-landscape.png ezoterist-bg-portrait.mp4 ezoterist-bg-landscape.mp4 README.md ./

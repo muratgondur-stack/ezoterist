@@ -18,6 +18,9 @@ const AY = require("./ay-takvimi-veri");
 const Y = require("./yuz-okuma-veri");
 const EB = require("./ebced-veri");
 
+const { reklamEkle } = require("./reklam");
+const Ayarlar = require("./ayarlar");
+
 const SITE = "https://ezoter.ist";
 const GUNCELLEME = "2026-10-07";
 
@@ -403,7 +406,6 @@ function sayfa({ yol, baslik, aciklama, kirinti, icerik, resim }) {
     <link rel="stylesheet" href="/astroloji.css?v=16" />
     <link rel="stylesheet" href="/rehber.css?v=1" />
     <script type="application/ld+json">${JSON.stringify(kirintiJson).replace(/</g, "\\u003c")}</script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8608496252118049" crossorigin="anonymous"></script>
   </head>
   <body>
     <header class="topbar">
@@ -570,6 +572,10 @@ function handleRehberRequest(request, response, url) {
   let govde;
   let tur = "text/html; charset=utf-8";
   if (yol === "/robots.txt") { govde = ROBOTS; tur = "text/plain; charset=utf-8"; }
+  else if (yol === "/ads.txt") { // yönetimdeki yayıncı kimliğinden
+    govde = `google.com, ${String(Ayarlar.get("reklam.yayinci")).replace(/^ca-/, "")}, DIRECT, f08c47fec0942fa0\n`;
+    tur = "text/plain; charset=utf-8";
+  }
   else if (yol === "/sitemap.xml") { govde = onbellek.get(yol) || siteHaritasi(); onbellek.set(yol, govde); tur = "application/xml; charset=utf-8"; }
   else if (yol === "/rehber" || yol.startsWith("/rehber/") || yol === "/hakkimizda" || yol === "/iletisim") {
     govde = onbellek.get(yol);
@@ -579,8 +585,9 @@ function handleRehberRequest(request, response, url) {
     }
     if (govde === null) return false; // bilinmeyen rehber adresi: genel 404'e düşer
   } else return false;
+  if (tur.startsWith("text/html")) govde = reklamEkle(govde, yol); // reklam kodu önbellekte değil, gönderirken eklenir
   const veri = Buffer.from(govde);
-  response.writeHead(200, { "Content-Type": tur, "Content-Length": veri.length, "Cache-Control": "public, max-age=600" });
+  response.writeHead(200, { "Content-Type": tur, "Content-Length": veri.length, "Cache-Control": tur.startsWith("text/html") ? "no-cache" : "public, max-age=600" });
   response.end(request.method === "HEAD" ? undefined : veri);
   return true;
 }
