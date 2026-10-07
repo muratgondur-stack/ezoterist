@@ -68,6 +68,8 @@ const SEMA = {
   "genel.muzik": { grup: "Genel", ad: "Ana menü müzik seviyesi", tur: "sayi", min: 0, max: 0.5, adim: 0.01, vars: 0.1 },
   // Fiyatlar ve maliyet varsayımları ("Fiyatlar" sekmesi; Murat 2026-10-04). Hizmet kendi Gemma/TTS/resim
   // motorumuzla verilir; maliyet ise dış API'lerden alınıyormuş gibi hesaplanır (birim fiyatlar USD).
+  "sinir.tarayiciGunluk": { grup: "Günlük sınırlar", ad: "Tarayıcı başına toplam yorum", tur: "tam", min: 0, max: 1000, vars: 10, birim: "/gün", aciklama: "bütün bölümler toplamı, ziyaretçi çerezine göre; yönetici hariç; 0 = sınırsız" },
+  "sinir.ipGunluk": { grup: "Günlük sınırlar", ad: "Aynı internet adresinden toplam yorum", tur: "tam", min: 0, max: 5000, vars: 40, birim: "/gün", aciklama: "çerezi silip sınırı aşmaya karşı; aynı ev/iş ağındaki kişiler bu adresi paylaşır; 0 = sınırsız" },
   "sinir.sanalUzman": { grup: "Günlük sınırlar", ad: "Sanal uzman yorumu", tur: "tam", min: 0, max: 1000, vars: 5, birim: "/gün", aciklama: "kişi başı, bütün bölümler toplamı; 0 = sınırsız" },
   "fiyat.tanitim": { grup: "Fiyatlar", ad: "Tanıtım dönemi (her şey ücretsiz)", tur: "bool", vars: true, aciklama: "açıkken onay penceresi açılmaz, fiyat rozetleri 'Ücretsiz Tanıtım' görünür" },
   "fiyat.kontorTL": { grup: "Fiyatlar", ad: "1 kontörün TL değeri", tur: "sayi", min: 0, max: 1000, adim: 0.01, vars: 1, birim: "₺" },

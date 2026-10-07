@@ -192,6 +192,58 @@ function kullaniciVeyaZiyaretci(request) {
   const id = ziyaretciKimligi(request);
   return id ? { id: `z-${id}`, email: "", name: "", profil: {}, anonim: true } : null;
 }
+// Tarayıcı başına günlük yorum sınırı (Murat 2026-10-07): bütün bölümlerdeki yapay zekâ işlemleri toplamı, ziyaretçi
+// çerezine göre; çerezi silerek aşmaya karşı aynı internet adresine daha geniş bir sınır. Yalnız sayılar bellekte
+// tutulur (içerik yok); gün İstanbul saatine göre döner, sunucu yeniden başlarsa sayaçlar sıfırlanır. Yönetici sınırsız.
+const hakSayaci = { gun: "", tarayici: new Map(), ip: new Map(), bolum: new Map() };
+const bugunTR = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(new Date());
+const istemciIp = (request) => String(request.headers["x-forwarded-for"] || "").split(",")[0].trim() || request.socket.remoteAddress || "";
+// API yolu → yönetim panelindeki bölüm kimliği (Özet tablosu için).
+const HAK_BOLUM = { fal: "kahve-fali", melek: "melek-sayilari", run: "run-taslari", ay: "ay-takvimi", cakra: "cakralar", kristal: "kristaller", sembol: "semboller" };
+// Yönetim paneli Özet: bugünkü kullanım (yalnız sayılar).
+function hakDurumu() {
+  const gunBugun = hakSayaci.gun === bugunTR();
+  const sinir = Ayarlar.sinir("tarayiciGunluk");
+  const sayilar = gunBugun ? [...hakSayaci.tarayici.values()] : [];
+  return {
+    tarayici: sayilar.filter((n) => n > 0).length,
+    yorum: sayilar.reduce((a, b) => a + b, 0),
+    sinirda: sayilar.filter((n) => n >= sinir).length,
+    ip: gunBugun ? [...hakSayaci.ip.values()].filter((n) => n > 0).length : 0,
+    bolum: gunBugun ? Object.fromEntries(hakSayaci.bolum) : {},
+  };
+}
+function hakKullan(request, response, ziyaretci) {
+  const gun = bugunTR();
+  if (hakSayaci.gun !== gun) Object.assign(hakSayaci, { gun, tarayici: new Map(), ip: new Map(), bolum: new Map() });
+  const json = (kod, error) => {
+    response.writeHead(kod, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+    response.end(JSON.stringify({ error }));
+    return false;
+  };
+  if (!ziyaretci) return json(403, "Tarayıcında çerezler kapalı görünüyor. Yorum alabilmek için bu siteye çerez izni ver ve sayfayı yenile.");
+  const ip = istemciIp(request);
+  const sinir = Ayarlar.sinir("tarayiciGunluk");
+  const ipSinir = Ayarlar.sinir("ipGunluk");
+  const t = hakSayaci.tarayici.get(ziyaretci) || 0;
+  const i = hakSayaci.ip.get(ip) || 0;
+  if (t >= sinir) return json(429, `Bugünkü ${sinir} ücretsiz yorum hakkını kullandın. Yarın yeniden bekleriz.`);
+  if (i >= ipSinir) return json(429, "Bu internet bağlantısından bugün çok sayıda yorum istendi. Yarın yeniden bekleriz.");
+  hakSayaci.tarayici.set(ziyaretci, t + 1);
+  hakSayaci.ip.set(ip, i + 1);
+  const bolum = HAK_BOLUM[String(request.url).split("/")[2]] || String(request.url).split("/")[2];
+  hakSayaci.bolum.set(bolum, (hakSayaci.bolum.get(bolum) || 0) + 1);
+  if (Number.isFinite(sinir)) response.setHeader("X-Kalan-Hak", `${sinir - t - 1}/${sinir}`);
+  // Başarısız işlem hak yemesin.
+  response.on("finish", () => {
+    if (response.statusCode < 400 || hakSayaci.gun !== gun) return;
+    hakSayaci.tarayici.set(ziyaretci, Math.max(0, (hakSayaci.tarayici.get(ziyaretci) || 1) - 1));
+    hakSayaci.ip.set(ip, Math.max(0, (hakSayaci.ip.get(ip) || 1) - 1));
+    hakSayaci.bolum.set(bolum, Math.max(0, (hakSayaci.bolum.get(bolum) || 1) - 1));
+  });
+  return true;
+}
+
 // Kaldırılan özellikler (tahsilat, üyelik, arşiv, harici uzman, ruhsal günlük): yönetici dışındakilere kapalı.
 const KAPALI_API = /^\/api\/(kontor|arsiv|odeme|kupon|uzman|ruhsal|register|forgot-password|reset-password|profil|sifre)(\/|$)/;
 const KAPALI_SAYFA = /^\/(arsiv|uzman|fiyatlar|mesafeli-satis|on-bilgilendirme|iptal-iade|ruhsal-gunluk|register|forgot-password|kupon\/[A-Za-z0-9-]+)$/; // kupon/ altındaki resimler (logo) açık kalır
@@ -219,7 +271,7 @@ const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser: kullan
 const handleDizimRequest = createDizimHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
 const handleYuzMuzigiRequest = createYuzMuzigiHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci });
 const handleEbcedCifirRequest = createEbcedCifirHandler({ dataDir, currentUser: kullaniciVeyaZiyaretci, sendFile });
-const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil });
+const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil, hakDurumu });
 
 // Her istek ait olduğu bölümün etiketiyle çalışır; yapay zekâ/ses kullanımı o bölüme yazılır (olcum.js).
 function istekBolumu(adres) {
@@ -311,6 +363,7 @@ function anaIsleyici(request, response) {
       return;
     }
   }
+  const cereziVardi = ziyaretciKimligi(request);
   if (!Ayarlar.yoneticiMi(oturum) && !ziyaretciKimligi(request)) {
     const id = crypto.randomBytes(8).toString("hex");
     request.headers.cookie = `${request.headers.cookie ? `${request.headers.cookie}; ` : ""}ezo_z=${id}`;
@@ -318,6 +371,7 @@ function anaIsleyici(request, response) {
     response.setHeader("Set-Cookie", `ezo_z=${id}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${guvenli}`);
   }
   if (request.method === "POST" && YAPAY_ZEKA_ISLEMI.test(istekYolu)) {
+    if (!Ayarlar.yoneticiMi(oturum) && !hakKullan(request, response, cereziVardi)) return;
     const sn = Ayarlar.get(istekYolu === "/api/asistan/mesaj" ? "sure.asistanBekleme" : DERIN_RAPOR.test(istekYolu) ? "sure.derinBekleme" : "sure.enAzBekleme");
     if (sn > 0) enAzBeklet(response, sn);
   }

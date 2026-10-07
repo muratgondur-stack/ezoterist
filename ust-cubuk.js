@@ -205,12 +205,30 @@ const bilgilendirmeKontrol = (user) => {
     }
   };
   const asilFetch = window.fetch.bind(window);
+  // Günlük yorum hakkı (sunucu her yapay zekâ işleminde X-Kalan-Hak: "kalan/sınır" gönderir): kısa bir bildirim.
+  let hakKutusu = null;
+  let hakZaman = 0;
+  const hakGoster = (deger) => {
+    const [kalan, sinir] = String(deger).split("/").map(Number);
+    if (!Number.isFinite(kalan) || !Number.isFinite(sinir)) return;
+    if (!hakKutusu) {
+      hakKutusu = document.createElement("div");
+      hakKutusu.setAttribute("role", "status");
+      hakKutusu.style.cssText = "position:fixed;left:50%;bottom:18px;z-index:60;transform:translateX(-50%);max-width:calc(100% - 32px);padding:9px 16px;border:1px solid rgba(243,194,107,.45);border-radius:999px;color:#f4f1ea;background:rgba(11,13,34,.92);box-shadow:0 8px 24px rgba(0,0,0,.45);font:700 .86rem Manrope,system-ui,sans-serif;text-align:center;transition:opacity .4s;pointer-events:none";
+      document.body.append(hakKutusu);
+    }
+    hakKutusu.textContent = kalan > 0 ? `Bugün ${kalan} / ${sinir} ücretsiz yorum hakkın kaldı` : `Bugünkü ${sinir} ücretsiz yorum hakkının hepsini kullandın`;
+    hakKutusu.style.opacity = "1";
+    clearTimeout(hakZaman);
+    hakZaman = setTimeout(() => { hakKutusu.style.opacity = "0"; }, 5000);
+  };
   window.fetch = (girdi, ayar) => {
     let yol = "";
     try { yol = new URL(typeof girdi === "string" ? girdi : girdi.url, location.href).pathname; } catch { yol = ""; }
     // Ezo asistan sohbetinin kendi "yazıyor" balonu var; orada büyük animasyon gösterilmez.
     const izle = yol.startsWith("/api/") && !HARIC.test(yol) && location.pathname !== "/asistan";
     const istek = asilFetch(girdi, ayar);
+    istek.then((r) => { const hak = r.headers.get("X-Kalan-Hak"); if (hak) hakGoster(hak); }, () => {});
     if (!izle) return istek;
     let sayildi = false;
     const zamanlayici = setTimeout(() => { sayildi = true; aktifYol = yol; bekleyen += 1; guncelle(); }, 700);

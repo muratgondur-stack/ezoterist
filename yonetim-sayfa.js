@@ -45,11 +45,13 @@ function renderOzet() {
   const o = veri.ozet;
   const ses = o.servis.ses;
   const kart = (deger, etiket, alt = "") => el("div", { className: "stat" }, el("b", { textContent: deger }), el("span", { textContent: etiket }), ...(alt ? [el("p", { textContent: alt })] : []));
-  const bugunToplam = o.kullanim.reduce((t, b) => t + b.bugun, 0);
+  // 2026-10-07: üyelik yok; bugünkü kullanım tarayıcı başına günlük sınır sayaçlarından (yalnız sayılar, bellekte).
+  const h = o.hak || { tarayici: 0, yorum: 0, sinirda: 0, ip: 0, bolum: {} };
+  const sinir = veri.degerler["sinir.tarayiciGunluk"];
   $("stats").replaceChildren(
-    kart(sayi(o.uye), "üye", `son 7 günde ${o.yeniUye} yeni`),
-    kart(sayi(bugunToplam), "bugünkü analiz", "günlük sınırlı bölümlerde"),
-    kart(String((o.uzman.sirada || 0) + (o.uzman.inceleniyor || 0)), "bekleyen uzman talebi", `${o.uzman.geciken || 0} gecikmiş · ${o.uzman.hazir || 0} yanıtlandı`),
+    kart(sayi(h.yorum), "bugünkü yorum", "bütün bölümler, yönetici hariç"),
+    kart(sayi(h.tarayici), "ziyaretçi tarayıcı", `${sayi(h.ip)} farklı internet adresi`),
+    kart(sayi(h.sinirda), "sınıra dayanan", sinir ? `günlük ${sinir} yorum hakkını bitiren tarayıcı` : "sınır kapalı (sınırsız)"),
     (() => {
       const k = kart(o.servis.yapayZeka && ses.ok ? "✓" : "!", "servisler", "");
       k.querySelector("p")?.remove();
@@ -64,9 +66,7 @@ function renderOzet() {
     return el("tr", {},
       el("td", { textContent: b.ad }),
       el("td", {}, el("span", { className: `pill ${b.acik ? "acik" : "kapali"}`, textContent: b.acik ? "Açık" : "Kapalı" })),
-      el("td", { className: "num", textContent: sayi(b.bugun) }),
-      el("td", { className: "num", textContent: sayi(b.kullanici) }),
-      el("td", { className: "num", textContent: sayi(b.toplam) }),
+      el("td", { className: "num", textContent: sayi(h.bolum[b.id] || 0) }),
       el("td", { className: "num", textContent: s === undefined ? "—" : s === 0 ? "sınırsız" : `${s}/gün` }),
     );
   }));

@@ -128,7 +128,7 @@ async function uzmanOzeti(dataDir) {
   return sayim;
 }
 
-function createHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil }) {
+function createHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil, hakDurumu }) {
   const kontor = kontorDefteri(dataDir);
   const gecmisDosyasi = path.join(dataDir, "yonetim", "gecmis.json");
 
@@ -186,6 +186,7 @@ function createHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil })
             uye: kullanicilar.length,
             yeniUye: kullanicilar.filter((u) => u.createdAt && Date.parse(u.createdAt) > hafta).length,
             kullanim, uzman,
+            hak: hakDurumu ? hakDurumu() : null,
             servis: { yapayZeka: llmEnabled, ses },
           },
           gecmis: ((await readCache(gecmisDosyasi)) || []).slice(0, 40),
