@@ -2,6 +2,7 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 require("./bellek-fs"); // ziyaretçi verisi diske yazılmaz, yalnız bellekte durur
+const { handleRehberRequest } = require("./rehber");
 const { handleAuthRequest, dataDir, currentUser, kullaniciListesi, kullaniciSil } = require("./auth");
 const Ayarlar = require("./ayarlar");
 const Olcum = require("./olcum");
@@ -276,6 +277,12 @@ function enAzBeklet(response, sn) {
 
 function anaIsleyici(request, response) {
   const istekYolu = String(request.url || "").split("?")[0];
+  // Tek adres (arama motorları için): www.ezoter.ist → ezoter.ist
+  if (/^www\./i.test(String(request.headers.host || ""))) {
+    response.writeHead(301, { Location: `https://${String(request.headers.host).slice(4)}${request.url || "/"}` });
+    response.end();
+    return;
+  }
   const oturum = currentUser(request);
   if (!Ayarlar.yoneticiMi(oturum)) {
     if (KAPALI_API.test(istekYolu)) {
@@ -372,6 +379,7 @@ function anaIsleyici(request, response) {
     sendFile(request, response, path.join(root, pageRoutes[requestPath]));
     return;
   }
+  if (handleRehberRequest(request, response, url)) return;
 
   const requestedFile = path.resolve(root, `.${requestPath}`);
 
@@ -393,8 +401,13 @@ function anaIsleyici(request, response) {
   }
 
   fs.stat(requestedFile, (error, stats) => {
-    const filePath = !error && stats.isFile() ? requestedFile : path.join(root, "index.html");
-    sendFile(request, response, filePath);
+    if (!error && stats.isFile()) return sendFile(request, response, requestedFile);
+    if (requestPath === "/") return sendFile(request, response, path.join(root, "index.html"));
+    // Bilinmeyen adres: ana sayfa gösterilir ama 404 koduyla (arama motorları boş sayfaları dizine eklemesin).
+    fs.readFile(path.join(root, "index.html"), (hata, veri) => {
+      response.writeHead(404, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-cache" });
+      response.end(hata ? "Not found" : veri);
+    });
   });
 }
 

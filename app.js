@@ -130,7 +130,8 @@ const kisaBildirim = (metin) => {
 };
 
 const openSection = (button) => {
-  const page = SECTION_PAGES[button.getAttribute("href")];
+  const href = button.getAttribute("href");
+  const page = SECTION_PAGES[href] || (href.startsWith("/") ? href : null);
   if (page && genelAyarlar.kapali.includes(page)) {
     kisaBildirim(`${button.dataset.title} şu an bakımda, çok yakında yeniden açılacak.`);
     return;
@@ -153,7 +154,7 @@ menuButtons.forEach((button) => {
     currentUser.then((user) => {
       // Giriş yapılmamışsa giriş penceresini aç; girişten sonra bu bölüme dönülür.
       if (!user) {
-        const next = SECTION_PAGES[button.getAttribute("href")] || `/${button.getAttribute("href")}`;
+        const next = SECTION_PAGES[button.getAttribute("href")] || button.getAttribute("href");
         window.location.assign(`/login?next=${encodeURIComponent(next)}`);
         return;
       }

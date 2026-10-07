@@ -288,7 +288,7 @@ function medSonraki() {
   medAdim += 1;
   if (medAdim > 7) { meditasyonuBitir(true); return; }
   medAdimGoster(medAdim);
-  if (durum.ses) {
+  if (durum.ses || durum.meditasyon) {
     medVoice.src = `/api/cakra/meditasyon?adim=${medAdim}`;
     medVoice.play().catch(() => { medZaman = setTimeout(medSonraki, 25000); });
   } else {
@@ -371,7 +371,7 @@ async function init() {
   $("topbarUser").textContent = me.user.name || me.user.email;
   const data = await fetch("/api/cakra/durum", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (data) {
-    durum = { ...durum, ses: data.ses, kalan: data.kalan, sinir: data.sinir };
+    durum = { ...durum, ses: data.ses, meditasyon: data.meditasyon, kalan: data.kalan, sinir: data.sinir };
     kayitlar = data.kayitlar;
   }
   renderKota();

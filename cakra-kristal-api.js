@@ -239,7 +239,7 @@ function createHandler({ dataDir, currentUser, sendFile }) {
     };
     const routes = {
       "GET /api/cakra/durum": async () => sendJson(response, 200, {
-        kayitlar: await gunlukOku(dataDir, "cakra", user.id), kalan: Math.max(0, TEST_SINIRI() - (await bugunkuSayi("cakra", user.id))), sinir: TEST_SINIRI(), ses: sesVar(), ai: llmEnabled,
+        kayitlar: await gunlukOku(dataDir, "cakra", user.id), kalan: Math.max(0, TEST_SINIRI() - (await bugunkuSayi("cakra", user.id))), sinir: TEST_SINIRI(), ses: sesVar(), meditasyon: true, ai: llmEnabled,
       }),
       "POST /api/cakra/test": async () => sendJson(response, 201, await cakraTesti(user, await readJson(request))),
       "POST /api/cakra/sil": sil("cakra"),
@@ -249,8 +249,8 @@ function createHandler({ dataDir, currentUser, sendFile }) {
         if (!kayit) throw hata("Sonuç bulunamadı.", 404);
         sendFile(request, response, await sesDosyasi(cakraOkunus(kayit), dizinAdi(dataDir, "cakra", user.id), `${kayit.id}-ses`));
       },
+      // Meditasyon sesi herkese aynı ve önceden üretilmiş sabit bir kayıttır; seslendirme kapalıyken de çalar (2026-10-07).
       "GET /api/cakra/meditasyon": async () => {
-        if (!sesVar()) throw hata("Seslendirme henüz hazır değil.", 503);
         const adim = Number(url.searchParams.get("adim"));
         if (!Number.isInteger(adim) || adim < 0 || adim > 7) throw hata("Geçersiz adım.");
         sendFile(request, response, await sesDosyasi(meditasyonMetni(adim), path.join(dataDir, "cakra", "_meditasyon"), `adim-${adim}`));
