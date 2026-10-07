@@ -513,7 +513,7 @@ $("clearTable").addEventListener("click", () => {
 
 function renderKota() {
   $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
-    ? `Bugün ${durum.kalan} dizim yansıması hakkın var (günde ${durum.sinir}).`
+    ? `Bugün ${durum.kalan} dizim yansıması hakkın var (bütün bölümlerde günde ${durum.sinir}).`
     : "Bugünkü dizim hakkını kullandın; masada yerleşim yapmaya yine devam edebilirsin, yansımayı yarın alabilirsin.";
   renderBench();
 }

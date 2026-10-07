@@ -54,7 +54,7 @@
     yuva: { ad: "Fotoğrafın", ipucu: "Galeriden ya da kameradan", ikon: "📷" },
     metinler: {
       musaitDegil: "Enerji okuyucumuz şu an müsait değil, biraz sonra tekrar dene.",
-      sinir: "Bugünkü 3 fotoğraf analizi hakkını kullandın. Yarın yeniden bekleriz.",
+      sinir: "Bugünkü ücretsiz yorum hakkını kullandın. Yarın yeniden bekleriz.",
       bekleniyor: "✨ Fotoğrafının enerjisi okunuyor…",
       bosGunluk: "Henüz bir analizin yok. Fotoğrafını yukarıda yükle.",
     },

@@ -370,6 +370,25 @@ function anaIsleyici(request, response) {
     const guvenli = String(request.headers["x-forwarded-proto"] || "").includes("https") ? "; Secure" : "";
     response.setHeader("Set-Cookie", `ezo_z=${id}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${guvenli}`);
   }
+  // Tek kural (Murat 2026-10-07): bölümlerin kendi günlük sınırları kapalı (0); cevaplardaki "kalan/sinir"
+  // tarayıcının ortak günlük hakkıyla değiştirilir, böylece her sayfa aynı hakkı gösterir.
+  if (istekYolu.startsWith("/api/") && !/^\/api\/(yonetim|ayarlar|me|login|logout)\b/.test(istekYolu)) {
+    const asilEnd = response.end.bind(response);
+    response.end = (govde, ...geri) => {
+      if (typeof govde === "string" && govde.startsWith("{") && /"(kalan|sinir)":/.test(govde)) {
+        try {
+          const veri = JSON.parse(govde);
+          const sinir = Ayarlar.sinir("tarayiciGunluk");
+          const sinirsiz = Ayarlar.yoneticiMi(oturum) || !Number.isFinite(sinir);
+          const kullanilan = hakSayaci.gun === bugunTR() ? hakSayaci.tarayici.get(cereziVardi) || 0 : 0;
+          if ("sinir" in veri) veri.sinir = sinirsiz ? 99 : sinir;
+          if ("kalan" in veri) veri.kalan = sinirsiz ? 99 : Math.max(0, sinir - kullanilan);
+          govde = JSON.stringify(veri);
+        } catch { /* JSON değilse dokunma */ }
+      }
+      return asilEnd(govde, ...geri);
+    };
+  }
   if (request.method === "POST" && YAPAY_ZEKA_ISLEMI.test(istekYolu)) {
     if (!Ayarlar.yoneticiMi(oturum) && !hakKullan(request, response, cereziVardi)) return;
     const sn = Ayarlar.get(istekYolu === "/api/asistan/mesaj" ? "sure.asistanBekleme" : DERIN_RAPOR.test(istekYolu) ? "sure.derinBekleme" : "sure.enAzBekleme");

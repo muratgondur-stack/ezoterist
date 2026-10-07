@@ -176,7 +176,7 @@
     yuva: { ad: "Yüzünün fotoğrafı", ipucu: "Önden, aydınlık", ikon: "🙂" },
     metinler: {
       musaitDegil: "Yüz okuma ustamız şu an müsait değil, biraz sonra tekrar dene.",
-      sinir: "Bugünkü 3 yüz okuma hakkını kullandın. Yarın yeniden bekleriz.",
+      sinir: "Bugünkü ücretsiz yorum hakkını kullandın. Yarın yeniden bekleriz.",
       bekleniyor: "🔬 Yüz haritan çıkarılıyor…",
       bosGunluk: "Henüz bir yüz okuman yok. Fotoğrafını yukarıda yükle.",
     },

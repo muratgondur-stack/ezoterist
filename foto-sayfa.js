@@ -67,7 +67,7 @@ window.FotoSayfa = function FotoSayfa(ayar) {
   function renderKota() {
     $("quota").textContent = !durum.ai
       ? ayar.metinler.musaitDegil
-      : !durum.sinir ? "" : durum.kalan > 0 ? `Bugün ${durum.kalan} hakkın kaldı (günde ${durum.sinir}).` : ayar.metinler.sinir;
+      : !durum.sinir ? "" : durum.kalan > 0 ? `Bugün ${durum.kalan} hakkın kaldı (bütün bölümlerde günde ${durum.sinir}).` : ayar.metinler.sinir;
     // Sınır kapalıysa (sinir null) düğme hep açık.
     $("falSubmit").disabled = (durum.sinir && durum.kalan <= 0) || !durum.ai;
   }

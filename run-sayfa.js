@@ -184,7 +184,7 @@ $("resetButton").addEventListener("click", () => { secimler = []; renderTable();
 
 function renderKota() {
   $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
-    ? `Bugün ${durum.kalan} açılım hakkın kaldı (günde ${durum.sinir}). Günün rünü buna dahil değil.`
+    ? `Bugün ${durum.kalan} açılım hakkın kaldı (bütün bölümlerde günde ${durum.sinir}). Günün rünü buna dahil değil.`
     : `Bugünkü ${durum.sinir} açılım hakkını kullandın. Yarın taşlar seni yine bekliyor.`;
   renderPickNote();
 }

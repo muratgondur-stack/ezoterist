@@ -77,8 +77,8 @@ textarea.addEventListener("input", sayac);
 
 function renderKota() {
   $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
-    ? `Bugün ${durum.kalan} rüya yorumu hakkın kaldı (günde ${durum.sinir}).`
-    : "Bugünkü 3 rüya yorumu hakkını kullandın. Yarın yeniden bekleriz.";
+    ? `Bugün ${durum.kalan} rüya yorumu hakkın kaldı (bütün bölümlerde günde ${durum.sinir}).`
+    : `Bugünkü ${durum.sinir} ücretsiz yorum hakkını kullandın. Yarın yeniden bekleriz.`;
   $("dreamSubmit").disabled = (durum.kalan != null && durum.kalan <= 0);
 }
 

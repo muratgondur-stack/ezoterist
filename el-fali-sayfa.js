@@ -91,8 +91,8 @@ function renderKota() {
     : !durum.sinir
       ? ""
       : durum.kalan > 0
-      ? `Bugün ${durum.kalan} el falı hakkın kaldı (günde ${durum.sinir}).`
-      : "Bugünkü 3 el falı hakkını kullandın. Yarın yeniden bekleriz.";
+      ? `Bugün ${durum.kalan} el falı hakkın kaldı (bütün bölümlerde günde ${durum.sinir}).`
+      : `Bugünkü ${durum.sinir} ücretsiz yorum hakkını kullandın. Yarın yeniden bekleriz.`;
   $("falSubmit").disabled = (durum.sinir && durum.kalan <= 0) || !durum.ai;
 }
 

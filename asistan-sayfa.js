@@ -214,7 +214,7 @@ alan.addEventListener("keydown", (e) => {
 });
 
 function renderKota() {
-  $("quota").textContent = durum.kalan == null ? "" : `Bugün ${durum.kalan} mesaj hakkın kaldı (günde ${durum.sinir}).`;
+  $("quota").textContent = durum.kalan == null ? "" : `Bugün ${durum.kalan} mesaj hakkın kaldı (bütün bölümlerde günde ${durum.sinir}).`;
 }
 
 async function gonder(metin) {

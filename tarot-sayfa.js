@@ -115,7 +115,7 @@ function renderKota() {
     ? "Okuyucumuz şu an müsait değil; kartları yine açabilirsin, yorum sözlükten gelir."
     : durum.kalan == null
       ? "Günün kartı günde bir."
-      : `Bugün ${durum.kalan} açılım hakkın kaldı (günde ${durum.sinir}); günün kartı ayrıca günde bir.`;
+      : `Bugün ${durum.kalan} açılım hakkın kaldı (bütün bölümlerde günde ${durum.sinir}); günün kartı ayrıca günde bir.`;
 }
 
 function acilimSec(kod) {

@@ -75,7 +75,7 @@ const kisiOku = (kisi) => ({
 
 function renderKota() {
   $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
-    ? `Bugün ${durum.kalan} uyum hesaplama hakkın kaldı (günde ${durum.sinir}).`
+    ? `Bugün ${durum.kalan} uyum hesaplama hakkın kaldı (bütün bölümlerde günde ${durum.sinir}).`
     : `Bugünkü ${durum.sinir} uyum hakkını kullandın. Yarın yeniden bekleriz.`;
   $("loveSubmit").disabled = (durum.kalan != null && durum.kalan <= 0);
 }

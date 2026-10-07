@@ -91,7 +91,7 @@ function renderAreas() {
 
 function renderKota() {
   $("quota").textContent = durum.kalan == null ? "" : durum.kalan > 0
-    ? `Bugün ${durum.kalan} soru hakkın kaldı (günde ${durum.sinir}).`
+    ? `Bugün ${durum.kalan} soru hakkın kaldı (bütün bölümlerde günde ${durum.sinir}).`
     : `Bugünkü ${durum.sinir} soru hakkını kullandın. I Ching aynı soruyu tekrar tekrar sormamayı öğütler; yarın yeniden bekleriz.`;
   $("askSubmit").disabled = (durum.kalan != null && durum.kalan <= 0);
 }
