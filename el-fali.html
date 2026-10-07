@@ -30,7 +30,7 @@
           <p class="lead">Elinin şekli, çizgilerin ve tepelerin sana dair bir hikâye anlatır. Avucunun fotoğrafını çek; falcımız el tipini, çizgilerini ve yeteneklerini yorumlasın, sen de sesli dinle.</p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="#bak">Elime bak</a>
-            <a class="btn btn-ghost" href="#rehber">El rehberi</a>
+            <button type="button" class="btn btn-ghost" data-el-rehberi>📖 El çizgileri rehberi</button>
           </div>
         </div>
         <div class="hero-art dream-art" aria-hidden="true">
@@ -115,7 +115,7 @@
       <section id="rehber" aria-labelledby="guideTitle">
         <div class="section-head">
           <h2 id="guideTitle">El rehberi</h2>
-          <p class="section-note">El tipleri, çizgiler ve tepeler ne anlatır?</p>
+          <p class="section-note">El tipleri, çizgiler ve tepeler ne anlatır? Ayrıntılı, şemalı rehber için: <button type="button" class="btn btn-ghost btn-kucuk" data-el-rehberi>📖 El çizgileri rehberi</button></p>
         </div>
         <h3 class="sub-title">El tipleri</h3>
         <ul class="element-grid" id="handTypes"></ul>
@@ -135,6 +135,8 @@
     <script src="/uzmanlar.js?v=4"></script>
     <script src="/uzman-kart.js?v=7"></script>
     <script src="/foto-yuva.js?v=20261004"></script>
+    <script src="/el-cizgi-rehber.js?v=4"></script>
+    <script>document.querySelectorAll("[data-el-rehberi]").forEach((b) => b.addEventListener("click", () => window.elCizgiRehberi(b.dataset.elRehberi)));</script>
     <script src="/el-fali-sayfa.js?v=7"></script>
     <script src="/ust-cubuk.js?v=21" defer></script>
 </body>

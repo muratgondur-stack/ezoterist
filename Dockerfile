@@ -14,7 +14,7 @@ COPY numeroloji ./numeroloji
 COPY ruya-veri.js ruya-api.js ruya.html ruya.css ruya-sayfa.js ./
 COPY ruya ./ruya
 COPY foto-fal.js fal-veri.js fal-api.js fal.html fal.css fal-sayfa.js ./
-COPY el-fali-veri.js el-fali-api.js el-fali.html el-fali-sayfa.js ./
+COPY el-fali-veri.js el-fali-api.js el-fali.html el-fali-sayfa.js el-cizgi-rehber.js ./
 COPY el-fali ./el-fali
 COPY tarot-veri.js tarot-api.js tarot.html tarot.css tarot-sayfa.js ./
 COPY tarot ./tarot
