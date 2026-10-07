@@ -1,7 +1,7 @@
 const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
-const { handleAuthRequest, dataDir, currentUser, kullaniciListesi } = require("./auth");
+const { handleAuthRequest, dataDir, currentUser, kullaniciListesi, kullaniciSil } = require("./auth");
 const Ayarlar = require("./ayarlar");
 const Olcum = require("./olcum");
 const { createHandler: createYonetimHandler } = require("./yonetim-api");
@@ -201,7 +201,7 @@ const handleAsistanRequest = createAsistanHandler({ dataDir, currentUser, sendFi
 const handleDizimRequest = createDizimHandler({ dataDir, currentUser, sendFile });
 const handleYuzMuzigiRequest = createYuzMuzigiHandler({ dataDir, currentUser });
 const handleEbcedCifirRequest = createEbcedCifirHandler({ dataDir, currentUser, sendFile });
-const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi });
+const handleYonetimRequest = createYonetimHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil });
 
 // Her istek ait olduğu bölümün etiketiyle çalışır; yapay zekâ/ses kullanımı o bölüme yazılır (olcum.js).
 function istekBolumu(adres) {

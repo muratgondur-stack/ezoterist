@@ -731,4 +731,19 @@ const kullaniciListesi = () => users.map((u) => ({
   bilgilendirmeOnay: u.bilgilendirmeOnay?.surum === BILGILENDIRME_SURUMU ? u.bilgilendirmeOnay.tarih : null,
 }));
 
-module.exports = { handleAuthRequest, dataDir, currentUser, kullaniciListesi };
+// Yönetim panelinden üyelik silme (Murat 2026-10-07): kayıt önce DATA_DIR/silinenler/uyeler/ altına yedeklenir,
+// sonra listeden çıkarılır; oturumu da geçersiz olur (kullanıcı bulunamaz). Yönetici kendini silemez.
+async function kullaniciSil(userId) {
+  const i = users.findIndex((u) => u.id === userId);
+  if (i === -1) throw Object.assign(new Error("Üye bulunamadı."), { status: 404 });
+  if (Ayarlar.yoneticiMi(users[i])) throw Object.assign(new Error("Yönetici hesabı silinemez."), { status: 400 });
+  const uye = users[i];
+  const yedek = path.join(dataDir, "silinenler", "uyeler");
+  await fs.promises.mkdir(yedek, { recursive: true });
+  await fs.promises.writeFile(path.join(yedek, `${uye.id}-${Date.now()}.json`), JSON.stringify({ ...uye, silinme: new Date().toISOString() }, null, 2), { mode: 0o600 });
+  users.splice(i, 1);
+  await saveUsers();
+  return { id: uye.id, email: uye.email, name: uye.name || "" };
+}
+
+module.exports = { handleAuthRequest, dataDir, currentUser, kullaniciListesi, kullaniciSil };

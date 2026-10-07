@@ -140,6 +140,23 @@ function sil(id) {
   });
 }
 
+// Gerçek uzmanı listeden çıkarır (üyeliği kalır). Kayıt ve fotoğraf DATA_DIR/silinenler/uzmanlar/ altına taşınır;
+// teslim edilmiş cevaplar ve hakedişler taleplerde durur.
+function gercekCikar(id) {
+  return isle(async (l) => {
+    const i = l.findIndex((x) => x.id === id && x.tip === "gercek");
+    if (i < 0) throw hata("Uzman bulunamadı.", 404);
+    const u = l[i];
+    const yedek = path.join(dataDir, "silinenler", "uzmanlar");
+    await fs.promises.mkdir(yedek, { recursive: true });
+    await fs.promises.writeFile(path.join(yedek, `${u.id}-${Date.now()}.json`), JSON.stringify(u, null, 2));
+    if (u.foto) await fs.promises.rename(path.join(fotoDizini, `${u.id}.${u.foto.uzanti}`), path.join(yedek, `${u.id}.${u.foto.uzanti}`)).catch(() => {});
+    l.splice(i, 1);
+    l.forEach((x) => { if (x.sabitUzman === id) x.sabitUzman = null; });
+    return u;
+  });
+}
+
 // --- Uzmanın kendisi ---
 
 function profilGuncelle(userId, { unvan, tanitim, bolumler, vitrinde }, gecerliBolumler) {
@@ -174,4 +191,4 @@ const fotoYolu = (id) => {
   return u?.foto ? path.join(fotoDizini, `${u.id}.${u.foto.uzanti}`) : null;
 };
 
-module.exports = { HAVUZ, havuzSayilari, hepsi, bul, gercekler, kullanicininUzmanligi, uzmanMi, herkeseAcik, vitrin, vitrindeMi, cevaplayanlar, resimAdresi, ekle, sanalEkle, yoneticiGuncelle, sil, profilGuncelle, fotoKaydet, fotoYolu };
+module.exports = { gercekCikar, HAVUZ, havuzSayilari, hepsi, bul, gercekler, kullanicininUzmanligi, uzmanMi, herkeseAcik, vitrin, vitrindeMi, cevaplayanlar, resimAdresi, ekle, sanalEkle, yoneticiGuncelle, sil, profilGuncelle, fotoKaydet, fotoYolu };

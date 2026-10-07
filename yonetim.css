@@ -180,3 +180,6 @@
 .uz-ses-kutu select option { color: #000; }
 .uz-prompt-kutu summary { cursor: pointer; color: var(--gold); font-size: 0.8rem; font-weight: 700; }
 .uz-prompt-kutu textarea { margin: 6px 0; font-size: 0.82rem !important; line-height: 1.5; }
+.uye-islem { display: flex; gap: 6px; justify-content: flex-end; }
+.tehlike { color: #ffb4a0 !important; border-color: rgba(255, 140, 110, 0.5) !important; }
+.tehlike:hover { background: rgba(255, 140, 110, 0.12) !important; }

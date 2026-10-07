@@ -242,11 +242,29 @@ function renderKullanicilar() {
       el("td", { textContent: [u.sifreVar ? "şifre" : "", u.google ? "Google" : ""].filter(Boolean).join(" + ") || "—" }),
       el("td", { className: u.bilgilendirmeOnay ? "ok" : "muted", textContent: u.bilgilendirmeOnay ? `✓ ${tarih(Date.parse(u.bilgilendirmeOnay))}` : "Onaylamadı" }),
       el("td", { className: "num", textContent: sayi(u.bakiye) }),
-      el("td", {}, ekle),
+      el("td", { className: "uye-islem" }, ekle, ...(u.email === window.yoneticiEposta ? [] : [silDugmesi(u)])),
     );
   }));
 }
 $("userSearch").addEventListener("input", renderKullanicilar);
+
+// Üyeliği sil (yönetici kendini silemez). Uzmansa uzman kaydı da çıkar; kayıtlar sunucuda yedeklenir.
+function silDugmesi(u) {
+  const b = el("button", { type: "button", className: "mini-btn tehlike", textContent: "🗑 Sil" });
+  b.title = "Üyeliği sil";
+  b.addEventListener("click", async () => {
+    const kim = u.name ? `${u.name} (${u.email})` : u.email;
+    if (!confirm(`${kim} üyeliği silinsin mi?\n\nHesap kaldırılır, oturumu kapanır; uzmansa uzman kaydı da çıkar. Kayıt sunucuda yedeklenir.`)) return;
+    b.disabled = true;
+    try {
+      await api("/api/yonetim/kullanici-sil", { userId: u.id });
+      kullanicilar = kullanicilar.filter((x) => x.id !== u.id);
+      renderKullanicilar();
+      toast(`${kim} silindi.`);
+    } catch (error) { toast(error.message); b.disabled = false; }
+  });
+  return b;
+}
 
 $("creditForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -539,10 +557,26 @@ function renderGercek() {
         u.resim ? el("img", { className: "uz-foto", src: u.resim, alt: "" }) : el("span", { className: "uz-foto bos", textContent: "👤" }),
         el("div", {}, el("b", { textContent: u.ad }), el("small", { textContent: `${u.email} · ${u.vitrinde ? (u.gorunuyor ? "kendi adıyla vitrinde" : "vitrinde görünmek istiyor (foto/bölüm eksik)") : "yalnız arka planda cevaplıyor"}` })),
         el("div", { className: "uz-hakedis" }, el("span", {}, "Toplam ", el("b", { textContent: tl2(h.toplam) })), el("span", {}, "Ödenen ", el("b", { textContent: tl2(h.odenen) })), el("span", { className: "kalan" }, "Kalan ", el("b", { textContent: tl2(h.kalan) })), ode)),
-      el("div", { className: "uz-duzen" }, el("label", {}, "Görünen ad", ad), el("label", {}, "Unvan", unvan), el("label", {}, "Oran %", oran), el("label", { className: "uz-acik" }, acik, " Açık"), fotoDugmesi(u.id, "🖼 Foto"), kaydet),
+      el("div", { className: "uz-duzen" }, el("label", {}, "Görünen ad", ad), el("label", {}, "Unvan", unvan), el("label", {}, "Oran %", oran), el("label", { className: "uz-acik" }, acik, " Açık"), fotoDugmesi(u.id, "🖼 Foto"), kaydet, cikarDugmesi(u)),
       el("small", { className: "uz-etiket", textContent: "Yorum yazabileceği bölümler (uzman kendisi de seçer)" }), bolumler,
       el("small", { className: "uz-etiket", textContent: "Kendi adıyla görünürse yazılı cevabını okuyacak ses" }), gses, kalemler);
   }) : [el("p", { className: "section-note", textContent: "Henüz gerçek uzman yok. Yukarıdan bir üyeyi uzman yap." })]));
+}
+
+// Uzmanlıktan çıkar: üyeliği kalır, uzman kaydı ve fotoğrafı yedeklenip listeden kalkar.
+function cikarDugmesi(u) {
+  const b = el("button", { type: "button", className: "btn btn-ghost btn-sm tehlike", textContent: "Uzmanlıktan çıkar" });
+  b.addEventListener("click", async () => {
+    const kalan = u.hakedis?.kalan || 0;
+    if (!confirm(`${u.ad} (${u.email}) uzmanlıktan çıkarılsın mı?\n\nÜyeliği devam eder.${kalan > 0 ? ` Ödenmemiş ${tl2(kalan)} hakedişi var; çıkarınca bu listede görünmez.` : ""}`)) return;
+    b.disabled = true;
+    try {
+      await api("/api/yonetim/uzman-cikar", { id: u.id });
+      toast(`${u.ad} uzmanlıktan çıkarıldı.`);
+      uzmanlariYukle();
+    } catch (error) { toast(error.message); b.disabled = false; }
+  });
+  return b;
 }
 
 $("snYeni").addEventListener("click", async () => {
@@ -707,6 +741,7 @@ window.addEventListener("beforeunload", (e) => { if (Object.keys(taslak).length)
   const me = await fetch("/api/me", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
   if (!me?.user) { window.location.replace("/login?next=%2Fyonetim"); return; }
   $("topbarUser").textContent = me.user.email;
+  window.yoneticiEposta = me.user.email;
   try {
     await yukle();
   } catch (error) {

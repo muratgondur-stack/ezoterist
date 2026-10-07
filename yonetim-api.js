@@ -128,7 +128,7 @@ async function uzmanOzeti(dataDir) {
   return sayim;
 }
 
-function createHandler({ dataDir, currentUser, kullaniciListesi }) {
+function createHandler({ dataDir, currentUser, kullaniciListesi, kullaniciSil }) {
   const kontor = kontorDefteri(dataDir);
   const gecmisDosyasi = path.join(dataDir, "yonetim", "gecmis.json");
 
@@ -228,6 +228,22 @@ function createHandler({ dataDir, currentUser, kullaniciListesi }) {
         const liste = await Promise.all(kullaniciListesi().map(async (u) => ({ ...u, bakiye: (await kontor.oku(u.id)).bakiye })));
         liste.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
         sendJson(response, 200, { kullanicilar: liste });
+      },
+      // Üyeliği sil: uzmansa önce uzman kaydı çıkarılır; ikisi de yedeklenir.
+      "POST /api/yonetim/kullanici-sil": async () => {
+        const body = await readJson(request);
+        const id = String(body?.userId || "");
+        const uz = UzmanKayit.kullanicininUzmanligi(id);
+        if (uz) await UzmanKayit.gercekCikar(uz.id);
+        const silinen = await kullaniciSil(id);
+        await gecmiseYaz(user, { [`uye.${silinen.id}`]: "(silindi)" }, { [`uye.${silinen.id}`]: `${silinen.name || ""} ${silinen.email}${uz ? " · uzmandı" : ""}`.trim() });
+        sendJson(response, 200, { silinen });
+      },
+      "POST /api/yonetim/uzman-cikar": async () => {
+        const body = await readJson(request);
+        const u = await UzmanKayit.gercekCikar(String(body?.id || ""));
+        await gecmiseYaz(user, { [`uzman.${u.id}`]: "(uzmanlıktan çıkarıldı)" }, { [`uzman.${u.id}`]: `${u.ad} (${u.email})` });
+        sendJson(response, 200, { tamam: true });
       },
       "POST /api/yonetim/kontor": async () => {
         const body = await readJson(request);
