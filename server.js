@@ -359,8 +359,36 @@ function sunucuDosyasi(dosya) {
   return sunucuDosyalari.has(dosya);
 }
 
+// Ziyaretçi sayacı (Murat 2026-10-12): yalnız günlük toplamlar (açılış, farklı tarayıcı, kaynak) DATA_DIR/sayac.json'da;
+// kimlik, IP, çerez saklanmaz. sayac.js her sayfa açılışında POST /api/sayac atar, cevabı altta gösterir.
+const sayacDosya = path.join(dataDir, "sayac.json");
+let sayac = null; let sayacYaz = null;
+function sayacOku() {
+  if (!sayac) { try { sayac = JSON.parse(fs.readFileSync(sayacDosya, "utf8")); } catch { sayac = { toplam: 0, gunler: {} }; } }
+  return sayac;
+}
+function sayacIstegi(request, response) {
+  let govde = "";
+  request.on("data", (p) => { govde += p; if (govde.length > 2000) request.destroy(); });
+  request.on("end", () => {
+    let b = {}; try { b = JSON.parse(govde || "{}"); } catch { /* boş */ }
+    const s = sayacOku(); const gun = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });
+    const g = (s.gunler[gun] = s.gunler[gun] || { acilis: 0, tekil: 0 });
+    if (!/bot|crawl|spider|slurp|preview|headless|lighthouse/i.test(String(request.headers["user-agent"] || ""))) {
+      g.acilis++; s.toplam++;
+      if (b.tekil === true) g.tekil++;
+      const k = String(b.kaynak || ""); if (/^(gads|instagram|youtube|google)$/.test(k)) g[k] = (g[k] || 0) + 1;
+      clearTimeout(sayacYaz);
+      sayacYaz = setTimeout(() => { fs.promises.mkdir(dataDir, { recursive: true }).then(() => fs.promises.writeFile(sayacDosya, JSON.stringify(s))).catch(() => {}); }, 3000);
+    }
+    response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+    response.end(JSON.stringify({ bugun: g.acilis, bugunTekil: g.tekil, toplam: s.toplam }));
+  });
+}
+
 function anaIsleyici(request, response) {
   const istekYolu = String(request.url || "").split("?")[0];
+  if (istekYolu === "/api/sayac" && request.method === "POST") return sayacIstegi(request, response);
   // Tek adres (arama motorları için): www.ezoter.ist → ezoter.ist
   if (/^www\./i.test(String(request.headers.host || ""))) {
     response.writeHead(301, { Location: `https://${String(request.headers.host).slice(4)}${request.url || "/"}` });

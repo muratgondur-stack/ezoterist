@@ -1,3 +1,6 @@
+// Ziyaretçi sayacı (Murat 2026-10-12): her sayfanın altında
+(() => { const s = document.createElement("script"); s.src = "/sayac.js?v=1"; s.defer = true; document.head.append(s); })();
+
 // Bilgilendirme onayı (bilgilendirme-metin.js): ziyaretçiye siteye her girişte (tarayıcı sekmesi başına bir kez,
 // sessionStorage) açılır ve onaylatılır; onaylamamış üyeye de. Yasal metin sayfalarında açılmaz
 // (penceredeki bağlantılar onları yeni sekmede açar, okunabilsinler).
