@@ -420,7 +420,7 @@ ${icerik}
         <p class="rh-not">Bu içerik geleneksel ve kültürel kaynaklara dayanan genel bilgidir; eğlence ve kişisel farkındalık amaçlıdır, bilimsel bir dayanağı yoktur ve tıbbi, psikolojik, hukuki ya da mali tavsiye yerine geçmez. Son güncelleme: ${GUNCELLEME.split("-").reverse().join(".")}.</p>
       </article>
     </main>
-    <script src="/ust-cubuk.js?v=25" defer></script>
+    <script src="/ust-cubuk.js?v=26" defer></script>
   </body>
 </html>`;
 }

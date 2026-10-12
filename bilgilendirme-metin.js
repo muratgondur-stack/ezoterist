@@ -67,8 +67,9 @@
     document.head.append(f, l);
   }
 
-  // Onay penceresi: kapatılamaz; onaylamak ya da çıkış yapmak gerekir.
-  // user.anonim ise onay sunucuya değil bu tarayıcı sekmesine yazılır (sessionStorage): her girişte yeniden sorulur.
+  // Murat 2026-10-12: giriş uyarısı 5 sn görünür ve kendiliğinden kapanır; onay kutusu ve düğme yok.
+  // Kapanınca görüldü sayılır: ziyaretçide bu sekmeye (sessionStorage), üyede sunucuya yazılır; sonraki sayfalarda tekrar açılmaz.
+  const GORUNME_SN = 5;
   function onayIste(user) {
     const anonim = Boolean(user?.anonim);
     if (document.querySelector(".bilgi-pencere")) return;
@@ -77,59 +78,26 @@
     pencere.className = "bilgi-pencere";
     pencere.setAttribute("aria-label", "Hoş geldiniz — bilgilendirme");
     const govde = icerik();
-    const alt = document.createElement("form");
-    alt.className = "bilgi-onay";
-    alt.innerHTML = `
-      <p class="bilgi-ipucu" aria-live="polite"></p>
-      <label><input type="checkbox" required disabled /> <span>Bu bilgilendirmeyi okudum ve anladım; içeriklerin eğlence ve kişisel farkındalık amaçlı olduğunu, danışmanlık yerine geçmediğini ve kararlarımın sorumluluğunun bana ait olduğunu kabul ediyorum. Ayrıca <a href="/kullanim-kosullari" target="_blank">Kullanım Koşulları</a>'nı ve <a href="/gizlilik" target="_blank">Gizlilik Politikası</a>'nı okudum.</span></label>
-      <div class="bilgi-dugmeler">
-        <button type="button" class="bilgi-cikis">${anonim ? "Vazgeç" : "Çıkış yap"}</button>
-        <button type="submit" class="bilgi-kabul" disabled>Kabul ediyorum, devam et</button>
-      </div>
-      <p class="bilgi-hata" hidden></p>`;
-    const kutucuk = alt.querySelector("input");
-    const kabul = alt.querySelector(".bilgi-kabul");
-    kutucuk.addEventListener("change", () => { kabul.disabled = !kutucuk.checked; });
-    // Onay ancak metnin sonuna kadar kaydırılıp en az 10 sn geçince açılır (Murat 2026-10-04).
+    const alt = document.createElement("div");
+    alt.className = "bilgi-onay hazir";
+    alt.innerHTML = `<p class="bilgi-ipucu" aria-live="polite"></p>`;
     const ipucu = alt.querySelector(".bilgi-ipucu");
     const acilis = Date.now();
-    let sonaGelindi = false;
+    const kapat = () => {
+      clearInterval(sayac);
+      if (anonim) { try { sessionStorage.setItem("ezo-bilgi", user.bilgilendirmeSurumu); } catch { /* depolama kapalı */ } }
+      else fetch("/api/bilgilendirme-onay", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ kabul: true }) }).catch(() => {});
+      pencere.close();
+      pencere.remove();
+      document.documentElement.classList.remove("bilgi-acik");
+    };
     const durumYaz = () => {
-      const kalan = Math.max(0, 10 - Math.floor((Date.now() - acilis) / 1000));
-      const hazir = sonaGelindi && kalan === 0;
-      kutucuk.disabled = !hazir;
-      alt.classList.toggle("hazir", hazir);
-      ipucu.textContent = hazir ? "" : !sonaGelindi ? `↓ Onaylayabilmek için metni sonuna kadar oku${kalan ? ` · ${kalan} sn` : ""}` : `Onay ${kalan} sn sonra açılacak…`;
-      if (hazir) clearInterval(sayac);
+      const kalan = Math.max(0, GORUNME_SN - Math.floor((Date.now() - acilis) / 1000));
+      ipucu.textContent = `Bu pencere ${kalan} sn içinde kendiliğinden kapanacak.`;
+      if (Date.now() - acilis >= GORUNME_SN * 1000) kapat();
     };
     const sayac = setInterval(durumYaz, 250);
-    new IntersectionObserver((girdiler, gozcu) => {
-      if (girdiler.some((g) => g.isIntersecting)) { sonaGelindi = true; gozcu.disconnect(); durumYaz(); }
-    }, { root: null, threshold: 1 }).observe(govde.querySelector(".bilgi-alt"));
-    alt.querySelector(".bilgi-cikis").addEventListener("click", () => {
-      if (anonim) { window.location.replace("about:blank"); return; }
-      fetch("/api/logout", { method: "POST", credentials: "same-origin" }).finally(() => window.location.assign("/"));
-    });
-    alt.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      kabul.disabled = true;
-      try {
-        if (anonim) {
-          try { sessionStorage.setItem("ezo-bilgi", user.bilgilendirmeSurumu); } catch { /* depolama kapalı */ }
-        } else {
-        const r = await fetch("/api/bilgilendirme-onay", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ kabul: true }) });
-        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Kaydedilemedi, tekrar dene.");
-        }
-        pencere.close();
-        pencere.remove();
-        document.documentElement.classList.remove("bilgi-acik");
-      } catch (error) {
-        const h = alt.querySelector(".bilgi-hata");
-        h.hidden = false;
-        h.textContent = error.message;
-        kabul.disabled = false;
-      }
-    });
+    durumYaz();
     pencere.addEventListener("cancel", (e) => e.preventDefault()); // Esc ile kapanmasın
     const ic = document.createElement("div");
     ic.className = "bilgi-pencere-ic";
