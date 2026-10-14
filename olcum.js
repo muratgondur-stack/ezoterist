@@ -48,7 +48,11 @@ function llm(giris, cikis) {
   const s = baglam.getStore();
   if (!s?.bolum) return;
   const k = kayit(s.bolum);
-  if (!s.llmSayildi) { s.llmSayildi = true; k.islem += 1; } // bir kullanıcı işlemi = yapay zekâ çağıran bir istek
+  if (!s.llmSayildi) {                                       // bir kullanıcı işlemi = yapay zekâ çağıran bir istek
+    s.llmSayildi = true; k.islem += 1;
+    const v = oku(); const gun = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });   // Murat 2026-10-14: gün gün
+    v.gunler ||= {}; v.gunler[gun] ||= {}; v.gunler[gun][s.bolum] = (v.gunler[gun][s.bolum] || 0) + 1;
+  }
   k.llm.n += 1;
   k.llm.giris += Math.max(0, Number(giris) || 0);
   k.llm.cikis += Math.max(0, Number(cikis) || 0);

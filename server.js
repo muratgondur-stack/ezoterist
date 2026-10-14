@@ -375,20 +375,57 @@ function sayacIstegi(request, response) {
     const s = sayacOku(); const gun = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });
     const g = (s.gunler[gun] = s.gunler[gun] || { acilis: 0, tekil: 0 });
     if (!/bot|crawl|spider|slurp|preview|headless|lighthouse/i.test(String(request.headers["user-agent"] || ""))) {
-      g.acilis++; s.toplam++;
+      const sf = sayfaAnahtari(b.sayfa); const giris = b.giris !== false;
+      if (sf === "/") { g.acilis++; s.toplam++; }            // açılış = ana sayfa (12 Ekim'den beri aynı anlamda)
       if (b.tekil === true) g.tekil++;
-      const k = String(b.kaynak || ""); if (/^(gads|instagram|youtube|google)$/.test(k)) g[k] = (g[k] || 0) + 1;
-      clearTimeout(sayacYaz);
-      sayacYaz = setTimeout(() => { fs.promises.mkdir(dataDir, { recursive: true }).then(() => fs.promises.writeFile(sayacDosya, JSON.stringify(s))).catch(() => {}); }, 3000);
+      const k = String(b.kaynak || ""); if (giris && /^(gads|gads_youtube|instagram|youtube|google)$/.test(k)) g[k] = (g[k] || 0) + 1;
+      // Murat 2026-10-14: sayfa başına açılış ve siteye giriş (dışarıdan bu sayfaya inen)
+      const p = sayfaKaydi(g, sf); p.acilis++; if (giris) p.giris++;
+      sayacKaydet();
     }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
     response.end(JSON.stringify({ bugun: g.acilis, bugunTekil: g.tekil, toplam: s.toplam }));
+  });
+}
+function sayacKaydet() {
+  clearTimeout(sayacYaz);
+  sayacYaz = setTimeout(() => { fs.promises.mkdir(dataDir, { recursive: true }).then(() => fs.promises.writeFile(sayacDosya, JSON.stringify(sayacOku()))).catch(() => {}); }, 3000);
+}
+// "/tarot.html" → "/tarot"; tanınmayan ya da tuhaf yol "diger"
+function sayfaAnahtari(y) {
+  let a = String(y || "/").toLowerCase().replace(/\.html$/, "").replace(/\/+$/, "") || "/";
+  if (a === "/index") a = "/";
+  return /^\/[a-z0-9-]{0,40}$/.test(a) ? a : "diger";
+}
+function sayfaKaydi(g, sf) {
+  g.sayfalar = g.sayfalar || {};
+  if (!g.sayfalar[sf] && Object.keys(g.sayfalar).length >= 80) sf = "diger";
+  return (g.sayfalar[sf] = g.sayfalar[sf] || { acilis: 0, giris: 0, cikis: 0, ici: 0, tik: 0, sure: { "0-5": 0, "5-15": 0, "15-60": 0, "60+": 0 }, derin: { "0-25": 0, "25-50": 0, "50-75": 0, "75-100": 0 } });
+}
+// Murat 2026-10-14: ziyaretçinin nerede bıraktığı — sayfadan ayrılırken (sendBeacon): süre, kaydırma, tıklama, site içine mi dışarı mı
+function sayacCikis(request, response) {
+  let govde = "";
+  request.on("data", (p) => { govde += p; if (govde.length > 2000) request.destroy(); });
+  request.on("end", () => {
+    let b = {}; try { b = JSON.parse(govde || "{}"); } catch { /* boş */ }
+    if (!/bot|crawl|spider|slurp|preview|headless|lighthouse/i.test(String(request.headers["user-agent"] || ""))) {
+      const s = sayacOku(); const gun = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });
+      const g = (s.gunler[gun] = s.gunler[gun] || { acilis: 0, tekil: 0 });
+      const p = sayfaKaydi(g, sayfaAnahtari(b.sayfa));
+      if (b.ic === true) p.ici++; else p.cikis++;
+      if (b.tik === true) p.tik++;
+      const sn = Math.max(0, Number(b.sn) || 0); p.sure[sn < 5 ? "0-5" : sn < 15 ? "5-15" : sn < 60 ? "15-60" : "60+"]++;
+      const d = Math.max(0, Math.min(100, Number(b.derin) || 0)); p.derin[d < 25 ? "0-25" : d < 50 ? "25-50" : d < 75 ? "50-75" : "75-100"]++;
+      sayacKaydet();
+    }
+    response.writeHead(204); response.end();
   });
 }
 
 function anaIsleyici(request, response) {
   const istekYolu = String(request.url || "").split("?")[0];
   if (istekYolu === "/api/sayac" && request.method === "POST") return sayacIstegi(request, response);
+  if (istekYolu === "/api/sayac/cikis" && request.method === "POST") return sayacCikis(request, response);
   // Tek adres (arama motorları için): www.ezoter.ist → ezoter.ist
   if (/^www\./i.test(String(request.headers.host || ""))) {
     response.writeHead(301, { Location: `https://${String(request.headers.host).slice(4)}${request.url || "/"}` });
