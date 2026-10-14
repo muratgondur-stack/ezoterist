@@ -102,6 +102,7 @@ const currentUser = fetch("/api/me", { credentials: "same-origin" })
 // Bilgilendirme onayı (bilgilendirme-metin.js): ziyaretçiye siteye her girişte (sekme başına, sessionStorage)
 // açılır ve onaylatılır; onaylamamış yöneticiye de.
 const bilgilendirmeKontrol = (user) => {
+  return; // Murat 2026-10-15: açılış uyarı penceresi tamamen kaldırıldı (reklamdan gelenler 5 sn'de çıkıyordu); alta yazı da konmaz
   if (user?.anonim) {
     try { if (sessionStorage.getItem("ezo-bilgi") === user.bilgilendirmeSurumu) return; } catch { /* depolama kapalı */ }
   } else if (!user?.bilgilendirmeGerekli) return;

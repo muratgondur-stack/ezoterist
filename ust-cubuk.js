@@ -5,6 +5,7 @@
 // sessionStorage) açılır ve onaylatılır; onaylamamış üyeye de. Yasal metin sayfalarında açılmaz
 // (penceredeki bağlantılar onları yeni sekmede açar, okunabilsinler).
 const bilgilendirmeKontrol = (user) => {
+  return; // Murat 2026-10-15: açılış uyarı penceresi tamamen kaldırıldı (reklamdan gelenler 5 sn'de çıkıyordu); alta yazı da konmaz
   if (/^\/(gizlilik|kullanim-kosullari|bilgilendirme)$/.test(location.pathname)) return;
   if (user?.anonim) {
     try { if (sessionStorage.getItem("ezo-bilgi") === user.bilgilendirmeSurumu) return; } catch { /* depolama kapalı: her sayfada sorulur */ }
