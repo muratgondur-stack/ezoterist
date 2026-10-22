@@ -422,10 +422,29 @@ function sayacCikis(request, response) {
   });
 }
 
+const BAKIM_DOSYA = path.join(dataDir, "bakim");
+let _bakim = { t: 0, v: false };
+function bakimda() { const t = Date.now(); if (t - _bakim.t > 5000) _bakim = { t, v: fs.existsSync(BAKIM_DOSYA) }; return _bakim.v; }
+const BAKIM_SAYFA = `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Ezoter.ist · Geçici olarak servis dışı</title>
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#120d1f;color:#eae2ff;font:17px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif;text-align:center;padding:24px;box-sizing:border-box}
+main{max-width:480px}h1{font-size:1.6rem;margin:0 0 .6rem}p{margin:.4rem 0;color:#b9addb}</style></head>
+<body><main><h1>Geçici olarak servis dışıyız</h1><p>Kısa bir bakım çalışması yapıyoruz. Çok yakında yeniden buradayız.</p><p>Anlayışınız için teşekkür ederiz.</p></main></body></html>`;
+
 function anaIsleyici(request, response) {
   const istekYolu = String(request.url || "").split("?")[0];
   if (istekYolu === "/api/sayac" && request.method === "POST") return sayacIstegi(request, response);
   if (istekYolu === "/api/sayac/cikis" && request.method === "POST") return sayacCikis(request, response);
+  /* Murat 2026-10-22 "geçici servis dışı mesajı koy" (API anahtarları iptal): <veri>/bakim dosyası varken ziyaretçi bakım sayfası görür;
+     yönetim (/yonetim, /api/yonetim, /api/ayarlar), giriş (/login, /api/login|me|logout, /auth/) ve dosyalar açık. Kaldırmak: <veri>/bakim dosyasını sil (yayın gerekmez). */
+  if (bakimda()) {
+    const q = String(request.url || "");
+    const acik = /^\/(yonetim|login|auth\/)/.test(istekYolu) || /^\/api\/(yonetim|ayarlar|me|login|logout)\b/.test(istekYolu) || /[?&]yonetici\b/.test(q)
+      || (istekYolu !== "/" && !istekYolu.startsWith("/api/") && !istekYolu.startsWith("/rehber") && !/\.html?$/.test(istekYolu) && /\.[a-z0-9]{2,5}$/i.test(istekYolu));
+    if (!acik) {
+      if (istekYolu.startsWith("/api/")) { response.writeHead(503, { "Content-Type": "application/json; charset=utf-8", "Retry-After": "3600" }); return response.end(JSON.stringify({ error: "Ezoter.ist geçici olarak servis dışı. Kısa süre sonra yeniden açılacak." })); }
+      response.writeHead(503, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Retry-After": "3600" }); return response.end(BAKIM_SAYFA);
+    }
+  }
   // Tek adres (arama motorları için): www.ezoter.ist → ezoter.ist
   if (/^www\./i.test(String(request.headers.host || ""))) {
     response.writeHead(301, { Location: `https://${String(request.headers.host).slice(4)}${request.url || "/"}` });
