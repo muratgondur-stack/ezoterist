@@ -1,3 +1,5 @@
+// Uygulama (PWA / Android) için service worker: yalnız çevrimdışı sayfası tutar (sw.js).
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 // Ziyaretçi sayacı (Murat 2026-10-12): her sayfanın altında
 (() => { const s = document.createElement("script"); s.src = "/sayac.js?v=1"; s.defer = true; document.head.append(s); })();
 

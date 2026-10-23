@@ -1,3 +1,5 @@
+// Uygulama (PWA / Android) için service worker: yalnız çevrimdışı sayfası tutar (sw.js).
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 const toast = document.getElementById("toast");
 
 const mobilePortrait = window.matchMedia("(orientation: portrait) and (max-width: 600px)");

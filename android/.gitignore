@@ -1,0 +1,13 @@
+# İmza anahtarı ve şifreleri ASLA depoya girmez.
+*.keystore
+*.jks
+*.pem
+keystore.properties
+# Derleme çıktıları
+build/
+.gradle/
+app/build/
+*.apk
+*.aab
+*.idsig
+local.properties

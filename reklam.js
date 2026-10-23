@@ -3,7 +3,7 @@
 const Ayarlar = require("./ayarlar");
 
 const SABIT = /^\/(gizlilik|kullanim-kosullari|bilgilendirme|hakkimizda|iletisim)$/;
-const ASLA = /^\/(yonetim|login|register|forgot-password|arsiv|uzman|fiyatlar|mesafeli-satis|on-bilgilendirme|iptal-iade|ruhsal-gunluk|kupon)(\/|$)/;
+const ASLA = /^\/(offline\.html|yonetim|login|register|forgot-password|arsiv|uzman|fiyatlar|mesafeli-satis|on-bilgilendirme|iptal-iade|ruhsal-gunluk|kupon)(\/|$)/;
 
 // Sayfanın reklam bölgesi: anasayfa, rehber, sabit (yasal/bilgi sayfaları), bolumler ya da null (hiç reklam yok).
 function reklamBolgesi(yol) {
@@ -25,9 +25,12 @@ function reklamEtiketi(yol) {
 }
 
 // HTML'e </head>'den hemen önce ekler.
+// Uygulama (PWA / Android) bağlantısı da her sayfaya buradan eklenir (Murat 2026-10-23).
+const MANIFEST = '<link rel="manifest" href="/manifest.json" />';
 const reklamEkle = (html, yol) => {
   const etiket = reklamEtiketi(yol);
-  return etiket ? String(html).replace("</head>", `    ${etiket}\n  </head>`) : String(html);
+  const ek = [String(html).includes('rel="manifest"') ? "" : MANIFEST, etiket].filter(Boolean).join("\n    ");
+  return ek ? String(html).replace("</head>", `    ${ek}\n  </head>`) : String(html);
 };
 
 module.exports = { reklamBolgesi, reklamEtiketi, reklamEkle };

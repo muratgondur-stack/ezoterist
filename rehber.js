@@ -420,7 +420,7 @@ ${icerik}
         <p class="rh-not">Bu içerik geleneksel ve kültürel kaynaklara dayanan genel bilgidir; eğlence ve kişisel farkındalık amaçlıdır, bilimsel bir dayanağı yoktur ve tıbbi, psikolojik, hukuki ya da mali tavsiye yerine geçmez. Son güncelleme: ${GUNCELLEME.split("-").reverse().join(".")}.</p>
       </article>
     </main>
-    <script src="/ust-cubuk.js?v=26" defer></script>
+    <script src="/ust-cubuk.js?v=27" defer></script>
   </body>
 </html>`;
 }
@@ -572,6 +572,11 @@ function handleRehberRequest(request, response, url) {
   let govde;
   let tur = "text/html; charset=utf-8";
   if (yol === "/robots.txt") { govde = ROBOTS; tur = "text/plain; charset=utf-8"; }
+  else if (yol === "/.well-known/assetlinks.json") { // Android uygulaması (TWA) ile site bağı
+    const izler = [Ayarlar.get("android.parmakIzi1"), Ayarlar.get("android.parmakIzi2")].filter((x) => x && x !== "-");
+    govde = JSON.stringify([{ relation: ["delegate_permission/common.handle_all_urls"], target: { namespace: "android_app", package_name: Ayarlar.get("android.paket"), sha256_cert_fingerprints: izler } }], null, 2);
+    tur = "application/json; charset=utf-8";
+  }
   else if (yol === "/ads.txt") { // yönetimdeki yayıncı kimliğinden
     govde = `google.com, ${String(Ayarlar.get("reklam.yayinci")).replace(/^ca-/, "")}, DIRECT, f08c47fec0942fa0\n`;
     tur = "text/plain; charset=utf-8";
