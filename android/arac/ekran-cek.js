@@ -12,6 +12,9 @@ const SAYFALAR = [["1-ana-menu", "/"], ["2-tarot", "/tarot"], ["3-kahve-fali", "
     const s = await bag.newPage();
     await s.goto(`https://ezoter.ist${yol}`, { waitUntil: "networkidle" });
     await s.waitForTimeout(1500);
+    // Alttaki ziyaret sayacı mağaza görselinde görünmesin.
+    await s.addStyleTag({ content: ".ezo-sayac { display: none !important; }" });
+    await s.waitForTimeout(200);
     await s.screenshot({ path: path.join(__dirname, "../magaza/ekranlar", `${ad}.png`) });
     console.log(ad);
     await s.close();
