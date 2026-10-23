@@ -11,3 +11,5 @@ app/build/
 *.aab
 *.idsig
 local.properties
+node_modules/
+*.log
