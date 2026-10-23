@@ -78,7 +78,7 @@ Bütün yorumlar ücretsizdir. Herkesin yararlanabilmesi için günlük kullanı
 
 **Uygulama erişimi:** Tüm işlevler özel erişim gerektirmez (giriş yok).
 
-**Reklamlar:** Evet, uygulama reklam içeriyor (Google AdSense, onaylanınca).
+**Reklamlar:** **Hayır**, uygulama reklam içermiyor (sitedeki reklamlar uygulama içinde gösterilmez).
 
 **İçerik derecelendirmesi (IARC anketi):** Kategori "Eğlence" ya da "Referans/Eğitim dışı diğer".
 Şiddet, cinsellik, küfür, uyuşturucu, kumar: **Hayır**. Kullanıcılar arası iletişim: **Hayır**.
@@ -97,6 +97,6 @@ Kullanıcı konumu paylaşımı: **Hayır**. Dijital ürün satışı: **Hayır*
   Toplanıyor · paylaşılmıyor · geçici işleniyor · isteğe bağlı · Uygulama işlevselliği.
 - **Uygulama etkinliği → Diğer kullanıcı içeriği** (rüya metni, sorular): Toplanıyor · paylaşılmıyor ·
   geçici işleniyor · isteğe bağlı · Uygulama işlevselliği.
-- **Cihaz veya diğer kimlikler** (rastgele ziyaretçi çerezi; reklam kimliği): Toplanıyor · reklam için
-  Google ile **paylaşılıyor** · zorunlu · amaç: Uygulama işlevselliği (günlük sınır), Reklam.
+- **Cihaz veya diğer kimlikler** (rastgele ziyaretçi çerezi): Toplanıyor · paylaşılmıyor · zorunlu ·
+  amaç: Uygulama işlevselliği (günlük kullanım sınırı).
 - Konum, kişiler, finans, sağlık, mesajlar, ses, dosyalar, takvim: **Toplanmıyor**.

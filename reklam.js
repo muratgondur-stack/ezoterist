@@ -15,8 +15,14 @@ function reklamBolgesi(yol) {
   return "bolumler";
 }
 
-function reklamEtiketi(yol) {
-  if (!Ayarlar.get("reklam.acik")) return "";
+// Android uygulaması (Play, TWA) ve ana ekrana eklenen uygulama içinde reklam gösterilmez (Murat 2026-10-23).
+// Uygulama ilk açılışta /?kaynak=uygulama ile ya da "android-app://" yönlendirmesiyle gelir; sunucu bunu ezo_app
+// çerezine yazar (server.js), sonraki sayfalar da çerezden tanınır.
+const uygulamadanMi = (request) => Boolean(request) && (/(?:^|;\s*)ezo_app=1(?:;|$)/.test(request.headers?.cookie || "")
+  || /[?&]kaynak=uygulama(&|$)/.test(request.url || "") || String(request.headers?.referer || "").startsWith("android-app://"));
+
+function reklamEtiketi(yol, request) {
+  if (!Ayarlar.get("reklam.acik") || uygulamadanMi(request)) return "";
   const bolge = reklamBolgesi(yol);
   if (!bolge || !Ayarlar.get(`reklam.${bolge}`)) return "";
   const yayinci = String(Ayarlar.get("reklam.yayinci") || "");
@@ -27,10 +33,10 @@ function reklamEtiketi(yol) {
 // HTML'e </head>'den hemen önce ekler.
 // Uygulama (PWA / Android) bağlantısı da her sayfaya buradan eklenir (Murat 2026-10-23).
 const MANIFEST = '<link rel="manifest" href="/manifest.json" />';
-const reklamEkle = (html, yol) => {
-  const etiket = reklamEtiketi(yol);
+const reklamEkle = (html, yol, request) => {
+  const etiket = reklamEtiketi(yol, request);
   const ek = [String(html).includes('rel="manifest"') ? "" : MANIFEST, etiket].filter(Boolean).join("\n    ");
   return ek ? String(html).replace("</head>", `    ${ek}\n  </head>`) : String(html);
 };
 
-module.exports = { reklamBolgesi, reklamEtiketi, reklamEkle };
+module.exports = { reklamBolgesi, reklamEtiketi, reklamEkle, uygulamadanMi };

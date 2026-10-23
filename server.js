@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 require("./bellek-fs"); // ziyaretçi verisi diske yazılmaz, yalnız bellekte durur
 const { handleRehberRequest } = require("./rehber");
-const { reklamEkle } = require("./reklam");
+const { reklamEkle, uygulamadanMi } = require("./reklam");
 const { handleAuthRequest, dataDir, currentUser, kullaniciListesi, kullaniciSil } = require("./auth");
 const Ayarlar = require("./ayarlar");
 const Olcum = require("./olcum");
@@ -94,7 +94,7 @@ function sendHtml(request, response, filePath) {
       response.end(error.code === "ENOENT" ? "Not found" : "Server error");
       return;
     }
-    const govde = Buffer.from(reklamEkle(html, request.url));
+    const govde = Buffer.from(reklamEkle(html, request.url, request));
     response.writeHead(200, { "Content-Type": contentTypes[".html"], "Cache-Control": "no-cache", "Content-Length": govde.length });
     response.end(request.method === "HEAD" ? undefined : govde);
   });
@@ -470,6 +470,12 @@ function anaIsleyici(request, response) {
     request.headers.cookie = `${request.headers.cookie ? `${request.headers.cookie}; ` : ""}ezo_z=${id}`;
     const guvenli = String(request.headers["x-forwarded-proto"] || "").includes("https") ? "; Secure" : "";
     response.setHeader("Set-Cookie", `ezo_z=${id}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${guvenli}`);
+  }
+  // Uygulamadan gelen ziyaret: reklamsız (reklam.js); sonraki sayfalar için çerez.
+  if (uygulamadanMi(request) && !/(?:^|;\s*)ezo_app=1(?:;|$)/.test(request.headers.cookie || "")) {
+    const guvenli = String(request.headers["x-forwarded-proto"] || "").includes("https") ? "; Secure" : "";
+    const onceki = response.getHeader("Set-Cookie");
+    response.setHeader("Set-Cookie", [...(onceki ? [].concat(onceki) : []), `ezo_app=1; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${guvenli}`]);
   }
   // Tek kural (Murat 2026-10-07): bölümlerin kendi günlük sınırları kapalı (0); cevaplardaki "kalan/sinir"
   // tarayıcının ortak günlük hakkıyla değiştirilir, böylece her sayfa aynı hakkı gösterir.

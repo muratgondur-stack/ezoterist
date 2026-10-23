@@ -590,7 +590,7 @@ function handleRehberRequest(request, response, url) {
     }
     if (govde === null) return false; // bilinmeyen rehber adresi: genel 404'e düşer
   } else return false;
-  if (tur.startsWith("text/html")) govde = reklamEkle(govde, yol); // reklam kodu önbellekte değil, gönderirken eklenir
+  if (tur.startsWith("text/html")) govde = reklamEkle(govde, yol, request); // reklam kodu önbellekte değil, gönderirken eklenir
   const veri = Buffer.from(govde);
   response.writeHead(200, { "Content-Type": tur, "Content-Length": veri.length, "Cache-Control": tur.startsWith("text/html") ? "no-cache" : "public, max-age=600" });
   response.end(request.method === "HEAD" ? undefined : veri);
