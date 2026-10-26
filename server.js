@@ -317,7 +317,23 @@ function yorumcuBul(request, bolum) {
   return { id: kart.id, ad: kart.ad, ses: kart.ses || "", uslup: kisisel ? Promptlar.karakterMetni(kart) : "" };
 }
 
+// Murat 2026-10-26: geçici servis dışı (Gemma/A6000 kapatılırken yapay zekâ yorumları duracak). Yönetim, giriş ve dosyalar açık;
+// geri açmak için SERVIS_DISI = false.
+const SERVIS_DISI = true;
+const SERVIS_DISI_SAYFA = `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>ezoter.ist · Geçici olarak servis dışı</title>
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#2a1745,#0e0918);color:#f3eadb;font:17px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif;text-align:center;padding:24px;box-sizing:border-box}main{max-width:480px}h1{font-size:1.6rem;margin:0 0 .6rem;color:#e7c873}p{margin:.4rem 0;color:#cdbfdc}.y{font-size:2.4rem;margin-bottom:.4rem}</style></head>
+<body><main><div class="y">✦</div><h1>Geçici olarak servis dışıyız</h1><p>ezoter.ist kısa bir bakım çalışmasında. Çok yakında yeniden buradayız.</p><p>Anlayışınız için teşekkür ederiz.</p></main></body></html>`;
+function servisDisiMi(url) {
+  const yol = String(url || "/").split("?")[0];
+  return !/^\/(yonetim|api\/yonetim|auth\/|api\/(me|login|logout|ayarlar\/genel)(\/|$))/.test(yol) && !/\.(js|css|png|jpe?g|webp|svg|ico|woff2?|json|txt|xml|mp3|mp4)$/i.test(yol);
+}
+
 const server = http.createServer((request, response) => {
+  if (SERVIS_DISI && servisDisiMi(request.url)) {
+    const api = String(request.url || "").startsWith("/api/");
+    response.writeHead(503, { "Content-Type": api ? "application/json; charset=utf-8" : "text/html; charset=utf-8", "Cache-Control": "no-store", "Retry-After": "3600" });
+    return response.end(api ? JSON.stringify({ error: "ezoter.ist geçici olarak servis dışı." }) : SERVIS_DISI_SAYFA);
+  }
   const bolum = istekBolumu(request.url);
   Olcum.calistir(bolum, () => anaIsleyici(request, response), { yorumcu: yorumcuBul(request, bolum) });
 });
