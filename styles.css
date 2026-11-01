@@ -305,7 +305,7 @@ button.auth-bar-user:hover, button.auth-bar-user[aria-expanded="true"] { backgro
 .iletisim-razece img { display: block; width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
 
 /* Tek sayfa içi banner: ağ kodu yokken gizli; ziyaretçiyi boş reklamla bekletmez. */
-.home-ad{flex:none;width:min(100%,752px);margin:8px auto 18px;padding:8px 12px 12px;border:1px solid rgba(213,185,128,.2);border-radius:14px;background:rgba(12,10,25,.65)}
+.home-ad{flex:none;width:min(100%,754px);margin:8px auto 18px;padding:8px 12px 12px;border:1px solid rgba(213,185,128,.2);border-radius:14px;background:rgba(12,10,25,.65)}
 .home-ad-label{display:block;margin-bottom:6px;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#bcb3ca;text-align:center}
 .home-ad-slot{width:728px;height:90px;max-width:100%;margin:auto;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .home-ad-slot iframe{display:block;border:0;max-width:100%}
