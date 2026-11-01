@@ -17,7 +17,9 @@
   const observer=new MutationObserver(()=>{
     for(const frame of slot.querySelectorAll('iframe')){
       if(frame.dataset.bannerObserved)continue;frame.dataset.bannerObserved='1';
-      frame.addEventListener('load',()=>{loaded=true;area.hidden=false;observer.disconnect();},{once:true});
+      // The supplied embed writes into an about:blank iframe whose initial load may
+      // precede observer delivery. Reveal on insertion so viewability can initialize.
+      loaded=true;area.hidden=false;observer.disconnect();
     }
   });
   observer.observe(slot,{childList:true,subtree:true});
