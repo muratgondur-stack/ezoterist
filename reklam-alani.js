@@ -3,11 +3,13 @@
   const area=document.querySelector('[data-ad-placement="home-top"]');
   if(!area)return;
   const slot=area.querySelector('[data-ad-slot]');
+  const ADSTERRA_ENABLED=false; // User requested no gambling ads; keep off until provider filter is confirmed.
   const mobile=window.matchMedia('(max-width:759px)').matches;
   if(new URLSearchParams(location.search).get('reklam-onizleme')==='1'){
     area.hidden=false;slot.classList.add('home-ad-preview');
     slot.textContent=mobile?'Banner alanı · 320 × 50':'Banner alanı · 728 × 90';return;
   }
+  if(!ADSTERRA_ENABLED)return;
   // A 320px banner must fit without cropping, scaling or covering navigation.
   if(mobile&&innerWidth<352)return;
   const unit=mobile?{key:'3ed9134d61d70ffb7ba88c5a7a70fe71',width:320,height:50}:{key:'e2d647daab550303412d89f89a39eecb',width:728,height:90};
