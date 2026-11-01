@@ -6,7 +6,7 @@ COPY google217da1d348cd56fc.html manifest.json sw.js offline.html reklam.js rehb
 COPY fiyatlar.html fiyatlar-sayfa.js on-bilgilendirme.html mesafeli-satis.html iptal-iade.html kupon.html kupon-sayfa.js kupon-cizim.js bilgilendirme.html bilgilendirme.css bilgilendirme-metin.js ./
 COPY kupon ./kupon
 COPY pwa ./pwa
-COPY index.html styles.css app.js login.html login.css login.js favicon.svg favicon.png apple-touch-icon.png ezoterist-bg.png ezoterist-bg-landscape.png ezoterist-bg-portrait.mp4 ezoterist-bg-landscape.mp4 README.md ./
+COPY index.html styles.css app.js reklam-alani.js login.html login.css login.js favicon.svg favicon.png apple-touch-icon.png ezoterist-bg.png ezoterist-bg-landscape.png ezoterist-bg-portrait.mp4 ezoterist-bg-landscape.mp4 README.md ./
 
 COPY astro.js astroloji-veri.js astroloji-api.js astroloji.html astroloji.css astroloji-sayfa.js ./
 COPY uzman-api.js uzman-kayit.js uzman-promptlari.js uzman-kaydedici.js uzman-kart.js uzman.html uzman.css uzman.js ./
