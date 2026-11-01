@@ -319,7 +319,7 @@ function yorumcuBul(request, bolum) {
 
 // Murat 2026-10-26: geçici servis dışı (Gemma/A6000 kapatılırken yapay zekâ yorumları duracak). Yönetim, giriş ve dosyalar açık;
 // geri açmak için SERVIS_DISI = false.
-const SERVIS_DISI = true;
+const SERVIS_DISI = false;
 const SERVIS_DISI_SAYFA = `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>ezoter.ist · Geçici olarak servis dışı</title>
 <style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#2a1745,#0e0918);color:#f3eadb;font:17px/1.6 -apple-system,"Segoe UI",Roboto,sans-serif;text-align:center;padding:24px;box-sizing:border-box}main{max-width:480px}h1{font-size:1.6rem;margin:0 0 .6rem;color:#e7c873}p{margin:.4rem 0;color:#cdbfdc}.y{font-size:2.4rem;margin-bottom:.4rem}</style></head>
 <body><main><div class="y">✦</div><h1>Geçici olarak servis dışıyız</h1><p>ezoter.ist kısa bir bakım çalışmasında. Çok yakında yeniden buradayız.</p><p>Anlayışınız için teşekkür ederiz.</p></main></body></html>`;
